@@ -637,7 +637,9 @@ Thanks`)
             </p>
             <div className="flex items-center gap-4">
               <a 
-                href="#" 
+                href="https://www.linkedin.com/company/111649326" 
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center text-gray-400 hover:text-white transition-colors"
                 aria-label="LinkedIn"
               >
