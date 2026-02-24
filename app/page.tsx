@@ -66,6 +66,10 @@ export default function Home() {
     }
   }
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     return emailRegex.test(email)
@@ -301,42 +305,61 @@ Thanks`)
       </section>
 
       {/* Impact */}
-      <section ref={statsRef} className="py-40 px-6 relative">
-        <div className="max-w-7xl mx-auto">
-          <div className={`grid md:grid-cols-3 gap-8 transition-opacity duration-1000 ${statsVisible ? 'opacity-100' : 'opacity-0'}`}>
+      <section ref={statsRef} className="py-40 px-6 relative overflow-visible">
+        <div className="max-w-7xl mx-auto overflow-visible">
+          <div className={`grid md:grid-cols-3 gap-4 md:gap-6 lg:gap-8 transition-opacity duration-1000 ${statsVisible ? 'opacity-100' : 'opacity-0'}`} style={{ overflow: 'visible' }}>
             {[
               { 
-                value: '$100M+', 
-                label: 'Revenue recovered',
-                sub: '200-location specialty group'
+                value: '$4.2M–$6M', 
+                label: 'Revenue leakage annually',
+                sub: 'Per 100-location dermatology portfolio'
               },
               { 
                 value: '50%', 
-                label: 'Patient leakage eliminated',
-                sub: 'Industry average vs. Tether'
+                label: 'Referrals never complete',
+                sub: 'Industry average (Source: Phreesia)'
               },
               { 
-                value: '46x', 
-                label: 'Return on investment',
-                sub: 'Per location, per year'
+                value: '$200–$500', 
+                label: 'Value per lost referral',
+                sub: 'First visit revenue opportunity'
               }
             ].map((stat, i) => (
               <div 
                 key={i} 
-                className="group bg-gradient-to-br from-white/5 to-white/0 border border-white/10 rounded-3xl p-12 hover:border-blue-500/30 transition-all text-center min-h-[280px] flex flex-col justify-center"
+                className="group bg-gradient-to-br from-white/5 to-white/0 border border-white/10 rounded-3xl p-4 sm:p-6 md:p-8 lg:p-10 hover:border-blue-500/30 transition-all text-center min-h-[280px] flex flex-col justify-center"
                 style={{ 
                   animationDelay: `${i * 100}ms`,
-                  animation: statsVisible ? 'fadeInUp 0.6s ease-out forwards' : 'none'
+                  animation: statsVisible ? 'fadeInUp 0.6s ease-out forwards' : 'none',
+                  overflow: 'visible',
+                  width: '100%'
                 }}
               >
-                <div className="text-5xl md:text-6xl lg:text-7xl font-light bg-gradient-to-br from-blue-400 to-blue-500 bg-clip-text text-transparent mb-4 group-hover:scale-105 transition-transform leading-tight overflow-visible whitespace-nowrap">
+                <div 
+                  className="font-light bg-gradient-to-br from-blue-400 to-blue-500 bg-clip-text text-transparent mb-4 transition-transform leading-none whitespace-nowrap" 
+                  style={{ 
+                    fontSize: 'clamp(1.125rem, 2.5vw, 2.75rem)',
+                    paddingLeft: '2rem',
+                    paddingRight: '2rem',
+                    minWidth: '0',
+                    width: 'auto',
+                    maxWidth: '100%',
+                    boxSizing: 'border-box',
+                    overflow: 'visible',
+                    textOverflow: 'clip',
+                    display: 'inline-block'
+                  }}
+                >
                   {stat.value}
                 </div>
-                <p className="text-white text-xl mb-2 font-light">{stat.label}</p>
-                <p className="text-gray-500 text-sm font-light tracking-wide">{stat.sub}</p>
+                <p className="text-white text-lg md:text-xl mb-2 font-light">{stat.label}</p>
+                <p className="text-gray-500 text-xs md:text-sm font-light tracking-wide px-2">{stat.sub}</p>
               </div>
             ))}
           </div>
+          <p className="text-center text-gray-500 text-xs font-light mt-8 max-w-3xl mx-auto">
+            Based on industry research and dermatology practice benchmarks. Individual results may vary.
+          </p>
         </div>
       </section>
 
@@ -505,58 +528,102 @@ Thanks`)
       <footer className="py-16 px-6 border-t border-white/5 bg-[#0a0e27]">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-center mb-12">
-            <div className="grid md:grid-cols-2 gap-16 md:gap-24">
-              {/* Column 1 - Resources */}
-              <div className="text-center md:text-left">
-                <h3 className="text-white font-medium mb-4 tracking-wide">Resources</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 lg:gap-16">
+              {/* Column 1 - Product */}
+              <div className="text-center sm:text-left">
+                <h3 className="text-white font-medium mb-4 tracking-wide">Product</h3>
                 <ul className="space-y-3">
                   <li>
                     <button 
-                      onClick={scrollToStats}
-                      className="text-gray-400 hover:text-white transition-colors font-light text-sm"
-                    >
-                      How It Works
-                    </button>
-                  </li>
-                  <li>
-                    <button 
                       onClick={scrollToCompliance}
-                      className="text-gray-400 hover:text-white transition-colors font-light text-sm"
+                      className="text-white hover:underline transition-all font-light text-sm"
                     >
                       Security
                     </button>
                   </li>
                   <li>
-                    <span className="text-gray-500 font-light text-sm" aria-label="Coming soon">
-                      Documentation
+                    <button 
+                      onClick={scrollToTop}
+                      className="text-white hover:underline transition-all font-light text-sm"
+                    >
+                      Platform
+                    </button>
+                  </li>
+                  <li>
+                    <span 
+                      className="text-gray-500 font-light text-sm opacity-50 cursor-not-allowed inline-block" 
+                      title="Coming Soon"
+                      aria-label="Coming soon"
+                    >
+                      Pricing
                     </span>
                   </li>
                 </ul>
               </div>
 
-              {/* Column 2 - Contact */}
-              <div className="text-center md:text-left">
-                <h3 className="text-white font-medium mb-4 tracking-wide">Questions?</h3>
+              {/* Column 2 - Company */}
+              <div className="text-center sm:text-left">
+                <h3 className="text-white font-medium mb-4 tracking-wide">Company</h3>
                 <ul className="space-y-3">
                   <li>
+                    <p className="text-white font-light text-sm mb-1">Contact</p>
                     <a 
                       href="mailto:support@tetherhealth.co" 
-                      className="text-blue-400 hover:text-blue-300 underline transition-colors font-light text-sm"
+                      className="text-gray-400 hover:text-white hover:underline transition-all font-light text-xs"
                     >
                       support@tetherhealth.co
                     </a>
                   </li>
-                  <li>
-                    <a 
-                      href="https://www.linkedin.com/company/111649326" 
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
-                      aria-label="LinkedIn"
+                  <li className="pt-2">
+                    <span 
+                      className="text-gray-500 font-light text-sm opacity-50 cursor-not-allowed inline-block" 
+                      title="Coming Soon"
+                      aria-label="Coming soon"
                     >
-                      <Linkedin className="w-5 h-5" />
-                      <span className="font-light text-sm">LinkedIn</span>
-                    </a>
+                      About
+                    </span>
+                  </li>
+                  <li>
+                    <span 
+                      className="text-gray-500 font-light text-sm opacity-50 cursor-not-allowed inline-block" 
+                      title="Coming Soon"
+                      aria-label="Coming soon"
+                    >
+                      Careers
+                    </span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Column 3 - Legal */}
+              <div className="text-center sm:text-left">
+                <h3 className="text-white font-medium mb-4 tracking-wide">Legal</h3>
+                <ul className="space-y-3">
+                  <li>
+                    <span 
+                      className="text-gray-500 font-light text-sm opacity-50 cursor-not-allowed inline-block" 
+                      title="Coming Soon"
+                      aria-label="Coming soon"
+                    >
+                      Privacy Policy
+                    </span>
+                  </li>
+                  <li>
+                    <span 
+                      className="text-gray-500 font-light text-sm opacity-50 cursor-not-allowed inline-block" 
+                      title="Coming Soon"
+                      aria-label="Coming soon"
+                    >
+                      Terms of Service
+                    </span>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={scrollToCompliance}
+                      className="text-white hover:underline transition-all font-light text-sm"
+                    >
+                      Security
+                    </button>
                   </li>
                 </ul>
               </div>
@@ -564,13 +631,26 @@ Thanks`)
           </div>
 
           {/* Footer Bottom */}
-          <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-center items-center gap-4 md:gap-8">
-            <p className="text-gray-600 text-sm font-light text-center">
+          <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-gray-600 text-sm font-light">
               © 2026 Tether. All rights reserved.
             </p>
-            <p className="text-gray-600 text-sm font-light text-center">
-              Designed for healthcare. Built for scale.
-            </p>
+            <div className="flex items-center gap-4">
+              <a 
+                href="#" 
+                className="inline-flex items-center text-gray-400 hover:text-white transition-colors"
+                aria-label="LinkedIn"
+              >
+                <Linkedin className="w-5 h-5" />
+              </a>
+              <span className="text-gray-400">|</span>
+              <a 
+                href="mailto:support@tetherhealth.co" 
+                className="text-gray-400 hover:text-white transition-colors font-light text-sm"
+              >
+                support@tetherhealth.co
+              </a>
+            </div>
           </div>
         </div>
       </footer>
