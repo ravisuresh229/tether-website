@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
+import Image from "next/image";
 
 // ─── Font loader (works in Next.js) ───
 function useFonts() {
@@ -257,7 +258,7 @@ const CSS = `
 .t-hero-demo:hover { box-shadow: 0 8px 64px rgba(0,0,0,0.1); }
 .t-hero-demo-bar { height: 44px; background: var(--bg-warm); border-bottom: 1px solid var(--t-border); display: flex; align-items: center; padding: 0 16px; gap: 8px; flex-shrink: 0; }
 .t-hero-demo-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--t-border); }
-.t-hero-demo-body { flex: 1; display: flex; align-items: center; justify-content: center; padding: 32px; text-align: center; color: var(--text-tertiary); font-size: 14px; flex-direction: column; gap: 16px; background: linear-gradient(180deg, rgba(45,58,78,0.02), rgba(13,115,119,0.03)); }
+.t-hero-demo-body { flex: 1; display: flex; align-items: center; justify-content: center; padding: 32px; text-align: center; color: var(--text-tertiary); font-size: 14px; flex-direction: column; gap: 16px; background: linear-gradient(180deg, rgba(45,58,78,0.02), rgba(13,115,119,0.03)); position: relative; overflow: hidden; }
 .t-hero-demo-play { width: 64px; height: 64px; border-radius: 50%; background: var(--navy); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 20px rgba(45,58,78,0.3); animation: t-pulse-play 2.5s ease infinite; }
 @keyframes t-pulse-play { 0%,100% { box-shadow: 0 4px 20px rgba(45,58,78,0.3); } 50% { box-shadow: 0 4px 32px rgba(45,58,78,0.5), 0 0 0 12px rgba(45,58,78,0.06); } }
 .t-hero-demo-play:hover { transform: scale(1.1); }
@@ -298,9 +299,11 @@ const CSS = `
 .t-pgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 .t-pcard { background: #fff; border: 1px solid var(--t-border); border-radius: 16px; overflow: hidden; }
 .t-pcard-img { aspect-ratio: 16/10; background: linear-gradient(135deg, rgba(45,58,78,0.04), rgba(13,115,119,0.06)); display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--t-border); position: relative; overflow: hidden; }
-.t-pcard-img::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, transparent 40%, rgba(13,115,119,0.04)); opacity: 0; transition: opacity 0.4s; }
+.t-pcard-img img { object-fit: cover; width: 100%; height: 100%; }
+.t-pcard-img::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, transparent 40%, rgba(13,115,119,0.04)); opacity: 0; transition: opacity 0.4s; pointer-events: none; }
 .t-pcard:hover .t-pcard-img::after { opacity: 1; }
 .t-pcard-img-ph { display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--navy); font-size: 13px; font-weight: 500; opacity: 0.6; }
+.t-hero-demo-body img { object-fit: cover; width: 100%; height: 100%; position: absolute; inset: 0; }
 .t-pcard-body { padding: 28px 28px 32px; }
 .t-pcard-body h3 { font-family: var(--serif); font-size: 22px; font-weight: 400; color: var(--navy-darkest); margin-bottom: 8px; }
 .t-pcard-body p { font-size: 14.5px; line-height: 1.6; color: var(--text-secondary); }
@@ -456,9 +459,9 @@ export default function TetherLanding() {
               <TiltCard className="t-hero-demo">
                 <div className="t-hero-demo-bar"><div className="t-hero-demo-dot"/><div className="t-hero-demo-dot"/><div className="t-hero-demo-dot"/></div>
                 <div className="t-hero-demo-body">
-                  <div className="t-hero-demo-play"><IconPlay /></div>
-                  <span className="t-hero-demo-label">Watch the Product Demo</span>
-                  <span style={{fontSize:12,color:'#9A9A9A'}}>Replit demo embed goes here</span>
+                  <Image src="/data/dashboard-ss.png" alt="Tether Referral Dashboard" fill sizes="600px" className="t-hero-demo-bg" style={{ objectFit: "cover", opacity: 0.4 }} />
+                  <div className="t-hero-demo-play" style={{ position: "relative", zIndex: 1 }}><IconPlay /></div>
+                  <span className="t-hero-demo-label" style={{ position: "relative", zIndex: 1 }}>Watch the Product Demo</span>
                 </div>
               </TiltCard>
             </div>
@@ -504,9 +507,9 @@ export default function TetherLanding() {
               <Reveal delay={0.15}><p className="t-sdesc">Designed for medical assistants and front desk staff who manage referrals every day. Not physicians who review dashboards once a week.</p></Reveal>
             </div>
             <div className="t-pgrid">
-              <Reveal delay={0.1}><TiltCard className="t-pcard t-pcard-full"><div className="t-pcard-img"><div className="t-pcard-img-ph"><IconSend />Screenshot: Referral Dashboard</div></div><div className="t-pcard-body"><h3>Referral Dashboard</h3><p>See every inbound and outbound referral in one place. Filter by status, provider, date, or insurance. Know exactly where every patient stands.</p></div></TiltCard></Reveal>
-              <Reveal delay={0.15}><TiltCard className="t-pcard"><div className="t-pcard-img"><div className="t-pcard-img-ph"><IconNetwork />Screenshot: Specialist Directory</div></div><div className="t-pcard-body"><h3>Specialist Directory</h3><p>A curated, searchable map of specialists accepting referrals. Filter by specialty, insurance, distance, and availability.</p></div></TiltCard></Reveal>
-              <Reveal delay={0.2}><TiltCard className="t-pcard"><div className="t-pcard-img"><div className="t-pcard-img-ph"><IconZap />Screenshot: AI Document Parsing</div></div><div className="t-pcard-body"><h3>AI-Powered Intake</h3><p>Drop in a referral PDF. Tether extracts patient demographics, clinical notes, and insurance details in seconds.</p></div></TiltCard></Reveal>
+              <Reveal delay={0.1}><TiltCard className="t-pcard t-pcard-full"><div className="t-pcard-img"><Image src="/data/dashboard-ss.png" alt="Referral Dashboard" fill sizes="(max-width: 900px) 100vw, 1200px" priority /></div><div className="t-pcard-body"><h3>Referral Dashboard</h3><p>See every inbound and outbound referral in one place. Filter by status, provider, date, or insurance. Know exactly where every patient stands.</p></div></TiltCard></Reveal>
+              <Reveal delay={0.15}><TiltCard className="t-pcard"><div className="t-pcard-img"><Image src="/data/directory-ss.png" alt="Specialist Directory" fill sizes="(max-width: 900px) 100vw, 600px" /></div><div className="t-pcard-body"><h3>Specialist Directory</h3><p>A curated, searchable map of specialists accepting referrals. Filter by specialty, insurance, distance, and availability.</p></div></TiltCard></Reveal>
+              <Reveal delay={0.2}><TiltCard className="t-pcard"><div className="t-pcard-img"><Image src="/data/parser-ss.png" alt="AI Document Parsing" fill sizes="(max-width: 900px) 100vw, 600px" /></div><div className="t-pcard-body"><h3>AI-Powered Intake</h3><p>Drop in a referral PDF. Tether extracts patient demographics, clinical notes, and insurance details in seconds.</p></div></TiltCard></Reveal>
             </div>
           </div>
         </section>
