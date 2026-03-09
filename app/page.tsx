@@ -217,7 +217,7 @@ const CSS = `
 .t-nav-logo-text { font-family: var(--sans); font-weight: 600; font-size: 22px; letter-spacing: -0.5px; color: var(--navy-deep); }
 .t-nav-links { display: flex; align-items: center; gap: 36px; list-style: none; }
 .t-nav-links a { font-size: 14px; font-weight: 500; color: var(--text-secondary); text-decoration: none; transition: color 0.2s; letter-spacing: 0.01em; position: relative; }
-.t-nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 1.5px; background: var(--teal); transition: width 0.3s cubic-bezier(0.16,1,0.3,1); }
+.t-nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 1.5px; background: var(--teal); transition: width 0.3s cubic-bezier(0.16,1,0.3,1); pointer-events: none; }
 .t-nav-links a:hover { color: var(--navy-deep); }
 .t-nav-links a:hover::after { width: 100%; }
 .t-nav-cta { background: var(--navy) !important; color: #fff !important; padding: 10px 22px !important; border-radius: 8px !important; font-size: 14px !important; font-weight: 600 !important; transition: all 0.25s ease !important; }
@@ -246,7 +246,7 @@ const CSS = `
 .t-hero-actions { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; animation: t-fade-up 0.8s cubic-bezier(0.16,1,0.3,1) 0.6s both; }
 
 .t-btn-p { display: inline-flex; align-items: center; gap: 10px; padding: 14px 28px; background: var(--coral); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; font-family: var(--sans); cursor: pointer; transition: all 0.25s cubic-bezier(0.16,1,0.3,1); text-decoration: none; letter-spacing: 0.01em; position: relative; overflow: hidden; }
-.t-btn-p::before { content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; background: rgba(255,255,255,0.15); border-radius: 50%; transform: translate(-50%,-50%); transition: width 0.6s, height 0.6s; }
+.t-btn-p::before { content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; background: rgba(255,255,255,0.15); border-radius: 50%; transform: translate(-50%,-50%); transition: width 0.6s, height 0.6s; pointer-events: none; }
 .t-btn-p:hover::before { width: 300px; height: 300px; }
 .t-btn-p:hover { background: var(--coral-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(212,97,62,0.25); }
 .t-btn-s { display: inline-flex; align-items: center; gap: 8px; padding: 14px 24px; background: transparent; color: var(--text); border: 1.5px solid var(--t-border); border-radius: 10px; font-size: 15px; font-weight: 500; font-family: var(--sans); cursor: pointer; transition: all 0.25s; text-decoration: none; }
@@ -396,13 +396,28 @@ const CSS = `
   .t-hero-title { font-size: 34px; } .t-hero-actions { flex-direction: column; align-items: stretch; }
   .t-btn-p, .t-btn-s { justify-content: center; } .t-pstat { padding: 32px 24px; } .t-aud-card { padding: 32px 24px; }
 }
+.t-demo-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
+.t-demo-modal-box { background: #fff; border-radius: 16px; border: 1px solid var(--t-border); box-shadow: 0 24px 64px rgba(0,0,0,0.15); max-width: 440px; width: 100%; padding: 32px; position: relative; }
+.t-demo-modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; cursor: pointer; color: var(--text-tertiary); padding: 8px; line-height: 1; }
+.t-demo-modal-close:hover { color: var(--navy); }
+.t-demo-modal h3 { font-family: var(--serif); font-size: 24px; font-weight: 400; color: var(--navy-darkest); margin-bottom: 8px; }
+.t-demo-modal p { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; }
+.t-demo-form label { display: block; font-size: 13px; font-weight: 500; color: var(--navy); margin-bottom: 6px; }
+.t-demo-form input, .t-demo-form textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--t-border); border-radius: 8px; font-size: 15px; font-family: var(--sans); margin-bottom: 16px; }
+.t-demo-form input:focus, .t-demo-form textarea:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 2px rgba(13,115,119,0.15); }
+.t-demo-form textarea { min-height: 80px; resize: vertical; }
+.t-demo-form button[type="submit"] { width: 100%; padding: 14px; background: var(--coral); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: var(--sans); }
+.t-demo-form button[type="submit"]:hover { background: var(--coral-hover); }
 `;
 
 // ─── Main Component ───
+const DEMO_FORM_ACTION = "https://formspree.io/f/xpqrqkzw"; // Create at formspree.io and replace with your form ID
+
 export default function TetherLanding() {
   useFonts();
   const [scrolled, setScrolled] = useState(false);
   const [scrollPct, setScrollPct] = useState(0);
+  const [showDemoForm, setShowDemoForm] = useState(false);
   const scrollY = useScrollY();
 
   useEffect(() => {
@@ -431,7 +446,7 @@ export default function TetherLanding() {
             <li><a href="#product">Product</a></li>
             <li><a href="#specialists">For Specialists</a></li>
             <li><a href="#network">The Network</a></li>
-            <li><a href="#demo" className="t-nav-cta">Request Demo</a></li>
+            <li><button type="button" onClick={() => setShowDemoForm(true)} className="t-nav-cta" style={{ border: "none", cursor: "pointer", font: "inherit", background: "var(--navy)", color: "#fff", padding: "10px 22px", borderRadius: "8px" }}>Request Demo</button></li>
           </ul>
           <button className="t-nav-mob" aria-label="Menu">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -451,19 +466,35 @@ export default function TetherLanding() {
               </h1>
               <p className="t-hero-sub">Tether is the referral network that connects primary care and specialty practices with real-time tracking, loop closure, and a shared directory your staff actually wants to use.</p>
               <div className="t-hero-actions">
-                <a href="#demo" className="t-btn-p">Request a Demo <IconArrowRight /></a>
+                <button type="button" onClick={() => setShowDemoForm(true)} className="t-btn-p" style={{ border: "none", cursor: "pointer", font: "inherit" }}>Request a Demo <IconArrowRight /></button>
                 <a href="#how" className="t-btn-s">See How It Works</a>
               </div>
             </div>
+            {/* HERO DEMO - Arcade Embed */}
             <div className="t-hero-demo-wrap" style={{ transform: `translateY(${parallaxY}px)` }}>
-              <TiltCard className="t-hero-demo">
-                <div className="t-hero-demo-bar"><div className="t-hero-demo-dot"/><div className="t-hero-demo-dot"/><div className="t-hero-demo-dot"/></div>
-                <div className="t-hero-demo-body">
-                  <Image src="/data/dashboard-ss.png" alt="Tether Referral Dashboard" fill sizes="600px" className="t-hero-demo-bg" style={{ objectFit: "cover", opacity: 0.4 }} />
-                  <div className="t-hero-demo-play" style={{ position: "relative", zIndex: 1 }}><IconPlay /></div>
-                  <span className="t-hero-demo-label" style={{ position: "relative", zIndex: 1 }}>Watch the Product Demo</span>
-                </div>
-              </TiltCard>
+              <div style={{
+                borderRadius: '16px',
+                border: '1px solid var(--t-border)',
+                boxShadow: '0 4px 48px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04)',
+                overflow: 'hidden',
+                aspectRatio: '4/3',
+                background: '#fff',
+              }}>
+                <iframe
+                  src="https://app.arcade.software/share/y8UoqrKIdMeY8tq2kqbD?embed&show_copy_link=true"
+                  title="Submit a Referral to a Specialist Using Tether Health"
+                  frameBorder="0"
+                  loading="lazy"
+                  allowFullScreen
+                  allow="clipboard-write"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    border: 'none',
+                    borderRadius: '16px',
+                  }}
+                />
+              </div>
             </div>
           </div>
         </section>
@@ -597,7 +628,7 @@ export default function TetherLanding() {
           <div className="t-fcta-inner">
             <Reveal><h2>Ready to connect<br />your practice?</h2></Reveal>
             <Reveal delay={0.1}><p>Join the network of practices building a better referral experience for their patients and their teams.</p></Reveal>
-            <Reveal delay={0.2}><a href="mailto:sach@tetherhealth.com" className="t-btn-p">Request a Demo <IconArrowRight /></a></Reveal>
+            <Reveal delay={0.2}><button type="button" onClick={() => setShowDemoForm(true)} className="t-btn-p" style={{ border: "none", cursor: "pointer", font: "inherit" }}>Request a Demo <IconArrowRight /></button></Reveal>
             <Reveal delay={0.25}><p className="t-fcta-note">Free for referring providers. No contracts required.</p></Reveal>
           </div>
         </section>
@@ -617,6 +648,31 @@ export default function TetherLanding() {
           </div>
           <div className="t-footer-bottom"><span>&copy; 2026 Tether Health, Inc. All rights reserved.</span><div><a href="#">Twitter</a><a href="#">LinkedIn</a></div></div>
         </footer>
+
+        {/* Demo Request Modal */}
+        {showDemoForm && (
+          <div className="t-demo-modal" onClick={() => setShowDemoForm(false)}>
+            <div className="t-demo-modal-box" onClick={e => e.stopPropagation()}>
+              <button type="button" className="t-demo-modal-close" onClick={() => setShowDemoForm(false)} aria-label="Close">✕</button>
+              <h3>Request a Demo</h3>
+              <p>Fill out the form below and we&apos;ll reach out to schedule a personalized walkthrough.</p>
+              <form className="t-demo-form" action={DEMO_FORM_ACTION} method="POST">
+                <input type="hidden" name="_subject" value="Demo Request - Tether Health" />
+                <label htmlFor="demo-email">Email</label>
+                <input id="demo-email" type="email" name="email" required placeholder="you@practice.com" />
+                <label htmlFor="demo-practice">Practice name</label>
+                <input id="demo-practice" type="text" name="practice" placeholder="Your practice name" />
+                <label htmlFor="demo-role">Role</label>
+                <input id="demo-role" type="text" name="role" placeholder="e.g. Practice Manager" />
+                <label htmlFor="demo-time">Best time to connect</label>
+                <input id="demo-time" type="text" name="best_time" placeholder="e.g. Tuesday mornings" />
+                <label htmlFor="demo-message">Message (optional)</label>
+                <textarea id="demo-message" name="message" placeholder="Any specific questions or needs?" />
+                <button type="submit">Submit Request</button>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
