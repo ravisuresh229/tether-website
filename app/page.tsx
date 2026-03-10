@@ -341,12 +341,17 @@ const CSS = `
 .t-nnode h4 { font-size: 14px; font-weight: 600; color: var(--navy-darkest); margin-bottom: 6px; }
 .t-nnode p { font-size: 13px; color: var(--text-tertiary); line-height: 1.5; }
 
-.t-trust { padding: 80px 48px; background: var(--bg); border-top: 1px solid var(--t-border); border-bottom: 1px solid var(--t-border); }
-.t-trust-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 56px; flex-wrap: wrap; }
-.t-trust-item { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 500; color: var(--text-secondary); transition: color 0.2s; }
-.t-trust-item:hover { color: var(--navy); }
-.t-trust-icon { width: 36px; height: 36px; border-radius: 8px; background: rgba(45,58,78,0.06); color: var(--navy); display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
-.t-trust-item:hover .t-trust-icon { background: var(--teal-light); color: var(--teal); transform: scale(1.1); }
+.t-trust { padding: 96px 48px; background: var(--teal-light); }
+.t-trust-inner { max-width: 1200px; margin: 0 auto; }
+.t-trust-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+.t-trust-card { background: #fff; border: 1px solid rgba(13,115,119,0.12); border-radius: 16px; padding: 32px 24px; transition: all 0.3s; }
+.t-trust-card:hover { border-color: rgba(13,115,119,0.25); box-shadow: 0 8px 32px rgba(13,115,119,0.08); }
+.t-trust-card-icon { width: 48px; height: 48px; border-radius: 12px; background: var(--teal-light); color: var(--teal); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+.t-trust-card h4 { font-size: 16px; font-weight: 600; color: var(--navy-darkest); margin-bottom: 8px; }
+.t-trust-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.5; margin: 0; }
+.t-trust-link { display: inline-flex; align-items: center; gap: 8px; margin-top: 40px; font-size: 14px; font-weight: 500; color: var(--teal); text-decoration: none; transition: color 0.2s; }
+.t-trust-link:hover { color: var(--teal-dark); }
+.t-trust-link-wrap { text-align: center; }
 
 .t-proof { padding: 120px 48px; background: var(--bg); }
 .t-proof-inner { max-width: 900px; margin: 0 auto; text-align: center; }
@@ -389,7 +394,7 @@ const CSS = `
   .t-pstats, .t-how-steps, .t-pgrid, .t-aud-grid, .t-nvis { grid-template-columns: 1fr; }
   .t-pstat-n { font-size: 42px; } .t-how-step-conn { display: none; }
   .t-footer-inner { flex-direction: column; gap: 40px; } .t-footer-links { gap: 32px; flex-wrap: wrap; }
-  .t-trust-inner { gap: 24px; justify-content: flex-start; } .t-trust { padding: 48px 24px; }
+  .t-trust-grid { grid-template-columns: 1fr; } .t-trust { padding: 64px 24px; }
   .t-proof-logos { gap: 16px; } .t-footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
   .t-gradient-orb { display: none; }
 }
@@ -485,6 +490,7 @@ export default function TetherLanding() {
             <li><a href="#product">Product</a></li>
             <li><a href="#specialists">For Specialists</a></li>
             <li><a href="#network">The Network</a></li>
+            <li><a href="/security">Security</a></li>
             <li><button type="button" onClick={() => setShowDemoForm(true)} className="t-nav-cta" style={{ border: "none", cursor: "pointer", font: "inherit", background: "var(--navy)", color: "#fff", padding: "10px 22px", borderRadius: "8px" }}>Request Demo</button></li>
           </ul>
           <button className="t-nav-mob" aria-label="Menu">
@@ -615,10 +621,31 @@ export default function TetherLanding() {
         {/* TRUST */}
         <section className="t-trust">
           <div className="t-trust-inner">
-            <div className="t-trust-item"><div className="t-trust-icon"><IconShield /></div>HIPAA Compliant</div>
-            <div className="t-trust-item"><div className="t-trust-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>End-to-End Encryption</div>
-            <div className="t-trust-item"><div className="t-trust-icon"><IconClock /></div>5-Minute Onboarding</div>
-            <div className="t-trust-item"><div className="t-trust-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>Works Alongside Your EMR</div>
+            <div className="t-trust-grid">
+              <div className="t-trust-card">
+                <div className="t-trust-card-icon"><IconShield /></div>
+                <h4>HIPAA Compliant</h4>
+                <p>All data encrypted at rest and in transit</p>
+              </div>
+              <div className="t-trust-card">
+                <div className="t-trust-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+                <h4>End-to-End Encryption</h4>
+                <p>Zero-knowledge architecture for all PHI</p>
+              </div>
+              <div className="t-trust-card">
+                <div className="t-trust-card-icon"><IconClock /></div>
+                <h4>5-Minute Onboarding</h4>
+                <p>No IT integration or setup required</p>
+              </div>
+              <div className="t-trust-card">
+                <div className="t-trust-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+                <h4>Works Alongside Your EMR</h4>
+                <p>Runs parallel to Epic, Athena, and others</p>
+              </div>
+            </div>
+            <div className="t-trust-link-wrap">
+              <a href="/security" className="t-trust-link">Learn more about our security practices <IconArrowRight /></a>
+            </div>
           </div>
         </section>
 
@@ -652,15 +679,15 @@ export default function TetherLanding() {
           <div className="t-footer-inner">
             <div className="t-footer-brand">
               <div className="t-footer-logo"><Image src="/LOGO.jpeg" alt="Tether" width={24} height={24} style={{ objectFit: "contain" }} /><span className="t-footer-logo-text">Tether Health</span></div>
-              <p className="t-footer-tagline">The referral network for modern medical practices. Built in Washington, D.C.</p>
+              <p className="t-footer-tagline">The referral network for modern medical practices.</p>
             </div>
             <div className="t-footer-links">
               <div className="t-footer-col"><h5>Product</h5><a href="#how">How It Works</a><a href="#product">Features</a><a href="#specialists">For Specialists</a><a href="#specialists">For Primary Care</a></div>
               <div className="t-footer-col"><h5>Company</h5><a href="#">About</a><a href="#">Blog</a><a href="#">Careers</a><a href="mailto:sach@tetherhealth.com">Contact</a></div>
-              <div className="t-footer-col"><h5>Legal</h5><a href="#">Privacy Policy</a><a href="#">Terms of Service</a><a href="#">BAA</a><a href="#">Security</a></div>
+              <div className="t-footer-col"><h5>Legal</h5><a href="/privacy_policy.pdf" target="_blank" rel="noopener noreferrer">Privacy Policy</a><a href="/terms_of_service.pdf" target="_blank" rel="noopener noreferrer">Terms of Service</a><a href="/cookie_policy.pdf" target="_blank" rel="noopener noreferrer">Cookie Policy</a><a href="/hipaa_information_notice.pdf" target="_blank" rel="noopener noreferrer">HIPAA Information</a></div>
             </div>
           </div>
-          <div className="t-footer-bottom"><span>&copy; 2026 Tether Health, Inc. All rights reserved.</span><div><a href="#">Twitter</a><a href="#">LinkedIn</a></div></div>
+          <div className="t-footer-bottom"><span>&copy; 2026 Tether Health, Inc. All rights reserved.</span><div><a href="#">Twitter</a><a href="https://www.linkedin.com/company/111649326/" target="_blank" rel="noopener noreferrer">LinkedIn</a></div></div>
         </footer>
 
         {/* Demo Request Modal */}
