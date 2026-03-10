@@ -355,16 +355,6 @@ const CSS = `
 .t-trust-link:hover { color: var(--teal-dark); }
 .t-trust-link-wrap { text-align: center; }
 
-.t-proof { padding: 120px 48px; background: var(--bg); }
-.t-proof-inner { max-width: 900px; margin: 0 auto; text-align: center; }
-.t-proof-logos { display: flex; align-items: center; justify-content: center; gap: 48px; margin-top: 48px; flex-wrap: wrap; }
-.t-proof-logo-ph { width: 140px; height: 48px; border-radius: 8px; background: var(--surface); border: 1px dashed var(--t-border); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text-tertiary); font-weight: 500; transition: all 0.3s; }
-.t-proof-logo-ph:hover { border-color: var(--navy); background: rgba(45,58,78,0.04); }
-.t-proof-quote { margin-top: 64px; padding: 48px; background: #fff; border: 1px solid var(--t-border); border-radius: 20px; position: relative; transition: all 0.4s; }
-.t-proof-quote:hover { box-shadow: 0 12px 48px rgba(0,0,0,0.06); transform: translateY(-2px); }
-.t-proof-quote::before { content: '\\201C'; font-family: var(--serif); font-size: 80px; color: rgba(45,58,78,0.08); position: absolute; top: 12px; left: 40px; line-height: 1; }
-.t-proof-quote p { font-family: var(--serif); font-size: 22px; line-height: 1.5; color: var(--navy-darkest); font-style: italic; margin-bottom: 20px; position: relative; z-index: 1; }
-.t-proof-quote-attr { font-size: 14px; color: var(--text-tertiary); font-style: normal; }
 
 .t-fcta { padding: 120px 48px; background: var(--navy-deep); color: #fff; text-align: center; position: relative; overflow: hidden; }
 .t-fcta::before { content: ''; position: absolute; bottom: -100px; left: 50%; transform: translateX(-50%); width: 800px; height: 400px; background: radial-gradient(ellipse, rgba(13,115,119,0.15), transparent 70%); pointer-events: none; animation: t-orb-drift 15s ease-in-out infinite alternate; }
@@ -391,13 +381,13 @@ const CSS = `
 @media (max-width: 900px) {
   .t-nav { padding: 0 24px; } .t-nav-links { display: none; } .t-nav-mob { display: block; }
   .t-hero { padding: 100px 24px 60px; } .t-hero-title { font-size: 40px; } .t-hero-content { max-width: 100%; }
-  .t-problem, .t-how, .t-product, .t-audiences, .t-network, .t-proof, .t-fcta { padding: 80px 24px; }
+  .t-problem, .t-how, .t-product, .t-audiences, .t-network, .t-fcta { padding: 80px 24px; }
   .t-problem h2, .t-stitle, .t-network h2 { font-size: 32px; } .t-fcta h2 { font-size: 36px; }
   .t-pstats, .t-how-steps, .t-pgrid, .t-aud-grid, .t-nvis { grid-template-columns: 1fr; }
   .t-pstat-n { font-size: 42px; } .t-how-step-conn { display: none; }
   .t-footer-inner { flex-direction: column; gap: 40px; } .t-footer-links { gap: 32px; flex-wrap: wrap; }
   .t-trust-grid { grid-template-columns: 1fr; } .t-trust { padding: 64px 24px; }
-  .t-proof-logos { gap: 16px; } .t-footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+  .t-footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
   .t-gradient-orb { display: none; }
 }
 @media (max-width: 480px) {
@@ -484,7 +474,7 @@ function HeroVideo({ parallaxY }: { parallaxY: number }) {
           onTimeUpdate={handleTimeUpdate}
           style={{ width: "100%", display: "block", borderRadius: "16px" }}
         >
-          <source src="/demo-video.mp4" type="video/mp4" />
+          <source src="/demo-video.mp4?v=2" type="video/mp4" />
         </video>
         <div className="t-hero-demo-progress" style={{ width: `${progress}%` }} />
       </div>
@@ -531,7 +521,7 @@ export default function TetherLanding() {
             <li><a href="#specialists">For Specialists</a></li>
             <li><a href="#network">The Network</a></li>
             <li><a href="/security">Security</a></li>
-            <li><button type="button" onClick={() => setShowDemoForm(true)} className="t-nav-cta" style={{ border: "none", cursor: "pointer", font: "inherit", background: "var(--navy)", color: "#fff", padding: "10px 22px", borderRadius: "8px" }}>Request Demo</button></li>
+            <li><a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer" className="t-nav-cta" style={{ textDecoration: "none", display: "inline-block" }}>Request Demo</a></li>
           </ul>
           <button className="t-nav-mob" aria-label="Menu">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -551,7 +541,7 @@ export default function TetherLanding() {
               </h1>
               <p className="t-hero-sub">Tether is the referral network that connects primary care and specialty practices with real-time tracking, loop closure, and a shared directory your staff actually wants to use.</p>
               <div className="t-hero-actions">
-                <button type="button" onClick={() => setShowDemoForm(true)} className="t-btn-p" style={{ border: "none", cursor: "pointer", font: "inherit" }}>Request a Demo <IconArrowRight /></button>
+                <a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer" className="t-btn-p" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}>Request a Demo <IconArrowRight /></a>
                 <a href="#how" className="t-btn-s">See How It Works</a>
               </div>
             </div>
@@ -622,6 +612,7 @@ export default function TetherLanding() {
                     <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Visibility into your referral network and top senders</div>
                     <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Automated status updates back to referring providers</div>
                     <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Presence in the Tether specialist directory for new referral sources</div>
+                    <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Grow referral volume from new PCP relationships through the Tether network</div>
                   </div>
                 </div>
               </Reveal>
@@ -635,6 +626,7 @@ export default function TetherLanding() {
                     <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Real-time referral status tracking with zero follow-up calls</div>
                     <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Loop closure notifications when the visit is completed</div>
                     <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Always free. No contracts, no software fees.</div>
+                    <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Supports value-based care reporting with closed-loop referral documentation</div>
                   </div>
                 </div>
               </Reveal>
@@ -689,27 +681,12 @@ export default function TetherLanding() {
           </div>
         </section>
 
-        {/* PROOF */}
-        <section className="t-proof">
-          <div className="t-proof-inner">
-            <Reveal><div className="t-slbl">Trusted By</div></Reveal>
-            <Reveal delay={0.1}><div className="t-stitle">Practices across the DMV and beyond</div></Reveal>
-            <Reveal delay={0.2}><div className="t-proof-logos"><div className="t-proof-logo-ph">Partner Logo</div><div className="t-proof-logo-ph">Partner Logo</div><div className="t-proof-logo-ph">Partner Logo</div><div className="t-proof-logo-ph">Partner Logo</div></div></Reveal>
-            <Reveal delay={0.25}>
-              <div className="t-proof-quote">
-                <p>The referral process has always been a black box. Tether finally makes it feel like we are actually connected to the specialists we send patients to.</p>
-                <div className="t-proof-quote-attr">Pilot Practice, DMV Region</div>
-              </div>
-            </Reveal>
-          </div>
-        </section>
-
         {/* FINAL CTA */}
         <section className="t-fcta" id="demo">
           <div className="t-fcta-inner">
             <Reveal><h2>Ready to connect<br />your practice?</h2></Reveal>
             <Reveal delay={0.1}><p>Join the network of practices building a better referral experience for their patients and their teams.</p></Reveal>
-            <Reveal delay={0.2}><button type="button" onClick={() => setShowDemoForm(true)} className="t-btn-p" style={{ border: "none", cursor: "pointer", font: "inherit" }}>Request a Demo <IconArrowRight /></button></Reveal>
+            <Reveal delay={0.2}><a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer" className="t-btn-p" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}>Request a Demo <IconArrowRight /></a></Reveal>
             <Reveal delay={0.25}><p className="t-fcta-note">Free for referring providers. No contracts required.</p></Reveal>
           </div>
         </section>
@@ -724,7 +701,7 @@ export default function TetherLanding() {
             <div className="t-footer-links">
               <div className="t-footer-col"><h5>Product</h5><a href="#how">How It Works</a><a href="#product">Features</a><a href="#specialists">For Specialists</a><a href="#specialists">For Primary Care</a></div>
               <div className="t-footer-col"><h5>Company</h5><a href="#">About</a><a href="#">Blog</a><a href="#">Careers</a><a href="mailto:sach@tetherhealth.com">Contact</a></div>
-              <div className="t-footer-col"><h5>Legal</h5><a href="/privacy_policy.pdf" target="_blank" rel="noopener noreferrer">Privacy Policy</a><a href="/terms_of_service.pdf" target="_blank" rel="noopener noreferrer">Terms of Service</a><a href="/cookie_policy.pdf" target="_blank" rel="noopener noreferrer">Cookie Policy</a><a href="/hipaa_information_notice.pdf" target="_blank" rel="noopener noreferrer">HIPAA Information</a></div>
+              <div className="t-footer-col"><h5>Legal</h5><a href="/legal#privacy">Privacy Policy</a><a href="/legal#terms">Terms of Service</a><a href="/legal#cookies">Cookie Policy</a><a href="/legal#hipaa">HIPAA Information</a></div>
             </div>
           </div>
           <div className="t-footer-bottom"><span>&copy; 2026 Tether Health, Inc. All rights reserved.</span><div><a href="#">Twitter</a><a href="https://www.linkedin.com/company/111649326/" target="_blank" rel="noopener noreferrer">LinkedIn</a></div></div>

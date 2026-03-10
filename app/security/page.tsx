@@ -196,7 +196,7 @@ export default function SecurityPage() {
           <li><a href="/#specialists">For Specialists</a></li>
           <li><a href="/#network">The Network</a></li>
           <li><a href="/security" style={{ color: "var(--navy-deep)", fontWeight: 600 }}>Security</a></li>
-          <li><a href="mailto:support@tetherhealth.co?subject=Demo%20Request%20-%20Tether%20Health&body=Hi%2C%0A%0AI%E2%80%99d%20like%20to%20learn%20more%20about%20Tether%20for%20my%20practice.%0A%0APractice%20name%3A%0ARole%3A%0ABest%20time%20to%20connect%3A%0A%0AThank%20you" className="sec-nav-cta">Request Demo</a></li>
+          <li><a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer" className="sec-nav-cta">Request Demo</a></li>
         </ul>
       </nav>
 
