@@ -258,8 +258,10 @@ const CSS = `
 .t-hero-demo-video { border-radius: 16px; border: 1px solid var(--t-border); box-shadow: 0 8px 40px rgba(0,0,0,0.08); overflow: hidden; background: #fff; position: relative; flex: 1; min-height: 400px; display: flex; align-items: center; justify-content: center; }
 .t-hero-demo-video video { display: block; width: 100%; height: auto; max-height: 70vh; object-fit: contain; }
 .t-hero-demo-caption { text-align: center; font-size: 13px; color: var(--text-tertiary); margin-top: 16px; font-weight: 400; }
-.t-hero-demo-expand { position: absolute; top: 12px; right: 12px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: #fff; background: rgba(0,0,0,0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 6px; opacity: 0.7; transition: opacity 0.2s; pointer-events: none; z-index: 2; }
+.t-hero-demo-expand { position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; color: #fff; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 50%; border: none; cursor: pointer; z-index: 10; opacity: 0; transition: opacity 0.2s, background 0.2s, transform 0.2s; }
 .t-hero-demo-video:hover .t-hero-demo-expand { opacity: 1; }
+.t-hero-demo-expand:hover { background: rgba(0,0,0,0.7); transform: scale(1.05); }
+.t-hero-demo-progress { position: absolute; bottom: 0; left: 0; height: 3px; background: var(--teal); border-top-right-radius: 3px; border-bottom-right-radius: 3px; transition: width 0.1s linear; }
 .t-pcard-img { cursor: pointer; }
 .t-video-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 48px; background: rgba(0,0,0,0.8); }
 .t-video-modal-inner { position: relative; max-width: 90vw; max-height: 90vh; }
@@ -431,22 +433,60 @@ function ProductCardVideo({ src }: { src: string }) {
 
 // ─── Hero Video ───
 function HeroVideo({ parallaxY }: { parallaxY: number }) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const handleClick = () => { videoRef.current?.requestFullscreen?.(); };
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    const video = videoRef.current;
+    if (!el || !video) return;
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        if (document.fullscreenElement === video) return;
+        if (e.isIntersecting) {
+          video.currentTime = 0;
+          video.play().catch(() => {});
+          setProgress(0);
+        } else {
+          video.pause();
+          video.currentTime = 0;
+          setProgress(0);
+        }
+      },
+      { threshold: 0.25 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  const handleTimeUpdate = useCallback(() => {
+    const v = videoRef.current;
+    if (!v || !(v.duration > 0)) return;
+    setProgress((v.currentTime / v.duration) * 100);
+  }, []);
+
+  const handleExpandClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    videoRef.current?.requestFullscreen?.();
+  };
+
   return (
     <div className="t-hero-demo-wrap" style={{ transform: `translateY(${parallaxY}px)` }}>
-      <div className="t-hero-demo-video" onClick={handleClick} style={{ cursor: "pointer" }}>
-        <div className="t-hero-demo-expand"><IconExpand /></div>
+      <div ref={containerRef} className="t-hero-demo-video">
+        <button type="button" className="t-hero-demo-expand" onClick={handleExpandClick} aria-label="Expand to fullscreen"><IconExpand /></button>
         <video
           ref={videoRef}
           autoPlay
           muted
           loop
           playsInline
-          style={{ width: "100%", display: "block", borderRadius: "16px", cursor: "pointer" }}
+          onTimeUpdate={handleTimeUpdate}
+          style={{ width: "100%", display: "block", borderRadius: "16px" }}
         >
           <source src="/demo-video.mp4" type="video/mp4" />
         </video>
+        <div className="t-hero-demo-progress" style={{ width: `${progress}%` }} />
       </div>
       <p className="t-hero-demo-caption">Georgetown Family Medicine sending a referral via Tether</p>
     </div>
