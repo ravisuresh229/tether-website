@@ -68,13 +68,13 @@ function Counter({ end, suffix = "", prefix = "", duration = 2000 }: { end: numb
 }
 
 // ─── Reveal ───
-function Reveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
+function Reveal({ children, delay = 0, className = "", translateY = 36, duration = 0.9 }: { children: React.ReactNode; delay?: number; className?: string; translateY?: number; duration?: number }) {
   const [ref, v] = useInView();
   return (
     <div ref={ref} className={className} style={{
       opacity: v ? 1 : 0,
-      transform: v ? "translateY(0)" : "translateY(36px)",
-      transition: `opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s, transform 0.9s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s`,
+      transform: v ? "translateY(0)" : `translateY(${translateY}px)`,
+      transition: `opacity ${duration}s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s, transform ${duration}s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s`,
     }}>{children}</div>
   );
 }
@@ -226,7 +226,7 @@ const CSS = `
 .t-nav-cta:hover { background: var(--navy-deep) !important; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(45,58,78,0.2) !important; }
 .t-nav-mob { display: none; background: none; border: none; cursor: pointer; padding: 8px; color: var(--navy-deep); }
 
-.t-hero { position: relative; min-height: 100vh; display: flex; align-items: flex-start; padding: 160px 24px 80px; overflow: hidden; }
+.t-hero { position: relative; display: flex; align-items: flex-start; padding: 160px 24px 80px; overflow: hidden; }
 .t-hero-inner { max-width: 1200px; margin: 0 auto; width: 100%; flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; z-index: 1; min-height: 0; }
 .t-hero-content { max-width: 560px; display: flex; flex-direction: column; align-items: center; }
 .t-hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px 6px 8px; background: rgba(45,58,78,0.06); border: 1px solid rgba(45,58,78,0.1); border-radius: 100px; font-size: 13px; font-weight: 500; color: var(--navy); margin-bottom: 28px; letter-spacing: 0.01em; animation: t-badge-in 0.8s cubic-bezier(0.16,1,0.3,1) both; }
@@ -253,11 +253,12 @@ const CSS = `
 .t-btn-s { display: inline-flex; align-items: center; gap: 8px; padding: 14px 24px; background: transparent; color: var(--text); border: 1.5px solid var(--t-border); border-radius: 10px; font-size: 15px; font-weight: 500; font-family: var(--sans); cursor: pointer; transition: all 0.25s; text-decoration: none; }
 .t-btn-s:hover { border-color: var(--navy); color: var(--navy); background: rgba(45,58,78,0.04); }
 
-.t-hero-demo-wrap { margin-top: 48px; width: 100%; max-width: 1080px; margin-left: auto; margin-right: auto; flex: 1; min-height: 0; display: flex; flex-direction: column; animation: t-demo-in 1s cubic-bezier(0.16,1,0.3,1) 0.3s both; }
-@keyframes t-demo-in { from { opacity: 0; transform: translateY(40px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
-.t-hero-demo-video { border-radius: 16px; border: 1px solid var(--t-border); box-shadow: 0 8px 40px rgba(0,0,0,0.08); overflow: hidden; background: #fff; position: relative; flex: 1; min-height: 400px; display: flex; align-items: center; justify-content: center; }
+.t-hero-demo-wrap { max-width: 1000px; margin: 40px auto 0; width: 100%; }
+.t-hero-demo-video { border-radius: 12px; overflow: hidden; position: relative; min-height: 400px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.04), 0 10px 40px rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.08); }
 .t-hero-demo-video video { display: block; width: 100%; height: auto; max-height: 70vh; object-fit: contain; }
 .t-hero-demo-caption { text-align: center; font-size: 13px; color: var(--text-tertiary); margin-top: 16px; font-weight: 400; }
+.t-hero-demo-caption-expand { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 4px; font-size: 12px; color: var(--text-tertiary); }
+.t-hero-demo-caption-expand svg { width: 12px; height: 12px; opacity: 0.8; }
 .t-hero-demo-expand { position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; color: #fff; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 50%; border: none; cursor: pointer; z-index: 10; opacity: 0; transition: opacity 0.2s, background 0.2s, transform 0.2s; }
 .t-hero-demo-video:hover .t-hero-demo-expand { opacity: 1; }
 .t-hero-demo-expand:hover { background: rgba(0,0,0,0.7); transform: scale(1.05); }
@@ -288,12 +289,13 @@ const CSS = `
 
 .t-how { padding: 120px 48px; background: var(--bg); }
 .t-how-inner { max-width: 1200px; margin: 0 auto; }
-.t-how-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
-.t-how-step { background: #fff; border: 1px solid var(--t-border); border-radius: 16px; padding: 40px 32px; position: relative; }
+.t-how-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; align-items: stretch; }
+.t-how-steps > * { min-width: 0; }
+.t-how-step { width: 100%; height: 100%; min-height: 280px; box-sizing: border-box; display: flex; flex-direction: column; background: #fff; border: 1px solid var(--t-border); border-radius: 16px; padding: 40px 32px; position: relative; }
 .t-how-step-num { width: 36px; height: 36px; border-radius: 10px; background: rgba(45,58,78,0.06); color: var(--navy); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; margin-bottom: 24px; transition: all 0.3s; }
 .t-how-step:hover .t-how-step-num { background: var(--teal); color: #fff; transform: scale(1.1); }
 .t-how-step h3 { font-family: var(--serif); font-size: 24px; font-weight: 400; color: var(--navy-darkest); margin-bottom: 12px; }
-.t-how-step p { font-size: 15px; line-height: 1.65; color: var(--text-secondary); }
+.t-how-step p { flex: 1; font-size: 15px; line-height: 1.65; color: var(--text-secondary); }
 .t-how-step-conn { position: absolute; top: 58px; right: -18px; color: var(--t-border); z-index: 2; }
 
 .t-product { padding: 120px 48px; background: var(--bg-warm); }
@@ -301,17 +303,17 @@ const CSS = `
 .t-product-header { text-align: center; margin-bottom: 72px; }
 .t-product-header .t-sdesc { margin-left: auto; margin-right: auto; margin-bottom: 0; }
 .t-pgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-.t-pcard { background: #fff; border: 1px solid var(--t-border); border-radius: 16px; overflow: hidden; }
-.t-pcard-img { aspect-ratio: 16/10; background: linear-gradient(135deg, rgba(45,58,78,0.04), rgba(13,115,119,0.06)); display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--t-border); position: relative; overflow: hidden; }
-.t-pcard-img img, .t-pcard-img video { object-fit: cover; width: 100%; height: 100%; position: absolute; inset: 0; }
-.t-pcard-img::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, transparent 40%, rgba(13,115,119,0.04)); opacity: 0; transition: opacity 0.4s; pointer-events: none; }
-.t-pcard:hover .t-pcard-img::after { opacity: 1; }
-.t-pcard-img-ph { display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--navy); font-size: 13px; font-weight: 500; opacity: 0.6; }
-.t-pcard-body { padding: 28px 28px 32px; }
+.t-pcard { background: #fff; border: 1px solid rgba(0,0,0,0.06); border-radius: 16px; overflow: hidden; transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s cubic-bezier(0.16,1,0.3,1); }
+.t-pcard:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.08); }
+.t-pcard-img { aspect-ratio: 16/10; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; cursor: pointer; }
+.t-pcard-img img, .t-pcard-img video { object-fit: cover; width: 100%; height: 100%; position: absolute; inset: 0; transition: transform 0.4s ease; }
+.t-pcard:hover .t-pcard-img video { transform: scale(1.03); }
+.t-pcard-expand { position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; color: #fff; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 50%; border: none; cursor: pointer; z-index: 10; opacity: 0; transition: opacity 0.2s, background 0.2s, transform 0.2s; }
+.t-pcard-img:hover .t-pcard-expand { opacity: 1; }
+.t-pcard-expand:hover { background: rgba(0,0,0,0.7); transform: scale(1.05); }
+.t-pcard-body { padding: 24px; }
 .t-pcard-body h3 { font-family: var(--serif); font-size: 22px; font-weight: 400; color: var(--navy-darkest); margin-bottom: 8px; }
 .t-pcard-body p { font-size: 14.5px; line-height: 1.6; color: var(--text-secondary); }
-.t-pcard-full { grid-column: 1 / -1; }
-.t-pcard-full .t-pcard-img { aspect-ratio: 21/9; }
 
 .t-audiences { padding: 120px 48px; background: var(--bg); }
 .t-audiences-inner { max-width: 1200px; margin: 0 auto; }
@@ -383,13 +385,14 @@ const CSS = `
   .t-hero { padding: 100px 24px 60px; } .t-hero-title { font-size: 40px; } .t-hero-content { max-width: 100%; }
   .t-problem, .t-how, .t-product, .t-audiences, .t-network, .t-fcta { padding: 80px 24px; }
   .t-problem h2, .t-stitle, .t-network h2 { font-size: 32px; } .t-fcta h2 { font-size: 36px; }
-  .t-pstats, .t-how-steps, .t-pgrid, .t-aud-grid, .t-nvis { grid-template-columns: 1fr; }
+  .t-pstats, .t-how-steps, .t-aud-grid, .t-nvis { grid-template-columns: 1fr; }
   .t-pstat-n { font-size: 42px; } .t-how-step-conn { display: none; }
   .t-footer-inner { flex-direction: column; gap: 40px; } .t-footer-links { gap: 32px; flex-wrap: wrap; }
   .t-trust-grid { grid-template-columns: 1fr; } .t-trust { padding: 64px 24px; }
   .t-footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
   .t-gradient-orb { display: none; }
 }
+@media (max-width: 768px) { .t-pgrid { grid-template-columns: 1fr; } }
 @media (max-width: 480px) {
   .t-hero-title { font-size: 34px; } .t-hero-actions { flex-direction: column; align-items: stretch; }
   .t-btn-p, .t-btn-s { justify-content: center; } .t-pstat { padding: 32px 24px; } .t-aud-card { padding: 32px 24px; }
@@ -412,17 +415,53 @@ const CSS = `
 const IconExpand = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>;
 
 // ─── Product card video (0.75x speed) ───
-function ProductCardVideo({ src }: { src: string }) {
-  const ref = useRef<HTMLVideoElement>(null);
+// ─── Product Card (scroll animation + video play on view) ───
+function ProductCard({ title, description, videoSrc, modalKey, animationDelay, onOpenModal }: { title: string; description: string; videoSrc: string; modalKey: string; animationDelay: number; onOpenModal: (key: string) => void }) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.1 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (inView) v.play().catch(() => {});
+    else v.pause();
+  }, [inView]);
+
   return (
-    <video ref={ref} autoPlay muted loop playsInline onLoadedData={() => { if (ref.current) ref.current.playbackRate = 0.75; }}>
-      <source src={src} type="video/mp4" />
-    </video>
+    <div
+      ref={cardRef}
+      className="t-pcard"
+      style={{
+        opacity: inView ? 1 : 0,
+        transform: inView ? "translateY(0)" : "translateY(40px)",
+        transition: `opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) ${animationDelay}s, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) ${animationDelay}s`,
+      }}
+    >
+      <div className="t-pcard-img" onClick={() => onOpenModal(modalKey)} role="button" tabIndex={0} onKeyDown={e => e.key === "Enter" && onOpenModal(modalKey)}>
+        <button type="button" className="t-pcard-expand" onClick={e => { e.stopPropagation(); videoRef.current?.requestFullscreen?.(); }} aria-label="Expand to fullscreen"><IconExpand /></button>
+        <video ref={videoRef} muted loop playsInline onLoadedData={() => { if (videoRef.current) videoRef.current.playbackRate = 0.75; }}>
+          <source src={videoSrc} type="video/mp4" />
+        </video>
+      </div>
+      <div className="t-pcard-body">
+        <h3>{title}</h3>
+        <p>{description}</p>
+      </div>
+    </div>
   );
 }
 
 // ─── Hero Video ───
-function HeroVideo({ parallaxY }: { parallaxY: number }) {
+function HeroVideo() {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [progress, setProgress] = useState(0);
@@ -462,7 +501,7 @@ function HeroVideo({ parallaxY }: { parallaxY: number }) {
   };
 
   return (
-    <div className="t-hero-demo-wrap" style={{ transform: `translateY(${parallaxY}px)` }}>
+    <div className="t-hero-demo-wrap">
       <div ref={containerRef} className="t-hero-demo-video">
         <button type="button" className="t-hero-demo-expand" onClick={handleExpandClick} aria-label="Expand to fullscreen"><IconExpand /></button>
         <video
@@ -472,13 +511,14 @@ function HeroVideo({ parallaxY }: { parallaxY: number }) {
           loop
           playsInline
           onTimeUpdate={handleTimeUpdate}
-          style={{ width: "100%", display: "block", borderRadius: "16px" }}
+          style={{ width: "100%", display: "block", borderRadius: "12px" }}
         >
           <source src="/demo-video.mp4?v=2" type="video/mp4" />
         </video>
         <div className="t-hero-demo-progress" style={{ width: `${progress}%` }} />
       </div>
       <p className="t-hero-demo-caption">Georgetown Family Medicine sending a referral via Tether</p>
+      <div className="t-hero-demo-caption-expand"><IconExpand />Click to expand</div>
     </div>
   );
 }
@@ -499,8 +539,6 @@ export default function TetherLanding() {
     const h = document.documentElement.scrollHeight - window.innerHeight;
     setScrollPct(h > 0 ? (scrollY / h) * 100 : 0);
   }, [scrollY]);
-
-  const parallaxY = Math.min(scrollY * 0.15, 80);
 
   return (
     <>
@@ -545,7 +583,7 @@ export default function TetherLanding() {
                 <a href="#how" className="t-btn-s">See How It Works</a>
               </div>
             </div>
-            <HeroVideo parallaxY={parallaxY} />
+            <HeroVideo />
           </div>
         </section>
 
@@ -572,9 +610,9 @@ export default function TetherLanding() {
             <Reveal delay={0.1}><div className="t-stitle">Three steps. Zero fax machines.</div></Reveal>
             <Reveal delay={0.15}><p className="t-sdesc">Your front desk staff can be sending tracked referrals in under 10 minutes. No IT integration required. No workflow disruption.</p></Reveal>
             <div className="t-how-steps">
-              <Reveal delay={0.1}><TiltCard className="t-how-step"><div className="t-how-step-num">1</div><h3>Send or Receive</h3><p>Upload a referral PDF or use the built-in form. Tether&apos;s AI extracts patient details, insurance, and clinical context automatically.</p><div className="t-how-step-conn"><IconArrowRight /></div></TiltCard></Reveal>
-              <Reveal delay={0.2}><TiltCard className="t-how-step"><div className="t-how-step-num">2</div><h3>Track in Real Time</h3><p>Both the sending and receiving practice see the referral status live. No more calling to ask &quot;did you get it?&quot; Every update is logged and visible.</p><div className="t-how-step-conn"><IconArrowRight /></div></TiltCard></Reveal>
-              <Reveal delay={0.3}><TiltCard className="t-how-step"><div className="t-how-step-num">3</div><h3>Close the Loop</h3><p>When the visit is complete, the referring provider gets notified. The patient&apos;s care journey is documented, connected, and never lost.</p></TiltCard></Reveal>
+              <Reveal delay={0} translateY={30} duration={0.8}><TiltCard className="t-how-step"><div className="t-how-step-num">1</div><h3>Send or Receive</h3><p>Upload a referral PDF or use the built-in form. Tether&apos;s AI extracts patient details, insurance, and clinical context automatically.</p><div className="t-how-step-conn"><IconArrowRight /></div></TiltCard></Reveal>
+              <Reveal delay={0.1} translateY={30} duration={0.8}><TiltCard className="t-how-step"><div className="t-how-step-num">2</div><h3>Track in Real Time</h3><p>Both the sending and receiving practice see the referral status live. No more calling to ask &quot;did you get it?&quot; Every update is logged and visible.</p><div className="t-how-step-conn"><IconArrowRight /></div></TiltCard></Reveal>
+              <Reveal delay={0.2} translateY={30} duration={0.8}><TiltCard className="t-how-step"><div className="t-how-step-num">3</div><h3>Close the Loop</h3><p>When the visit is complete, the referring provider gets notified. The patient&apos;s care journey is documented, connected, and never lost.</p></TiltCard></Reveal>
             </div>
           </div>
         </section>
@@ -588,9 +626,10 @@ export default function TetherLanding() {
               <Reveal delay={0.15}><p className="t-sdesc">Designed for medical assistants and front desk staff who manage referrals every day. Not physicians who review dashboards once a week.</p></Reveal>
             </div>
             <div className="t-pgrid">
-              <Reveal delay={0.1}><TiltCard className="t-pcard t-pcard-full"><div className="t-pcard-img" onClick={() => setVideoModal("dashboard")} role="button" tabIndex={0} onKeyDown={e => e.key === "Enter" && setVideoModal("dashboard")}><ProductCardVideo src="/dashboard-demo.mp4" /></div><div className="t-pcard-body"><h3>Referral Dashboard</h3><p>See every inbound and outbound referral in one place. Filter by status, provider, date, or insurance. Know exactly where every patient stands.</p></div></TiltCard></Reveal>
-              <Reveal delay={0.15}><TiltCard className="t-pcard"><div className="t-pcard-img" onClick={() => setVideoModal("directory")} role="button" tabIndex={0} onKeyDown={e => e.key === "Enter" && setVideoModal("directory")}><ProductCardVideo src="/directory-demo.mp4" /></div><div className="t-pcard-body"><h3>Specialist Directory</h3><p>A curated, searchable map of specialists accepting referrals. Filter by specialty, insurance, distance, and availability.</p></div></TiltCard></Reveal>
-              <Reveal delay={0.2}><TiltCard className="t-pcard"><div className="t-pcard-img" onClick={() => setVideoModal("parser")} role="button" tabIndex={0} onKeyDown={e => e.key === "Enter" && setVideoModal("parser")}><ProductCardVideo src="/parser-demo.mp4" /></div><div className="t-pcard-body"><h3>AI-Powered Intake</h3><p>Drop in a referral PDF. Tether extracts patient demographics, clinical notes, and insurance details in seconds.</p></div></TiltCard></Reveal>
+              <ProductCard title="Referral Dashboard" description="See every inbound and outbound referral in one place. Filter by status, provider, date, or insurance. Know exactly where every patient stands." videoSrc="/dashboard-demo.mp4" modalKey="dashboard" animationDelay={0} onOpenModal={setVideoModal} />
+              <ProductCard title="Specialist Directory" description="A curated, searchable map of specialists accepting referrals. Filter by specialty, insurance, distance, and availability." videoSrc="/directory-demo.mp4" modalKey="directory" animationDelay={0.1} onOpenModal={setVideoModal} />
+              <ProductCard title="AI-Powered Intake" description="Drop in a referral PDF. Tether extracts patient demographics, clinical notes, and insurance details in seconds." videoSrc="/parser-demo.mp4" modalKey="parser" animationDelay={0.2} onOpenModal={setVideoModal} />
+              <ProductCard title="Specialist Referral View" description="Receive referrals, contact patients, schedule visits, and update status. Close the loop without a single phone call." videoSrc="/specialist-demo.mp4" modalKey="specialist" animationDelay={0.3} onOpenModal={setVideoModal} />
             </div>
           </div>
         </section>
@@ -738,7 +777,7 @@ export default function TetherLanding() {
             <div className="t-video-modal-inner" onClick={e => e.stopPropagation()}>
               <button type="button" className="t-video-modal-close" onClick={() => setVideoModal(null)} aria-label="Close">✕</button>
               <video autoPlay muted loop playsInline style={{ display: "block" }}>
-                <source src={videoModal === "dashboard" ? "/dashboard-demo.mp4" : videoModal === "directory" ? "/directory-demo.mp4" : "/parser-demo.mp4"} type="video/mp4" />
+                <source src={videoModal === "dashboard" ? "/dashboard-demo.mp4" : videoModal === "directory" ? "/directory-demo.mp4" : videoModal === "parser" ? "/parser-demo.mp4" : "/specialist-demo.mp4"} type="video/mp4" />
               </video>
             </div>
           </div>
