@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 
 function useInView(opts: IntersectionObserverInit = {}) {
   const ref = useRef<HTMLDivElement>(null);
@@ -26,21 +27,6 @@ function Reveal({ children, delay = 0, className = "" }: { children: React.React
       transform: v ? "translateY(0)" : "translateY(32px)",
       transition: `opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s`,
     }}>{children}</div>
-  );
-}
-
-function TetherMark({ size = 32, color = "currentColor" }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 64 64" fill="none">
-      <path d="M10 12C10 12 18 18 24 24C28 28 30 32 31 38L31 56" stroke={color} strokeWidth="2.2" strokeLinecap="round"/>
-      <path d="M14 10C14 10 20 16 26 22C29 25 31 30 32 36L32 56" stroke={color} strokeWidth="2.2" strokeLinecap="round"/>
-      <path d="M18 8C18 8 23 14 28 20C30 22 32 28 33 34L33 56" stroke={color} strokeWidth="2.2" strokeLinecap="round"/>
-      <path d="M22 7C22 7 26 12 30 18C31 20 33 26 33.5 32L33.5 56" stroke={color} strokeWidth="2.2" strokeLinecap="round"/>
-      <path d="M54 12C54 12 46 18 40 24C36 28 34 32 33 38L33 56" stroke={color} strokeWidth="2.2" strokeLinecap="round"/>
-      <path d="M50 10C50 10 44 16 38 22C35 25 33 30 32 36L32 56" stroke={color} strokeWidth="2.2" strokeLinecap="round"/>
-      <path d="M46 8C46 8 41 14 36 20C34 22 32 28 31 34L31 56" stroke={color} strokeWidth="2.2" strokeLinecap="round"/>
-      <path d="M42 7C42 7 38 12 34 18C33 20 31 26 30.5 32L30.5 56" stroke={color} strokeWidth="2.2" strokeLinecap="round"/>
-    </svg>
   );
 }
 
@@ -109,12 +95,13 @@ const CSS = `
 .sec-principles-inner { max-width: 1100px; margin: 0 auto; }
 .sec-slbl { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--teal); margin-bottom: 16px; }
 .sec-stitle { font-family: var(--serif); font-size: 40px; line-height: 1.15; font-weight: 400; color: var(--navy-darkest); letter-spacing: -0.8px; margin-bottom: 56px; }
-.sec-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-.sec-card { background: white; border: 1px solid var(--border); border-radius: 16px; padding: 36px 32px; transition: all 0.35s cubic-bezier(0.16,1,0.3,1); }
+.sec-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; align-items: stretch; }
+.sec-grid > * { min-width: 0; }
+.sec-card { height: 100%; min-height: 280px; display: flex; flex-direction: column; background: white; border: 1px solid var(--border); border-radius: 16px; padding: 36px 32px; transition: all 0.35s cubic-bezier(0.16,1,0.3,1); }
 .sec-card:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,0.06); border-color: rgba(13,115,119,0.2); }
 .sec-card-icon { width: 52px; height: 52px; border-radius: 14px; background: var(--teal-light); color: var(--teal); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
 .sec-card h3 { font-family: var(--serif); font-size: 22px; font-weight: 400; color: var(--navy-darkest); margin-bottom: 10px; }
-.sec-card p { font-size: 14.5px; line-height: 1.6; color: var(--text-secondary); }
+.sec-card p { flex: 1; font-size: 14.5px; line-height: 1.6; color: var(--text-secondary); }
 
 /* Details */
 .sec-details { padding: 96px 48px; background: var(--navy-deep); color: white; }
@@ -187,7 +174,7 @@ export default function SecurityPage() {
       {/* NAV */}
       <nav className="sec-nav">
         <a href="/" className="sec-nav-logo">
-          <TetherMark size={30} color="#2D3A4E" />
+          <Image src="/LOGO.jpeg" alt="Tether" width={30} height={30} style={{ objectFit: "contain" }} />
           <span className="sec-nav-logo-text">Tether</span>
         </a>
         <ul className="sec-nav-links">
