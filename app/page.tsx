@@ -193,6 +193,9 @@ const IconRefresh = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="
 const IconLink = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>;
 const IconSparkles = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/><path d="M19 12l.75 2.25L22 15l-2.25.75L19 18l-.75-2.25L16 15l2.25-.75L19 12z"/><path d="M5 12l.75 2.25L8 15l-2.25.75L5 18l-.75-2.25L2 15l2.25-.75L5 12z"/></svg>;
 const IconCalendarCheck = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg>;
+const IconUpload = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>;
+const IconPulse = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>;
+const IconCheckCircle = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>;
 const IconPlay = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>;
 
 // ─── Styles (t- prefixed to avoid Tailwind collisions) ───
@@ -266,7 +269,6 @@ const CSS = `
 .t-hero-demo-video:hover .t-hero-demo-expand { opacity: 1; }
 .t-hero-demo-expand:hover { background: rgba(0,0,0,0.7); transform: scale(1.05); }
 .t-hero-demo-progress { position: absolute; bottom: 0; left: 0; height: 3px; background: var(--teal); border-top-right-radius: 3px; border-bottom-right-radius: 3px; transition: width 0.1s linear; }
-.t-pcard-img { cursor: pointer; }
 .t-video-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 48px; background: rgba(0,0,0,0.8); }
 .t-video-modal-inner { position: relative; max-width: 90vw; max-height: 90vh; }
 .t-video-modal video { max-width: 90vw; max-height: 90vh; border-radius: 12px; }
@@ -305,18 +307,16 @@ const CSS = `
 .t-product-inner { max-width: 1200px; margin: 0 auto; }
 .t-product-header { text-align: center; margin-bottom: 72px; }
 .t-product-header .t-sdesc { margin-left: auto; margin-right: auto; margin-bottom: 0; }
-.t-pgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-.t-pcard { background: #fff; border: 1px solid rgba(0,0,0,0.06); border-radius: 16px; overflow: hidden; transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s cubic-bezier(0.16,1,0.3,1); }
-.t-pcard:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.08); }
-.t-pcard-img { aspect-ratio: 16/10; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; cursor: pointer; }
-.t-pcard-img img, .t-pcard-img video { object-fit: cover; width: 100%; height: 100%; position: absolute; inset: 0; transition: transform 0.4s ease; }
-.t-pcard:hover .t-pcard-img video { transform: scale(1.03); }
-.t-pcard-expand { position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; color: #fff; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 50%; border: none; cursor: pointer; z-index: 10; opacity: 0; transition: opacity 0.2s, background 0.2s, transform 0.2s; }
-.t-pcard-img:hover .t-pcard-expand { opacity: 1; }
-.t-pcard-expand:hover { background: rgba(0,0,0,0.7); transform: scale(1.05); }
-.t-pcard-body { padding: 24px; }
-.t-pcard-body h3 { font-family: var(--serif); font-size: 22px; font-weight: 400; color: var(--navy-darkest); margin-bottom: 8px; }
-.t-pcard-body p { font-size: 14.5px; line-height: 1.6; color: var(--text-secondary); }
+.t-prows { display: flex; flex-direction: column; gap: 0; }
+.t-prow { display: flex; align-items: center; gap: 48px; margin-bottom: 64px; }
+.t-prow:last-child { margin-bottom: 0; }
+.t-prow-video { flex: 0 0 60%; width: 60%; border-radius: 12px; overflow: hidden; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 24px rgba(0,0,0,0.06); aspect-ratio: 16/10; }
+.t-prow-video video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.t-prow-text { flex: 0 0 40%; width: 40%; }
+.t-prow-text h3 { font-family: var(--serif); font-size: 28px; font-weight: 400; color: var(--navy-darkest); margin-bottom: 12px; }
+.t-prow-text p { font-size: 15px; line-height: 1.7; color: var(--text-secondary); margin-bottom: 16px; }
+.t-prow-watch { font-size: 14px; font-weight: 500; color: var(--teal); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: color 0.2s; cursor: pointer; background: none; border: none; font-family: inherit; padding: 0; }
+.t-prow-watch:hover { color: var(--teal-dark); }
 
 .t-audiences { padding: 120px 48px; background: var(--bg); }
 .t-audiences-inner { max-width: 1200px; margin: 0 auto; }
@@ -353,8 +353,8 @@ const CSS = `
 .t-comingsoon .t-slbl { color: var(--teal); }
 .t-comingsoon h2 { font-family: var(--serif); font-size: 44px; line-height: 1.15; font-weight: 400; color: var(--navy-darkest); letter-spacing: -0.8px; margin-bottom: 20px; }
 .t-comingsoon-desc { font-size: 17px; line-height: 1.7; color: var(--text-secondary); max-width: 600px; margin: 0 auto 56px; }
-.t-csoon-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 48px; }
-.t-csoon-card { background: #fff; border: 1px solid var(--t-border); border-radius: 14px; padding: 28px 20px; text-align: center; transition: all 0.3s; }
+.t-csoon-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 48px; }
+.t-csoon-card { background: #fff; border: 1px solid var(--t-border); border-radius: 14px; padding: 32px 24px; text-align: center; transition: all 0.3s; }
 .t-csoon-card:hover { border-color: var(--navy); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(45,58,78,0.08); }
 .t-csoon-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; transition: all 0.3s; }
 .t-csoon-icon-navy { background: rgba(45,58,78,0.06); color: var(--navy); }
@@ -417,7 +417,10 @@ const CSS = `
   .t-gradient-orb { display: none; }
 }
 @media (max-width: 768px) {
-  .t-pgrid { grid-template-columns: 1fr; }
+  .t-prow { flex-direction: column; gap: 24px; margin-bottom: 48px; }
+  .t-prow-video, .t-prow-text { flex: none; width: 100%; }
+  .t-prow-video { order: 1; }
+  .t-prow-text { order: 2; }
   .t-hero-demo-wrap { margin-top: 28px; }
   .t-hero-demo-video { min-height: 280px; }
 }
@@ -446,15 +449,14 @@ const CSS = `
 // ─── Expand icon ───
 const IconExpand = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>;
 
-// ─── Product card video (0.75x speed) ───
-// ─── Product Card (scroll animation + video play on view) ───
-function ProductCard({ title, description, videoSrc, modalKey, animationDelay, onOpenModal }: { title: string; description: string; videoSrc: string; modalKey: string; animationDelay: number; onOpenModal: (key: string) => void }) {
-  const cardRef = useRef<HTMLDivElement>(null);
+// ─── Product Feature Row (alternating staggered layout) ───
+function ProductFeatureRow({ title, description, videoSrc, videoOnLeft }: { title: string; description: string; videoSrc: string; videoOnLeft: boolean }) {
+  const rowRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [inView, setInView] = useState(false);
 
   useEffect(() => {
-    const el = cardRef.current;
+    const el = rowRef.current;
     if (!el) return;
     const obs = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.1 });
     obs.observe(el);
@@ -468,26 +470,46 @@ function ProductCard({ title, description, videoSrc, modalKey, animationDelay, o
     else v.pause();
   }, [inView]);
 
+  const handleWatchDemo = () => videoRef.current?.requestFullscreen?.();
+
+  const videoBlock = (
+    <div className="t-prow-video">
+      <video ref={videoRef} muted loop playsInline onLoadedData={() => { if (videoRef.current) videoRef.current.playbackRate = 0.75; }}>
+        <source src={videoSrc} type="video/mp4" />
+      </video>
+    </div>
+  );
+  const textBlock = (
+    <div className="t-prow-text">
+      <h3>{title}</h3>
+      <p>{description}</p>
+      <button type="button" className="t-prow-watch" onClick={handleWatchDemo}>
+        <IconExpand /> Watch full demo
+      </button>
+    </div>
+  );
+
   return (
     <div
-      ref={cardRef}
-      className="t-pcard"
+      ref={rowRef}
+      className="t-prow"
       style={{
         opacity: inView ? 1 : 0,
         transform: inView ? "translateY(0)" : "translateY(40px)",
-        transition: `opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) ${animationDelay}s, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) ${animationDelay}s`,
+        transition: "opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)",
       }}
     >
-      <div className="t-pcard-img" onClick={() => onOpenModal(modalKey)} role="button" tabIndex={0} onKeyDown={e => e.key === "Enter" && onOpenModal(modalKey)}>
-        <button type="button" className="t-pcard-expand" onClick={e => { e.stopPropagation(); videoRef.current?.requestFullscreen?.(); }} aria-label="Expand to fullscreen"><IconExpand /></button>
-        <video ref={videoRef} muted loop playsInline onLoadedData={() => { if (videoRef.current) videoRef.current.playbackRate = 0.75; }}>
-          <source src={videoSrc} type="video/mp4" />
-        </video>
-      </div>
-      <div className="t-pcard-body">
-        <h3>{title}</h3>
-        <p>{description}</p>
-      </div>
+      {videoOnLeft ? (
+        <>
+          {videoBlock}
+          {textBlock}
+        </>
+      ) : (
+        <>
+          {textBlock}
+          {videoBlock}
+        </>
+      )}
     </div>
   );
 }
@@ -657,11 +679,11 @@ export default function TetherLanding() {
               <Reveal delay={0.1}><div className="t-stitle">Built for the way<br />practices actually work</div></Reveal>
               <Reveal delay={0.15}><p className="t-sdesc">Designed for medical assistants and front desk staff who manage referrals every day. Not physicians who review dashboards once a week.</p></Reveal>
             </div>
-            <div className="t-pgrid">
-              <ProductCard title="Referral Dashboard" description="See every inbound and outbound referral in one place. Filter by status, provider, date, or insurance. Know exactly where every patient stands." videoSrc="/dashboard-demo.mp4" modalKey="dashboard" animationDelay={0} onOpenModal={setVideoModal} />
-              <ProductCard title="Specialist Directory" description="A curated, searchable map of specialists accepting referrals. Filter by specialty, insurance, distance, and availability." videoSrc="/directory-demo.mp4" modalKey="directory" animationDelay={0.1} onOpenModal={setVideoModal} />
-              <ProductCard title="AI-Powered Intake" description="Drop in a referral PDF. Tether extracts patient demographics, clinical notes, and insurance details in seconds." videoSrc="/parser-demo.mp4" modalKey="parser" animationDelay={0.2} onOpenModal={setVideoModal} />
-              <ProductCard title="Specialist Referral View" description="Receive referrals, contact patients, schedule visits, and update status. Close the loop without a single phone call." videoSrc="/specialist-demo.mp4" modalKey="specialist" animationDelay={0.3} onOpenModal={setVideoModal} />
+            <div className="t-prows">
+              <ProductFeatureRow title="Referral Dashboard" description="See every inbound and outbound referral in one place. Filter by status, provider, date, or insurance. Know exactly where every patient stands." videoSrc="/dashboard-demo.mp4" videoOnLeft={true} />
+              <ProductFeatureRow title="Specialist Directory" description="A curated, searchable map of specialists accepting referrals. Filter by specialty, insurance, distance, and availability." videoSrc="/directory-demo.mp4" videoOnLeft={false} />
+              <ProductFeatureRow title="AI-Powered Intake" description="Drop in a referral PDF. Tether extracts patient demographics, clinical notes, and insurance details in seconds." videoSrc="/parser-demo.mp4" videoOnLeft={true} />
+              <ProductFeatureRow title="Specialist Referral View" description="Receive referrals, contact patients, schedule visits, and update status. Close the loop without a single phone call." videoSrc="/specialist-demo.mp4" videoOnLeft={false} />
             </div>
           </div>
         </section>
@@ -732,17 +754,17 @@ export default function TetherLanding() {
                 <TiltCard className="t-csoon-card">
                   <div className="t-csoon-icon t-csoon-icon-navy"><IconLink /></div>
                   <h4>EHR Workflow Integration</h4>
-                  <p>Direct, frictionless connections with Athenahealth, ModMed EMA, and Epic. Patient data flows in, referral status flows back. Zero duplicate entry.</p>
+                  <p>Direct connections with Athenahealth, ModMed EMA, and Epic. Patient data flows in, status flows back. Zero duplicate entry.</p>
                 </TiltCard>
                 <TiltCard className="t-csoon-card">
                   <div className="t-csoon-icon t-csoon-icon-teal"><IconSparkles /></div>
                   <h4>Intelligent Agents</h4>
-                  <p>AI-powered agents that navigate your EHR securely, verify eligibility, route referrals, and close loops automatically. Like an extra MA inside your system.</p>
+                  <p>AI-powered agents navigate your EHR securely to verify eligibility, route referrals, and close loops. Like an extra MA in your system.</p>
                 </TiltCard>
                 <TiltCard className="t-csoon-card">
                   <div className="t-csoon-icon t-csoon-icon-coral"><IconCalendarCheck /></div>
                   <h4>End-to-End Patient Experience</h4>
-                  <p>From referral to appointment: automated scheduling, insurance verification, and patient notifications so visits happen faster and nothing falls through.</p>
+                  <p>From referral to appointment: automated scheduling, insurance checks, and notifications so visits happen faster and nothing falls through.</p>
                 </TiltCard>
               </div>
             </Reveal>
