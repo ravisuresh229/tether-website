@@ -190,6 +190,9 @@ const IconClock = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="no
 const IconUsers = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
 const IconZap = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>;
 const IconRefresh = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>;
+const IconLink = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>;
+const IconSparkles = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/><path d="M19 12l.75 2.25L22 15l-2.25.75L19 18l-.75-2.25L16 15l2.25-.75L19 12z"/><path d="M5 12l.75 2.25L8 15l-2.25.75L5 18l-.75-2.25L2 15l2.25-.75L5 12z"/></svg>;
+const IconCalendarCheck = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg>;
 const IconPlay = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>;
 
 // ─── Styles (t- prefixed to avoid Tailwind collisions) ───
@@ -345,6 +348,27 @@ const CSS = `
 .t-nnode h4 { font-size: 14px; font-weight: 600; color: var(--navy-darkest); margin-bottom: 6px; }
 .t-nnode p { font-size: 13px; color: var(--text-tertiary); line-height: 1.5; }
 
+.t-comingsoon { padding: 120px 48px; background: var(--bg-warm); }
+.t-comingsoon-inner { max-width: 900px; margin: 0 auto; text-align: center; }
+.t-comingsoon .t-slbl { color: var(--teal); }
+.t-comingsoon h2 { font-family: var(--serif); font-size: 44px; line-height: 1.15; font-weight: 400; color: var(--navy-darkest); letter-spacing: -0.8px; margin-bottom: 20px; }
+.t-comingsoon-desc { font-size: 17px; line-height: 1.7; color: var(--text-secondary); max-width: 600px; margin: 0 auto 56px; }
+.t-csoon-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 48px; }
+.t-csoon-card { background: #fff; border: 1px solid var(--t-border); border-radius: 14px; padding: 28px 20px; text-align: center; transition: all 0.3s; }
+.t-csoon-card:hover { border-color: var(--navy); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(45,58,78,0.08); }
+.t-csoon-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; transition: all 0.3s; }
+.t-csoon-icon-navy { background: rgba(45,58,78,0.06); color: var(--navy); }
+.t-csoon-icon-teal { background: rgba(13,115,119,0.08); color: var(--teal); }
+.t-csoon-icon-coral { background: rgba(212,97,62,0.08); color: var(--coral); }
+.t-csoon-card:hover .t-csoon-icon-navy { background: var(--navy); color: #fff; }
+.t-csoon-card:hover .t-csoon-icon-teal { background: var(--teal); color: #fff; }
+.t-csoon-card:hover .t-csoon-icon-coral { background: var(--coral); color: #fff; }
+.t-csoon-card h4 { font-size: 16px; font-weight: 600; color: var(--navy-darkest); margin-bottom: 8px; }
+.t-csoon-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.5; margin: 0; }
+.t-csoon-footer { font-size: 13px; color: var(--text-tertiary); margin-top: 32px; }
+.t-csoon-footer a { color: var(--teal); text-decoration: none; font-weight: 500; transition: color 0.2s; }
+.t-csoon-footer a:hover { color: var(--teal-dark); }
+
 .t-trust { padding: 96px 48px; background: var(--teal-light); }
 .t-trust-inner { max-width: 1200px; margin: 0 auto; }
 .t-trust-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
@@ -383,9 +407,9 @@ const CSS = `
 @media (max-width: 900px) {
   .t-nav { padding: 0 24px; } .t-nav-links { display: none; } .t-nav-mob { display: block; }
   .t-hero { padding: 100px 24px 60px; } .t-hero-title { font-size: 40px; } .t-hero-content { max-width: 100%; }
-  .t-problem, .t-how, .t-product, .t-audiences, .t-network, .t-fcta { padding: 80px 24px; }
-  .t-problem h2, .t-stitle, .t-network h2 { font-size: 32px; } .t-fcta h2 { font-size: 36px; }
-  .t-pstats, .t-how-steps, .t-aud-grid, .t-nvis { grid-template-columns: 1fr; }
+  .t-problem, .t-how, .t-product, .t-audiences, .t-network, .t-comingsoon, .t-fcta { padding: 80px 24px; }
+  .t-problem h2, .t-stitle, .t-network h2, .t-comingsoon h2 { font-size: 32px; } .t-fcta h2 { font-size: 36px; }
+  .t-pstats, .t-how-steps, .t-aud-grid, .t-nvis, .t-csoon-grid { grid-template-columns: 1fr; }
   .t-pstat-n { font-size: 42px; } .t-how-step-conn { display: none; }
   .t-footer-inner { flex-direction: column; gap: 40px; } .t-footer-links { gap: 32px; flex-wrap: wrap; }
   .t-trust-grid { grid-template-columns: 1fr; } .t-trust { padding: 64px 24px; }
@@ -692,6 +716,39 @@ export default function TetherLanding() {
                 <TiltCard className="t-nnode"><div className="t-nnode-icon"><IconSend /></div><h4>Outbound Referral</h4><p>Every fax you send through Tether is a warm invite for the specialist to join</p></TiltCard>
                 <TiltCard className="t-nnode"><div className="t-nnode-icon"><IconRefresh /></div><h4>Loop Closure</h4><p>Both sides see the full referral journey from send to completed visit</p></TiltCard>
                 <TiltCard className="t-nnode"><div className="t-nnode-icon"><IconNetwork /></div><h4>Network Growth</h4><p>More connections create a richer directory and smarter routing for everyone</p></TiltCard>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* COMING SOON */}
+        <section className="t-comingsoon" id="coming-soon">
+          <div className="t-comingsoon-inner">
+            <Reveal><div className="t-slbl">Coming Soon</div></Reveal>
+            <Reveal delay={0.1}><h2>Seamless integration with your existing systems.</h2></Reveal>
+            <Reveal delay={0.15}><p className="t-comingsoon-desc">We are building intelligent automation that lives inside the EHRs you already use, so referrals, patient data, and loop closure happen without leaving your workflow.</p></Reveal>
+            <Reveal delay={0.2}>
+              <div className="t-csoon-grid">
+                <TiltCard className="t-csoon-card">
+                  <div className="t-csoon-icon t-csoon-icon-navy"><IconLink /></div>
+                  <h4>EHR Workflow Integration</h4>
+                  <p>Direct, frictionless connections with Athenahealth, ModMed EMA, and Epic. Patient data flows in, referral status flows back. Zero duplicate entry.</p>
+                </TiltCard>
+                <TiltCard className="t-csoon-card">
+                  <div className="t-csoon-icon t-csoon-icon-teal"><IconSparkles /></div>
+                  <h4>Intelligent Agents</h4>
+                  <p>AI-powered agents that navigate your EHR securely, verify eligibility, route referrals, and close loops automatically. Like an extra MA inside your system.</p>
+                </TiltCard>
+                <TiltCard className="t-csoon-card">
+                  <div className="t-csoon-icon t-csoon-icon-coral"><IconCalendarCheck /></div>
+                  <h4>End-to-End Patient Experience</h4>
+                  <p>From referral to appointment: automated scheduling, insurance verification, and patient notifications so visits happen faster and nothing falls through.</p>
+                </TiltCard>
+              </div>
+            </Reveal>
+            <Reveal delay={0.25}>
+              <div className="t-csoon-footer">
+                Actively in development. <a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer">Early integration partners welcome</a>
               </div>
             </Reveal>
           </div>
