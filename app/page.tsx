@@ -392,10 +392,18 @@ const CSS = `
   .t-footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
   .t-gradient-orb { display: none; }
 }
-@media (max-width: 768px) { .t-pgrid { grid-template-columns: 1fr; } }
+@media (max-width: 768px) {
+  .t-pgrid { grid-template-columns: 1fr; }
+  .t-hero-demo-wrap { margin-top: 28px; }
+  .t-hero-demo-video { min-height: 280px; }
+}
 @media (max-width: 480px) {
   .t-hero-title { font-size: 34px; } .t-hero-actions { flex-direction: column; align-items: stretch; }
   .t-btn-p, .t-btn-s { justify-content: center; } .t-pstat { padding: 32px 24px; } .t-aud-card { padding: 32px 24px; }
+  .t-nav { padding-left: 16px; padding-right: 16px; }
+  .t-hero { padding-left: 16px; padding-right: 16px; }
+  .t-hero-demo-wrap { margin-top: 24px; }
+  .t-hero-demo-video { min-height: 220px; }
 }
 .t-demo-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
 .t-demo-modal-box { background: #fff; border-radius: 16px; border: 1px solid var(--t-border); box-shadow: 0 24px 64px rgba(0,0,0,0.15); max-width: 440px; width: 100%; padding: 32px; position: relative; }
