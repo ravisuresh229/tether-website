@@ -77,6 +77,13 @@ const CSS = `
 .sec-nav-links a:hover { color: var(--navy-deep); }
 .sec-nav-cta { background: var(--navy); color: #fff !important; padding: 10px 22px; border-radius: 8px; font-weight: 600 !important; transition: all 0.25s; }
 .sec-nav-cta:hover { background: var(--navy-deep); }
+.sec-nav-mob { display: none; background: none; border: none; cursor: pointer; padding: 8px; color: var(--navy-deep); }
+.sec-nav-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200; background: rgba(250,250,247,0.98); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 80px 24px; opacity: 0; animation: sec-mob-in 0.3s ease forwards; }
+@keyframes sec-mob-in { to { opacity: 1; } }
+.sec-nav-overlay a { font-size: 24px; font-weight: 500; color: var(--navy-deep); text-decoration: none; }
+.sec-nav-overlay-close { position: absolute; top: 24px; right: 24px; background: none; border: none; cursor: pointer; padding: 8px; color: var(--navy-deep); }
+.sec-nav-overlay-cta { display: inline-flex; padding: 14px 28px; background: var(--coral); color: #fff; border-radius: 10px; font-size: 15px; font-weight: 600; text-decoration: none; margin-top: 16px; }
+.sec-nav-overlay-cta:hover { background: #BF5535; }
 
 /* Hero */
 .sec-hero { padding: 160px 48px 80px; text-align: center; position: relative; overflow: hidden; }
@@ -146,6 +153,8 @@ const CSS = `
 /* Responsive */
 @media (max-width: 900px) {
   .sec-nav { padding: 0 24px; }
+  .sec-nav-links { display: none; }
+  .sec-nav-mob { display: block; }
   .sec-hero { padding: 120px 24px 60px; }
   .sec-hero h1 { font-size: 36px; }
   .sec-principles, .sec-details, .sec-baa, .sec-arch { padding: 72px 24px; }
@@ -157,6 +166,12 @@ const CSS = `
 `;
 
 export default function SecurityPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  useEffect(() => {
+    if (mobileMenuOpen) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "";
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileMenuOpen]);
   useEffect(() => {
     if (typeof document === "undefined") return;
     if (document.getElementById("tether-fonts")) return;
@@ -183,9 +198,27 @@ export default function SecurityPage() {
           <li><a href="/#specialists">For Specialists</a></li>
           <li><a href="/#network">The Network</a></li>
           <li><a href="/security" style={{ color: "var(--navy-deep)", fontWeight: 600 }}>Security</a></li>
+          <li><a href="/blog">Blog</a></li>
           <li><a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer" className="sec-nav-cta">Request Demo</a></li>
         </ul>
+        <button className="sec-nav-mob" aria-label="Menu" onClick={() => setMobileMenuOpen(true)}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
       </nav>
+      {mobileMenuOpen && (
+        <div className="sec-nav-overlay">
+          <button className="sec-nav-overlay-close" aria-label="Close" onClick={() => setMobileMenuOpen(false)}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+          <a href="/#how" onClick={() => setMobileMenuOpen(false)}>How It Works</a>
+          <a href="/#product" onClick={() => setMobileMenuOpen(false)}>Product</a>
+          <a href="/#specialists" onClick={() => setMobileMenuOpen(false)}>For Specialists</a>
+          <a href="/#network" onClick={() => setMobileMenuOpen(false)}>The Network</a>
+          <a href="/security" onClick={() => setMobileMenuOpen(false)}>Security</a>
+          <a href="/blog" onClick={() => setMobileMenuOpen(false)}>Blog</a>
+          <a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer" className="sec-nav-overlay-cta" onClick={() => setMobileMenuOpen(false)}>Request Demo</a>
+        </div>
+      )}
 
       {/* HERO */}
       <section className="sec-hero">

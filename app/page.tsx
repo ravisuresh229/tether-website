@@ -231,6 +231,12 @@ const CSS = `
 .t-nav-cta::after { display: none !important; }
 .t-nav-cta:hover { background: var(--navy-deep) !important; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(45,58,78,0.2) !important; }
 .t-nav-mob { display: none; background: none; border: none; cursor: pointer; padding: 8px; color: var(--navy-deep); }
+.t-nav-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200; background: rgba(250,250,247,0.98); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 80px 24px; opacity: 0; animation: t-mob-in 0.3s ease forwards; }
+@keyframes t-mob-in { to { opacity: 1; } }
+.t-nav-overlay a { font-size: 24px; font-weight: 500; color: var(--navy-deep); text-decoration: none; }
+.t-nav-overlay-close { position: absolute; top: 24px; right: 24px; background: none; border: none; cursor: pointer; padding: 8px; color: var(--navy-deep); }
+.t-nav-overlay-cta { display: inline-flex; padding: 14px 28px; background: var(--coral); color: #fff; border-radius: 10px; font-size: 15px; font-weight: 600; text-decoration: none; margin-top: 16px; }
+.t-nav-overlay-cta:hover { background: var(--coral-hover); }
 
 .t-hero { position: relative; display: flex; align-items: flex-start; padding: 160px 24px 80px; overflow: hidden; }
 .t-hero-inner { max-width: 1200px; margin: 0 auto; width: 100%; flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; z-index: 1; min-height: 0; }
@@ -586,7 +592,14 @@ export default function TetherLanding() {
   const [scrollPct, setScrollPct] = useState(0);
   const [showDemoForm, setShowDemoForm] = useState(false);
   const [videoModal, setVideoModal] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const scrollY = useScrollY();
+
+  useEffect(() => {
+    if (mobileMenuOpen) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "";
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileMenuOpen]);
 
   useEffect(() => {
     setScrolled(scrollY > 20);
@@ -616,10 +629,24 @@ export default function TetherLanding() {
             <li><a href="/blog">Blog</a></li>
             <li><a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer" className="t-nav-cta" style={{ textDecoration: "none", display: "inline-block" }}>Request Demo</a></li>
           </ul>
-          <button className="t-nav-mob" aria-label="Menu">
+          <button className="t-nav-mob" aria-label="Menu" onClick={() => setMobileMenuOpen(true)}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           </button>
         </nav>
+        {mobileMenuOpen && (
+          <div className="t-nav-overlay">
+            <button className="t-nav-overlay-close" aria-label="Close" onClick={() => setMobileMenuOpen(false)}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <a href="#how" onClick={() => setMobileMenuOpen(false)}>How It Works</a>
+            <a href="#product" onClick={() => setMobileMenuOpen(false)}>Product</a>
+            <a href="#specialists" onClick={() => setMobileMenuOpen(false)}>For Specialists</a>
+            <a href="#network" onClick={() => setMobileMenuOpen(false)}>The Network</a>
+            <a href="/security" onClick={() => setMobileMenuOpen(false)}>Security</a>
+            <a href="/blog" onClick={() => setMobileMenuOpen(false)}>Blog</a>
+            <a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer" className="t-nav-overlay-cta" onClick={() => setMobileMenuOpen(false)}>Request Demo</a>
+          </div>
+        )}
 
         {/* HERO */}
         <section className="t-hero">

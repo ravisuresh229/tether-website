@@ -118,6 +118,13 @@ const CSS = `
 .blog-nav-links a{font-size:14px;font-weight:500;color:var(--text-secondary);text-decoration:none;transition:color .2s}
 .blog-nav-links a:hover{color:var(--navy-deep)}
 .blog-nav-cta{background:var(--navy);color:#fff!important;padding:10px 22px;border-radius:8px;font-weight:600!important}
+.blog-nav-mob{display:none;background:none;border:none;cursor:pointer;padding:8px;color:var(--navy-deep)}
+.blog-nav-overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:rgba(250,250,247,0.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:80px 24px;opacity:0;animation:blog-mob-in .3s ease forwards}
+@keyframes blog-mob-in{to{opacity:1}}
+.blog-nav-overlay a{font-size:24px;font-weight:500;color:var(--navy-deep);text-decoration:none}
+.blog-nav-overlay-close{position:absolute;top:24px;right:24px;background:none;border:none;cursor:pointer;padding:8px;color:var(--navy-deep)}
+.blog-nav-overlay-cta{display:inline-flex;padding:14px 28px;background:var(--coral);color:#fff;border-radius:10px;font-size:15px;font-weight:600;text-decoration:none;margin-top:16px}
+.blog-nav-overlay-cta:hover{background:#BF5535}
 
 /* Hero */
 .blog-hero{padding:140px 48px 64px;border-bottom:1px solid var(--border)}
@@ -161,7 +168,7 @@ const CSS = `
 .blog-footer a{color:rgba(255,255,255,0.6);text-decoration:none}
 
 @media(max-width:768px){
-.blog-nav{padding:0 24px}.blog-nav-links{display:none}
+.blog-nav{padding:0 24px}.blog-nav-links{display:none}.blog-nav-mob{display:block}
 .blog-hero{padding:110px 24px 48px}.blog-hero h1{font-size:34px}
 .blog-list{padding:32px 24px 72px}
 .blog-card-title{font-size:22px}
@@ -171,6 +178,13 @@ const CSS = `
 
 export default function BlogPage() {
   const [currentPost, setCurrentPost] = useState<typeof POSTS[0] | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (mobileMenuOpen) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "";
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileMenuOpen]);
 
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -183,20 +197,18 @@ export default function BlogPage() {
   }, []);
 
   useEffect(() => {
-    const slug = window.location.hash.replace("#", "");
-    const post = POSTS.find(p => p.slug === slug);
-    if (post) setCurrentPost(post);
-    else setCurrentPost(null);
-  }, []);
-
-  useEffect(() => {
-    const onHashChange = () => {
+    const sync = () => {
       const slug = window.location.hash.replace("#", "");
       const post = POSTS.find(p => p.slug === slug);
       setCurrentPost(post || null);
     };
-    window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
+    sync();
+    window.addEventListener("hashchange", sync);
+    window.addEventListener("popstate", sync);
+    return () => {
+      window.removeEventListener("hashchange", sync);
+      window.removeEventListener("popstate", sync);
+    };
   }, []);
 
   const navigateToPost = (post: typeof POSTS[0]) => {
@@ -205,7 +217,8 @@ export default function BlogPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const navigateToList = () => {
+  const navigateToList = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
     setCurrentPost(null);
     window.history.pushState(null, "", "/blog");
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -233,7 +246,21 @@ export default function BlogPage() {
           <li><a href="/blog" style={{ color: "var(--navy-deep)", fontWeight: 600 }}>Blog</a></li>
           <li><a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer" className="blog-nav-cta">Request Demo</a></li>
         </ul>
+        <button className="blog-nav-mob" aria-label="Menu" onClick={() => setMobileMenuOpen(true)}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
       </nav>
+      {mobileMenuOpen && (
+        <div className="blog-nav-overlay">
+          <button className="blog-nav-overlay-close" aria-label="Close" onClick={() => setMobileMenuOpen(false)}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+          <a href="/" onClick={() => setMobileMenuOpen(false)}>Home</a>
+          <a href="/security" onClick={() => setMobileMenuOpen(false)}>Security</a>
+          <a href="/blog" onClick={() => setMobileMenuOpen(false)}>Blog</a>
+          <a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer" className="blog-nav-overlay-cta" onClick={() => setMobileMenuOpen(false)}>Request Demo</a>
+        </div>
+      )}
 
       {!currentPost ? (
         <>
@@ -261,7 +288,7 @@ export default function BlogPage() {
         </>
       ) : (
         <article className="blog-post">
-          <a href="/blog" className="blog-post-back" onClick={(e) => { e.preventDefault(); navigateToList(); }}>
+          <a href="/blog" className="blog-post-back" onClick={(e) => navigateToList(e)}>
             <IconBack /> Back to Blog
           </a>
           <span className="blog-post-cat" style={{ background: currentPost.categoryColor }}>{currentPost.category}</span>

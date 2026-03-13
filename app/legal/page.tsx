@@ -15,6 +15,13 @@ const CSS = `
 .legal-nav-links a{font-size:14px;font-weight:500;color:var(--text-secondary);text-decoration:none;transition:color .2s}
 .legal-nav-links a:hover{color:var(--navy-deep)}
 .legal-nav-cta{background:var(--navy);color:#fff!important;padding:10px 22px;border-radius:8px;font-weight:600!important}
+.legal-nav-mob{display:none;background:none;border:none;cursor:pointer;padding:8px;color:var(--navy-deep)}
+.legal-nav-overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:rgba(250,250,247,0.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:80px 24px;opacity:0;animation:legal-mob-in .3s ease forwards}
+@keyframes legal-mob-in{to{opacity:1}}
+.legal-nav-overlay a{font-size:24px;font-weight:500;color:var(--navy-deep);text-decoration:none}
+.legal-nav-overlay-close{position:absolute;top:24px;right:24px;background:none;border:none;cursor:pointer;padding:8px;color:var(--navy-deep)}
+.legal-nav-overlay-cta{display:inline-flex;padding:14px 28px;background:var(--coral);color:#fff;border-radius:10px;font-size:15px;font-weight:600;text-decoration:none;margin-top:16px}
+.legal-nav-overlay-cta:hover{background:#BF5535}
 
 .legal-hero{padding:140px 48px 60px;text-align:center;border-bottom:1px solid var(--border)}
 .legal-hero h1{font-family:var(--serif);font-size:44px;font-weight:400;color:var(--navy-darkest);letter-spacing:-1px;margin-bottom:12px}
@@ -44,7 +51,7 @@ const CSS = `
 .legal-footer a:hover{color:#fff}
 
 @media(max-width:900px){
-.legal-nav{padding:0 24px}.legal-nav-links{display:none}
+.legal-nav{padding:0 24px}.legal-nav-links{display:none}.legal-nav-mob{display:block}
 .legal-hero{padding:110px 24px 48px}.legal-hero h1{font-size:32px}
 .legal-tabs{padding:0 24px}.legal-body{padding:48px 24px 72px}
 }
@@ -59,6 +66,13 @@ const TABS = [
 
 export default function LegalPage() {
   const [activeTab, setActiveTab] = useState("privacy");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (mobileMenuOpen) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "";
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileMenuOpen]);
 
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -96,9 +110,24 @@ export default function LegalPage() {
         <ul className="legal-nav-links">
           <li><a href="/">Home</a></li>
           <li><a href="/security">Security</a></li>
+          <li><a href="/blog">Blog</a></li>
           <li><a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer" className="legal-nav-cta">Request Demo</a></li>
         </ul>
+        <button className="legal-nav-mob" aria-label="Menu" onClick={() => setMobileMenuOpen(true)}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
       </nav>
+      {mobileMenuOpen && (
+        <div className="legal-nav-overlay">
+          <button className="legal-nav-overlay-close" aria-label="Close" onClick={() => setMobileMenuOpen(false)}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+          <a href="/" onClick={() => setMobileMenuOpen(false)}>Home</a>
+          <a href="/security" onClick={() => setMobileMenuOpen(false)}>Security</a>
+          <a href="/blog" onClick={() => setMobileMenuOpen(false)}>Blog</a>
+          <a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer" className="legal-nav-overlay-cta" onClick={() => setMobileMenuOpen(false)}>Request Demo</a>
+        </div>
+      )}
 
       <div className="legal-hero">
         <h1>Legal</h1>
