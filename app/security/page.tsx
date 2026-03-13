@@ -415,6 +415,7 @@ export default function SecurityPage() {
           <p style={{ fontSize: 13, color: "rgba(255,255,255,0.3)" }}>
             &copy; 2026 Tether Health, Inc. All rights reserved.{" "}
             <a href="/" style={{ marginLeft: 16 }}>Back to Home</a>
+            <a href="/blog" style={{ marginLeft: 16 }}>Blog</a>
           </p>
         </div>
       </footer>

@@ -397,7 +397,7 @@ export default function LegalPage() {
       </div>
 
       <footer className="legal-footer">
-        <p>&copy; 2026 Tether Health, Inc. All rights reserved. <a href="/" style={{ marginLeft: 16 }}>Back to Home</a></p>
+        <p>&copy; 2026 Tether Health, Inc. All rights reserved. <a href="/" style={{ marginLeft: 16 }}>Back to Home</a> <a href="/blog" style={{ marginLeft: 16 }}>Blog</a></p>
       </footer>
 
     </div></>

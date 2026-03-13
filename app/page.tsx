@@ -613,6 +613,7 @@ export default function TetherLanding() {
             <li><a href="#specialists">For Specialists</a></li>
             <li><a href="#network">The Network</a></li>
             <li><a href="/security">Security</a></li>
+            <li><a href="/blog">Blog</a></li>
             <li><a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer" className="t-nav-cta" style={{ textDecoration: "none", display: "inline-block" }}>Request Demo</a></li>
           </ul>
           <button className="t-nav-mob" aria-label="Menu">
@@ -826,7 +827,7 @@ export default function TetherLanding() {
             </div>
             <div className="t-footer-links">
               <div className="t-footer-col"><h5>Product</h5><a href="#how">How It Works</a><a href="#product">Features</a><a href="#specialists">For Specialists</a><a href="#specialists">For Primary Care</a></div>
-              <div className="t-footer-col"><h5>Company</h5><a href="#">About</a><a href="#">Blog</a><a href="#">Careers</a><a href="mailto:sach@tetherhealth.com">Contact</a></div>
+              <div className="t-footer-col"><h5>Company</h5><a href="#">About</a><a href="/blog">Blog</a><a href="#">Careers</a><a href="mailto:sach@tetherhealth.com">Contact</a></div>
               <div className="t-footer-col"><h5>Legal</h5><a href="/legal#privacy">Privacy Policy</a><a href="/legal#terms">Terms of Service</a><a href="/legal#cookies">Cookie Policy</a><a href="/legal#hipaa">HIPAA Information</a></div>
             </div>
           </div>
