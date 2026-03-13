@@ -172,7 +172,7 @@ const CSS = `
 .blog-hero{padding:110px 24px 48px}.blog-hero h1{font-size:34px}
 .blog-list{padding:32px 24px 72px}
 .blog-card-title{font-size:22px}
-.blog-post{padding:110px 24px 72px}.blog-post h1{font-size:30px}
+.blog-post{padding:110px 28px 72px}.blog-post h1{font-size:30px;padding-right:8px}.blog-post-back{margin-left:4px}.blog-post-cat{margin-left:4px}
 }
 `;
 
