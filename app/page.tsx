@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
+import { JsonLd } from "@/components/JsonLd";
 
 // ─── Font loader (works in Next.js) ───
 function useFonts() {
@@ -46,14 +47,15 @@ function useScrollY() {
 
 // ─── Animated Counter ───
 function Counter({ end, suffix = "", prefix = "", duration = 2000 }: { end: number; suffix?: string; prefix?: string; duration?: number }) {
+  const num = parseFloat(String(end).replace(/[^0-9.]/g, ""));
   const [ref, inView] = useInView();
-  const [val, setVal] = useState(0);
+  const [val, setVal] = useState(num); // Start at real value for SSR (crawlers see actual numbers)
   const started = useRef(false);
   useEffect(() => {
     if (!inView || started.current) return;
     started.current = true;
+    setVal(0); // Reset to 0, then animate up (only in browser)
     const start = performance.now();
-    const num = parseFloat(String(end).replace(/[^0-9.]/g, ""));
     const tick = (now: number) => {
       const elapsed = now - start;
       const progress = Math.min(elapsed / duration, 1);
@@ -63,7 +65,7 @@ function Counter({ end, suffix = "", prefix = "", duration = 2000 }: { end: numb
       else setVal(num);
     };
     requestAnimationFrame(tick);
-  }, [inView, end, duration]);
+  }, [inView, end, duration, num]);
   return <span ref={ref}>{prefix}{val}{suffix}</span>;
 }
 
@@ -609,6 +611,47 @@ export default function TetherLanding() {
 
   return (
     <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "Tether Health",
+          url: "https://tetherhealth.co",
+          logo: "https://tetherhealth.co/logo.png",
+          description:
+            "Healthcare referral management software connecting primary care and specialty practices.",
+          contactPoint: {
+            "@type": "ContactPoint",
+            contactType: "sales",
+            email: "hello@tetherhealth.co",
+          },
+        }}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: "Tether",
+          applicationCategory: "HealthApplication",
+          operatingSystem: "Web",
+          description: "Referral management software for healthcare practices.",
+          url: "https://tetherhealth.co",
+          offers: {
+            "@type": "Offer",
+            price: "0",
+            priceCurrency: "USD",
+            description: "Free for referring providers",
+          },
+          featureList: [
+            "Real-time referral tracking",
+            "Closed-loop referral management",
+            "Specialist directory with procedure search",
+            "AI-powered document parsing",
+            "Fax automation",
+            "EHR integration",
+          ],
+        }}
+      />
       <style>{CSS}</style>
       <div className="tether-lp">
         <div className="t-scroll-prog" style={{ width: `${scrollPct}%` }} />

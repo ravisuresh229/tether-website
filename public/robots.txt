@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://tetherhealth.co/sitemap.xml

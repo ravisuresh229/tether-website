@@ -17,20 +17,50 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "Tether – The referral network for modern medical practices",
+  metadataBase: new URL("https://tetherhealth.co"),
+  title: {
+    default: "Healthcare Referral Management Software | Tether",
+    template: "%s | Tether",
+  },
   description:
-    "Tether connects primary care and specialty practices with real-time referral tracking, loop closure, and a shared provider directory.",
+    "Tether connects primary care and specialty practices with real-time referral tracking, loop closure, and a shared provider directory. Reduce referral leakage and grow your network.",
+  keywords: [
+    "referral management software",
+    "healthcare referral",
+    "specialist referral network",
+    "referral leakage",
+    "PCP referral",
+    "closed loop referral",
+    "care coordination",
+  ],
+  authors: [{ name: "Tether Health" }],
   openGraph: {
-    title: "Tether – The referral network for modern medical practices",
-    description:
-      "Real-time referral tracking, loop closure, and a shared provider directory for medical practices.",
     type: "website",
+    locale: "en_US",
+    url: "https://tetherhealth.co",
+    siteName: "Tether",
+    title: "Healthcare Referral Management Software | Tether",
+    description:
+      "Tether connects primary care and specialty practices with real-time referral tracking, loop closure, and a shared provider directory.",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Tether Health" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tether – The referral network for modern medical practices",
+    title: "Healthcare Referral Management Software | Tether",
     description:
-      "Real-time referral tracking, loop closure, and a shared provider directory for medical practices.",
+      "Real-time referral tracking, loop closure, and a shared provider directory for modern medical practices.",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
