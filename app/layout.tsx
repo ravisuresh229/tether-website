@@ -17,50 +17,20 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://tetherhealth.co"),
-  title: {
-    default: "Healthcare Referral Management Software | Tether",
-    template: "%s | Tether",
-  },
+  title: "Tether – The referral network for modern medical practices",
   description:
-    "Tether connects primary care and specialty practices with real-time referral tracking, loop closure, and a shared provider directory. Reduce referral leakage and grow your network.",
-  keywords: [
-    "referral management software",
-    "healthcare referral",
-    "specialist referral network",
-    "referral leakage",
-    "PCP referral",
-    "closed loop referral",
-    "care coordination",
-  ],
-  authors: [{ name: "Tether Health" }],
+    "Tether connects primary care and specialty practices with real-time referral tracking, loop closure, and a shared provider directory.",
   openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: "https://tetherhealth.co",
-    siteName: "Tether",
-    title: "Healthcare Referral Management Software | Tether",
+    title: "Tether – The referral network for modern medical practices",
     description:
-      "Tether connects primary care and specialty practices with real-time referral tracking, loop closure, and a shared provider directory.",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Tether Health" }],
+      "Real-time referral tracking, loop closure, and a shared provider directory for medical practices.",
+    type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Healthcare Referral Management Software | Tether",
+    title: "Tether – The referral network for modern medical practices",
     description:
-      "Real-time referral tracking, loop closure, and a shared provider directory for modern medical practices.",
-    images: ["/og-image.png"],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
+      "Real-time referral tracking, loop closure, and a shared provider directory for medical practices.",
   },
 };
 
