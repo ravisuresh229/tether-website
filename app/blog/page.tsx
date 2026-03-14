@@ -149,7 +149,7 @@ const CSS = `
 .blog-post{max-width:700px;margin:0 auto;padding:140px 48px 96px}
 .blog-post-back{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:var(--text-secondary);text-decoration:none;margin-bottom:32px;transition:color .2s}
 .blog-post-back:hover{color:var(--teal)}
-.blog-post-cat{display:inline-block;padding:3px 10px;border-radius:100px;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#fff;margin-bottom:16px}
+.blog-post-cat{display:inline-block;padding:3px 10px;border-radius:100px;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#fff;margin-bottom:16px;margin-left:0.75rem}
 .blog-post h1{font-family:var(--serif);font-size:40px;font-weight:400;color:var(--navy-darkest);letter-spacing:-0.8px;line-height:1.2;margin-bottom:16px}
 .blog-post-meta{font-size:14px;color:var(--text-tertiary);margin-bottom:48px;padding-bottom:32px;border-bottom:1px solid var(--border)}
 .blog-post-body{font-size:16px;line-height:1.85;color:var(--text-secondary)}
@@ -172,7 +172,7 @@ const CSS = `
 .blog-hero{padding:110px 24px 48px}.blog-hero h1{font-size:34px}
 .blog-list{padding:32px 24px 72px}
 .blog-card-title{font-size:22px}
-.blog-post{padding:110px 28px 72px}.blog-post h1{font-size:30px;padding-right:8px}.blog-post-back{margin-left:4px}.blog-post-cat{margin-left:4px}
+.blog-post{padding:110px 28px 72px}.blog-post h1{font-size:30px;padding-right:8px}.blog-post-back{margin-left:4px}.blog-post-cat{margin-left:0.75rem}
 }
 `;
 
@@ -241,7 +241,10 @@ export default function BlogPage() {
           <span className="blog-nav-logo-text">Tether</span>
         </a>
         <ul className="blog-nav-links">
-          <li><a href="/">Home</a></li>
+          <li><a href="/#how">How It Works</a></li>
+          <li><a href="/#product">Product</a></li>
+          <li><a href="/#specialists">For Specialists</a></li>
+          <li><a href="/#network">The Network</a></li>
           <li><a href="/security">Security</a></li>
           <li><a href="/blog" style={{ color: "var(--navy-deep)", fontWeight: 600 }}>Blog</a></li>
           <li><a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer" className="blog-nav-cta">Request Demo</a></li>
@@ -255,7 +258,10 @@ export default function BlogPage() {
           <button className="blog-nav-overlay-close" aria-label="Close" onClick={() => setMobileMenuOpen(false)}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
-          <a href="/" onClick={() => setMobileMenuOpen(false)}>Home</a>
+          <a href="/#how" onClick={() => setMobileMenuOpen(false)}>How It Works</a>
+          <a href="/#product" onClick={() => setMobileMenuOpen(false)}>Product</a>
+          <a href="/#specialists" onClick={() => setMobileMenuOpen(false)}>For Specialists</a>
+          <a href="/#network" onClick={() => setMobileMenuOpen(false)}>The Network</a>
           <a href="/security" onClick={() => setMobileMenuOpen(false)}>Security</a>
           <a href="/blog" onClick={() => setMobileMenuOpen(false)}>Blog</a>
           <a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer" className="blog-nav-overlay-cta" onClick={() => setMobileMenuOpen(false)}>Request Demo</a>

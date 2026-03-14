@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
+import { JsonLd } from "@/components/JsonLd";
 
 // ─── Font loader (works in Next.js) ───
 function useFonts() {
@@ -609,6 +610,48 @@ export default function TetherLanding() {
 
   return (
     <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "Tether Health",
+          url: "https://tetherhealth.co",
+          logo: "https://tetherhealth.co/logo.png",
+          description:
+            "Healthcare referral management software connecting primary care and specialty practices.",
+          sameAs: ["https://www.linkedin.com/company/tetherhealth"],
+          contactPoint: {
+            "@type": "ContactPoint",
+            contactType: "sales",
+            email: "hello@tetherhealth.co",
+          },
+        }}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: "Tether",
+          applicationCategory: "HealthApplication",
+          operatingSystem: "Web",
+          description:
+            "Referral management software for healthcare practices with real-time tracking and loop closure.",
+          url: "https://tetherhealth.co",
+          offers: {
+            "@type": "Offer",
+            price: "0",
+            priceCurrency: "USD",
+            description: "Contact us for pricing",
+          },
+          featureList: [
+            "Real-time referral tracking",
+            "Closed-loop referral management",
+            "Shared provider directory",
+            "Fax automation",
+            "AI-powered document parsing",
+          ],
+        }}
+      />
       <style>{CSS}</style>
       <div className="tether-lp">
         <div className="t-scroll-prog" style={{ width: `${scrollPct}%` }} />
