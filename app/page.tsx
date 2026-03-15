@@ -3,19 +3,6 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import { JsonLd } from "@/components/JsonLd";
 
-// ─── Font loader (works in Next.js) ───
-function useFonts() {
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    if (document.getElementById("tether-fonts")) return;
-    const link = document.createElement("link");
-    link.id = "tether-fonts";
-    link.rel = "stylesheet";
-    link.href = "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap";
-    document.head.appendChild(link);
-  }, []);
-}
-
 // ─── IntersectionObserver hook (SSR-safe) ───
 function useInView(opts: IntersectionObserverInit = {}) {
   const ref = useRef<HTMLDivElement>(null);
@@ -45,31 +32,57 @@ function useScrollY() {
   return y;
 }
 
-// ─── Animated Counter ───
-function Counter({ end, suffix = "", prefix = "", duration = 2000 }: { end: number; suffix?: string; prefix?: string; duration?: number }) {
-  const [ref, inView] = useInView();
-  const [val, setVal] = useState(0);
-  const started = useRef(false);
+// ─── Animated Stat Counter (easeOutExpo, stagger, threshold 0.3) ───
+function easeOutExpo(t: number) {
+  return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+}
+
+function StatCounter({ target, prefix = "", suffix = "", delay = 0, triggered }: { target: number; prefix?: string; suffix?: string; delay?: number; triggered: boolean }) {
+  const [val, setVal] = useState(target);
+  const ran = useRef(false);
   useEffect(() => {
-    if (!inView || started.current) return;
-    started.current = true;
-    const start = performance.now();
-    const num = parseFloat(String(end).replace(/[^0-9.]/g, ""));
-    const tick = (now: number) => {
-      const elapsed = now - start;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 4);
-      setVal(Math.floor(eased * num));
-      if (progress < 1) requestAnimationFrame(tick);
-      else setVal(num);
-    };
-    requestAnimationFrame(tick);
-  }, [inView, end, duration]);
-  return <span ref={ref}>{prefix}{val}{suffix}</span>;
+    if (!triggered || ran.current) return;
+    ran.current = true;
+    requestAnimationFrame(() => {
+      setVal(0);
+      const animStart = performance.now() + delay;
+      const tick = (now: number) => {
+        const elapsed = Math.max(0, now - animStart);
+        const progress = Math.min(elapsed / 2000, 1);
+        const eased = easeOutExpo(progress);
+        setVal(Math.round(eased * target));
+        if (progress < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+  }, [triggered, target, delay]);
+  return <span className="t-pstat-num">{prefix}{val}{suffix}</span>;
+}
+
+function ProblemStats() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [triggered, setTriggered] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setTriggered(true); obs.disconnect(); } },
+      { threshold: 0.3 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  return (
+    <div ref={ref} className="t-pstats">
+      <div className="t-pstat"><div className="t-pstat-n"><StatCounter target={50} suffix="%" triggered={triggered} /></div><div className="t-pstat-l">of referrals never result in a completed specialist visit</div></div>
+      <div className="t-pstat"><div className="t-pstat-n"><StatCounter target={971} prefix="$" suffix="B" delay={200} triggered={triggered} /></div><div className="t-pstat-l">in annual U.S. healthcare waste attributed to care coordination failures</div></div>
+      <div className="t-pstat"><div className="t-pstat-n"><StatCounter target={81} suffix="%" delay={400} triggered={triggered} /></div><div className="t-pstat-l">of PCPs report dissatisfaction with the referral communication process</div></div>
+    </div>
+  );
 }
 
 // ─── Reveal ───
-function Reveal({ children, delay = 0, className = "", translateY = 36, duration = 0.9 }: { children: React.ReactNode; delay?: number; className?: string; translateY?: number; duration?: number }) {
+function Reveal({ children, delay = 0, className = "", translateY = 18, duration = 0.55 }: { children: React.ReactNode; delay?: number; className?: string; translateY?: number; duration?: number }) {
   const [ref, v] = useInView();
   return (
     <div ref={ref} className={className} style={{
@@ -93,15 +106,16 @@ function WordRotator({ words }: { words: string[] }) {
   }, [words.length]);
   return (
     <span style={{ display: "inline-block", position: "relative", overflow: "hidden", verticalAlign: "bottom" }}>
-      <span style={{
-        display: "inline-block",
-        transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
-        transform: show ? "translateY(0)" : "translateY(110%)",
-        opacity: show ? 1 : 0,
-        fontFamily: "var(--serif)",
-        fontStyle: "italic",
-        color: "#0D7377",
-      }}>{words[idx]}</span>
+      <span
+        className="t-accent-serif"
+        style={{
+          display: "inline-block",
+          transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+          transform: show ? "translateY(0)" : "translateY(110%)",
+          opacity: show ? 1 : 0,
+          color: "#0D7377",
+        }}
+      >{words[idx]}</span>
     </span>
   );
 }
@@ -198,6 +212,120 @@ const IconUpload = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="n
 const IconPulse = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>;
 const IconCheckCircle = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>;
 const IconPlay = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>;
+const IconMessageSquare = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>;
+
+// ─── EHR Connection Diagram ───
+function EHRDiagram() {
+  return (
+    <div className="t-ehr-diagram">
+      <svg viewBox="0 0 500 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="tether-glow">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feFlood floodColor="#0D7377" floodOpacity="0.3" />
+            <feComposite in2="blur" operator="in" />
+            <feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+        </defs>
+        <line x1="250" y1="100" x2="250" y2="40" stroke="#D1D5DB" strokeWidth="1.5" />
+        <line x1="250" y1="100" x2="100" y2="100" stroke="#D1D5DB" strokeWidth="1.5" />
+        <line x1="250" y1="100" x2="400" y2="100" stroke="#D1D5DB" strokeWidth="1.5" />
+        <line x1="250" y1="100" x2="250" y2="160" stroke="#D1D5DB" strokeWidth="1.5" />
+        <circle cx="250" cy="100" r="3" fill="#0D7377" className="t-ehr-dot t-ehr-dot-1" />
+        <circle cx="250" cy="100" r="3" fill="#0D7377" className="t-ehr-dot t-ehr-dot-2" />
+        <circle cx="250" cy="100" r="3" fill="#0D7377" className="t-ehr-dot t-ehr-dot-3" />
+        <circle cx="250" cy="100" r="3" fill="#0D7377" className="t-ehr-dot t-ehr-dot-4" />
+        <circle cx="250" cy="100" r="24" fill="#0D7377" filter="url(#tether-glow)" />
+        <text x="250" y="107" textAnchor="middle" fill="white" fontSize="20" fontWeight="600" fontFamily="inherit">T</text>
+        <rect x="200" y="12" width="100" height="28" rx="14" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
+        <text x="250" y="31" textAnchor="middle" fill="#374151" fontSize="12" fontWeight="500" fontFamily="inherit">Athena</text>
+        <rect x="12" y="86" width="90" height="28" rx="14" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
+        <text x="57" y="105" textAnchor="middle" fill="#374151" fontSize="12" fontWeight="500" fontFamily="inherit">ModMed</text>
+        <rect x="398" y="86" width="90" height="28" rx="14" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
+        <text x="443" y="105" textAnchor="middle" fill="#374151" fontSize="12" fontWeight="500" fontFamily="inherit">Epic</text>
+        <rect x="175" y="172" width="150" height="28" rx="14" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
+        <text x="250" y="191" textAnchor="middle" fill="#374151" fontSize="12" fontWeight="500" fontFamily="inherit">eClinicalWorks</text>
+      </svg>
+    </div>
+  );
+}
+
+// ─── Newsletter Section ───
+function NewsletterSection() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "duplicate" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg("");
+    const trimmed = email.trim().toLowerCase();
+    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setStatus("error");
+      setErrorMsg("Please enter a valid email");
+      return;
+    }
+    setStatus("loading");
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: trimmed }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        if (data.duplicate) setStatus("duplicate");
+        else setStatus("success");
+      } else {
+        setStatus("error");
+        setErrorMsg(data.error || "Something went wrong.");
+      }
+    } catch {
+      setStatus("error");
+      setErrorMsg("Something went wrong. Please try again.");
+    }
+  };
+  if (status === "success" || status === "duplicate") {
+    return (
+      <section className="t-newsletter">
+        <div className="t-newsletter-inner">
+          <Reveal><div className="t-slbl">Stay in the Loop</div></Reveal>
+          <Reveal delay={0.1}>
+            <div className="t-newsletter-success">
+              <span className="t-newsletter-success-icon"><IconCheckCircle /></span>
+              {status === "success" ? "You're in. We'll be in touch." : "You're already subscribed."}
+            </div>
+          </Reveal>
+        </div>
+      </section>
+    );
+  }
+  return (
+    <section className="t-newsletter">
+      <div className="t-newsletter-inner">
+        <Reveal><div className="t-slbl">Stay in the Loop</div></Reveal>
+        <Reveal delay={0.1}><h2>Get updates on Tether.</h2></Reveal>
+        <Reveal delay={0.15}><p className="t-newsletter-sub">Product updates, referral management insights, and early access to new features. No spam, unsubscribe anytime.</p></Reveal>
+        <Reveal delay={0.2}>
+          <form className="t-newsletter-form" onSubmit={handleSubmit}>
+            <input
+              type="email"
+              className={`t-newsletter-input ${status === "error" && errorMsg ? "t-newsletter-input-error" : ""}`}
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); setErrorMsg(""); setStatus("idle"); }}
+              disabled={status === "loading"}
+            />
+            <button type="submit" className="t-newsletter-btn" disabled={status === "loading"}>
+              {status === "loading" ? "Subscribing..." : "Subscribe"}
+            </button>
+          </form>
+          {errorMsg && <p className="t-newsletter-msg">{errorMsg}</p>}
+          <p className="t-newsletter-note">Join practice managers and administrators staying ahead of referral management.</p>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
 
 // ─── Styles (t- prefixed to avoid Tailwind collisions) ───
 const CSS = `
@@ -208,9 +336,10 @@ const CSS = `
   --coral: #D4613E; --coral-hover: #BF5535;
   --text: #2D2D2D; --text-secondary: #6B6B6B; --text-tertiary: #9A9A9A;
   --t-border: #E0DDD5;
-  --serif: 'Instrument Serif', Georgia, serif;
-  --sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --serif: var(--font-serif), Georgia, serif;
+  --sans: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
 }
+html { scroll-behavior: smooth; }
 .tether-lp, .tether-lp * { margin: 0; padding: 0; box-sizing: border-box; }
 .tether-lp { font-family: var(--sans); color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; overflow-x: hidden; position: relative; }
 .tether-lp ::selection { background: var(--navy); color: #fff; }
@@ -239,7 +368,8 @@ const CSS = `
 .t-nav-overlay-cta { display: inline-flex; padding: 14px 28px; background: var(--coral); color: #fff; border-radius: 10px; font-size: 15px; font-weight: 600; text-decoration: none; margin-top: 16px; }
 .t-nav-overlay-cta:hover { background: var(--coral-hover); }
 
-.t-hero { position: relative; display: flex; align-items: flex-start; padding: 160px 24px 80px; overflow: hidden; }
+.t-hero { position: relative; display: flex; align-items: flex-start; padding: 160px 24px 80px; overflow: hidden; background: linear-gradient(135deg, #FAFAF7 0%, #FAFAF6 45%, #F9F9F5 50%, #FAFAF6 55%, #FAFAF7 100%); background-size: 200% 200%; animation: t-hero-breathe 14s ease-in-out infinite; }
+@keyframes t-hero-breathe { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
 .t-hero-inner { max-width: 1200px; margin: 0 auto; width: 100%; flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; z-index: 1; min-height: 0; }
 .t-hero-content { max-width: 560px; display: flex; flex-direction: column; align-items: center; }
 .t-hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px 6px 8px; background: rgba(45,58,78,0.06); border: 1px solid rgba(45,58,78,0.1); border-radius: 100px; font-size: 13px; font-weight: 500; color: var(--navy); margin-bottom: 28px; letter-spacing: 0.01em; animation: t-badge-in 0.8s cubic-bezier(0.16,1,0.3,1) both; }
@@ -267,9 +397,10 @@ const CSS = `
 .t-btn-s:hover { border-color: var(--navy); color: var(--navy); background: rgba(45,58,78,0.04); }
 
 .t-hero-demo-wrap { max-width: 1000px; margin: 40px auto 0; width: 100%; }
-.t-hero-demo-video { border-radius: 12px; overflow: hidden; position: relative; min-height: 400px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.04), 0 10px 40px rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.08); }
+.t-hero-demo-frame { border-radius: 14px; overflow: hidden; border: 1px solid #E5E7EB; box-shadow: 0 4px 24px rgba(0,0,0,0.08); background: #fff; }
+.t-hero-demo-video { position: relative; min-height: 400px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .t-hero-demo-video video { display: block; width: 100%; height: auto; max-height: 70vh; object-fit: contain; }
-.t-hero-demo-caption { text-align: center; font-size: 13px; color: var(--text-tertiary); margin-top: 16px; font-weight: 400; }
+.t-hero-demo-caption { text-align: center; font-size: 13px; color: var(--text-tertiary); margin-top: 24px; font-weight: 400; }
 .t-hero-demo-caption-expand { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 4px; font-size: 12px; color: var(--text-tertiary); }
 .t-hero-demo-caption-expand svg { width: 12px; height: 12px; opacity: 0.8; }
 .t-hero-demo-expand { position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; color: #fff; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 50%; border: none; cursor: pointer; z-index: 10; opacity: 0; transition: opacity 0.2s, background 0.2s, transform 0.2s; }
@@ -281,10 +412,11 @@ const CSS = `
 .t-video-modal video { max-width: 90vw; max-height: 90vh; border-radius: 12px; }
 .t-video-modal-close { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.5); border: none; color: #fff; cursor: pointer; padding: 8px 12px; font-size: 20px; line-height: 1; border-radius: 6px; z-index: 10; opacity: 0.9; }
 .t-video-modal-close:hover { opacity: 1; }
-.t-problem { padding: 120px 48px; background: var(--navy-deep); color: #fff; position: relative; overflow: hidden; }
+.t-problem { padding: 120px 48px 100px; background: var(--navy-deep); color: #fff; position: relative; overflow: hidden; }
 .t-problem::before { content: ''; position: absolute; top: -200px; right: -200px; width: 600px; height: 600px; background: radial-gradient(circle, rgba(13,115,119,0.12), transparent 70%); pointer-events: none; animation: t-orb-drift 20s ease-in-out infinite alternate; }
 @keyframes t-orb-drift { from { transform: translate(0,0); } to { transform: translate(-60px,40px); } }
 .t-problem::after { content: ''; position: absolute; bottom: -100px; left: -100px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(212,97,62,0.06), transparent 70%); pointer-events: none; }
+.t-problem-fade { position: absolute; bottom: 0; left: 0; right: 0; height: 100px; background: linear-gradient(to bottom, transparent, var(--bg-warm)); pointer-events: none; z-index: 2; }
 .t-problem-inner { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
 .t-plbl { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--coral); margin-bottom: 20px; }
 .t-problem h2 { font-family: var(--serif); font-size: 46px; line-height: 1.1; font-weight: 400; letter-spacing: -1px; margin-bottom: 24px; max-width: 700px; }
@@ -293,22 +425,12 @@ const CSS = `
 .t-pstat { padding: 48px 40px; background: var(--navy-deep); transition: background 0.3s; }
 .t-pstat:hover { background: rgba(30,42,58,0.7); }
 .t-pstat-n { font-family: var(--serif); font-size: 54px; font-weight: 400; color: var(--coral); line-height: 1; margin-bottom: 12px; }
+.t-pstat-num { display: inline-block; min-width: 3ch; will-change: contents; }
 .t-pstat-l { font-size: 15px; color: rgba(255,255,255,0.5); line-height: 1.5; }
 
 .t-slbl { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--teal); margin-bottom: 16px; }
 .t-stitle { font-family: var(--serif); font-size: 44px; line-height: 1.15; font-weight: 400; color: var(--navy-darkest); letter-spacing: -0.8px; margin-bottom: 16px; }
 .t-sdesc { font-size: 17px; line-height: 1.65; color: var(--text-secondary); max-width: 520px; margin-bottom: 64px; }
-
-.t-how { padding: 120px 48px; background: var(--bg); }
-.t-how-inner { max-width: 1200px; margin: 0 auto; }
-.t-how-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; align-items: stretch; }
-.t-how-steps > * { min-width: 0; }
-.t-how-step { width: 100%; height: 100%; min-height: 280px; box-sizing: border-box; display: flex; flex-direction: column; background: #fff; border: 1px solid var(--t-border); border-radius: 16px; padding: 40px 32px; position: relative; }
-.t-how-step-num { width: 36px; height: 36px; border-radius: 10px; background: rgba(45,58,78,0.06); color: var(--navy); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; margin-bottom: 24px; transition: all 0.3s; }
-.t-how-step:hover .t-how-step-num { background: var(--teal); color: #fff; transform: scale(1.1); }
-.t-how-step h3 { font-family: var(--serif); font-size: 24px; font-weight: 400; color: var(--navy-darkest); margin-bottom: 12px; }
-.t-how-step p { flex: 1; font-size: 15px; line-height: 1.65; color: var(--text-secondary); }
-.t-how-step-conn { position: absolute; top: 58px; right: -18px; color: var(--t-border); z-index: 2; }
 
 .t-product { padding: 120px 48px; background: var(--bg-warm); }
 .t-product-inner { max-width: 1200px; margin: 0 auto; }
@@ -341,6 +463,7 @@ const CSS = `
 .t-aud-feat-icon { flex-shrink: 0; width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
 .t-aud-spec .t-aud-feat-icon { background: rgba(212,97,62,0.08); color: var(--coral); }
 .t-aud-pcp .t-aud-feat-icon { background: var(--teal-light); color: var(--teal); }
+.t-aud-feat-highlight { font-weight: 600; color: var(--teal) !important; }
 
 .t-network { padding: 120px 48px; background: linear-gradient(180deg, var(--bg-warm), var(--bg)); }
 .t-network-inner { max-width: 900px; margin: 0 auto; text-align: center; }
@@ -355,26 +478,65 @@ const CSS = `
 .t-nnode h4 { font-size: 14px; font-weight: 600; color: var(--navy-darkest); margin-bottom: 6px; }
 .t-nnode p { font-size: 13px; color: var(--text-tertiary); line-height: 1.5; }
 
-.t-comingsoon { padding: 120px 48px; background: var(--bg-warm); }
-.t-comingsoon-inner { max-width: 900px; margin: 0 auto; text-align: center; }
-.t-comingsoon .t-slbl { color: var(--teal); }
-.t-comingsoon h2 { font-family: var(--serif); font-size: 44px; line-height: 1.15; font-weight: 400; color: var(--navy-darkest); letter-spacing: -0.8px; margin-bottom: 20px; }
-.t-comingsoon-desc { font-size: 17px; line-height: 1.7; color: var(--text-secondary); max-width: 600px; margin: 0 auto 56px; }
-.t-csoon-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 48px; }
-.t-csoon-card { background: #fff; border: 1px solid var(--t-border); border-radius: 14px; padding: 32px 24px; text-align: center; transition: all 0.3s; }
-.t-csoon-card:hover { border-color: var(--navy); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(45,58,78,0.08); }
-.t-csoon-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; transition: all 0.3s; }
-.t-csoon-icon-navy { background: rgba(45,58,78,0.06); color: var(--navy); }
-.t-csoon-icon-teal { background: rgba(13,115,119,0.08); color: var(--teal); }
-.t-csoon-icon-coral { background: rgba(212,97,62,0.08); color: var(--coral); }
-.t-csoon-card:hover .t-csoon-icon-navy { background: var(--navy); color: #fff; }
-.t-csoon-card:hover .t-csoon-icon-teal { background: var(--teal); color: #fff; }
-.t-csoon-card:hover .t-csoon-icon-coral { background: var(--coral); color: #fff; }
-.t-csoon-card h4 { font-size: 16px; font-weight: 600; color: var(--navy-darkest); margin-bottom: 8px; }
-.t-csoon-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.5; margin: 0; }
-.t-csoon-footer { font-size: 13px; color: var(--text-tertiary); margin-top: 32px; }
-.t-csoon-footer a { color: var(--teal); text-decoration: none; font-weight: 500; transition: color 0.2s; }
-.t-csoon-footer a:hover { color: var(--teal-dark); }
+.t-platform { padding: 120px 48px; background: var(--bg-warm); position: relative; }
+.t-platform::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 80px; background: linear-gradient(to bottom, transparent, var(--bg)); pointer-events: none; }
+.t-platform-inner { max-width: 1000px; margin: 0 auto; text-align: center; position: relative; z-index: 1; }
+.t-platform .t-slbl { color: var(--teal); }
+.t-platform h2 { font-family: var(--serif); font-size: 44px; line-height: 1.15; font-weight: 400; color: var(--navy-darkest); letter-spacing: -0.8px; margin-bottom: 20px; }
+.t-platform-desc { font-size: 17px; line-height: 1.7; color: var(--text-secondary); max-width: 600px; margin: 0 auto 56px; }
+.t-platform-layout { display: flex; flex-direction: column; gap: 24px; }
+.t-platform-ehr { background: #fff; border: 1px solid var(--t-border); border-radius: 16px; padding: 48px 40px; text-align: center; transition: all 0.3s; }
+.t-platform-ehr:hover { border-color: var(--navy); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(45,58,78,0.08); }
+.t-platform-ehr-icon { width: 52px; height: 52px; border-radius: 14px; background: rgba(45,58,78,0.06); color: var(--navy); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; transition: all 0.3s; }
+.t-platform-ehr:hover .t-platform-ehr-icon { background: var(--navy); color: #fff; }
+.t-platform-ehr h4 { font-size: 20px; font-weight: 600; color: var(--navy-darkest); margin-bottom: 12px; }
+.t-platform-ehr p { font-size: 15px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px; max-width: 560px; margin-left: auto; margin-right: auto; }
+.t-ehr-diagram { width: 100%; max-width: 500px; height: 200px; margin: 24px auto 0; font-family: var(--sans); }
+.t-ehr-diagram svg { width: 100%; height: 100%; }
+.t-ehr-dot { transform-origin: 250px 100px; }
+.t-ehr-dot-1 { animation: t-ehr-dot-up 2.5s ease-in-out infinite; }
+.t-ehr-dot-2 { animation: t-ehr-dot-left 2.5s ease-in-out infinite 0.6s; }
+.t-ehr-dot-3 { animation: t-ehr-dot-right 2.5s ease-in-out infinite 1.2s; }
+.t-ehr-dot-4 { animation: t-ehr-dot-down 2.5s ease-in-out infinite 1.8s; }
+@keyframes t-ehr-dot-up { 0%,100% { transform: translate(0, 0); opacity: 1; } 50% { transform: translate(0, -60px); opacity: 1; } }
+@keyframes t-ehr-dot-left { 0%,100% { transform: translate(0, 0); opacity: 1; } 50% { transform: translate(-150px, 0); opacity: 1; } }
+@keyframes t-ehr-dot-right { 0%,100% { transform: translate(0, 0); opacity: 1; } 50% { transform: translate(150px, 0); opacity: 1; } }
+@keyframes t-ehr-dot-down { 0%,100% { transform: translate(0, 0); opacity: 1; } 50% { transform: translate(0, 60px); opacity: 1; } }
+.t-platform-divider { display: flex; align-items: center; gap: 16px; width: 100%; margin: 8px 0 24px; }
+.t-platform-divider-line { flex: 1; height: 1px; background: #E5E7EB; }
+.t-platform-divider-badge { font-size: 12px; font-weight: 500; color: var(--teal); background: rgba(13,115,119,0.1); padding: 6px 14px; border-radius: 9999px; white-space: nowrap; }
+.t-platform-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.t-platform-card { background: #fff; border: 1px solid var(--t-border); border-radius: 14px; padding: 32px 24px; text-align: center; transition: all 0.3s; }
+.t-platform-card:hover { border-color: var(--navy); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(45,58,78,0.08); }
+.t-platform-card-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; transition: all 0.3s; }
+.t-platform-icon-teal { background: rgba(13,115,119,0.08); color: var(--teal); }
+.t-platform-icon-coral { background: rgba(212,97,62,0.08); color: var(--coral); }
+.t-platform-card:hover .t-platform-icon-teal { background: var(--teal); color: #fff; }
+.t-platform-card:hover .t-platform-icon-coral { background: var(--coral); color: #fff; }
+.t-platform-card h4 { font-size: 16px; font-weight: 600; color: var(--navy-darkest); margin-bottom: 8px; }
+.t-platform-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.5; margin: 0; }
+.t-platform-footer { font-size: 13px; color: var(--text-tertiary); margin-top: 40px; line-height: 1.6; }
+.t-platform-footer-live { color: var(--teal); font-weight: 600; }
+.t-platform-footer a { color: var(--teal); text-decoration: none; font-weight: 500; transition: color 0.2s; }
+.t-platform-footer a:hover { color: var(--teal-dark); }
+
+.t-newsletter { padding: 96px 48px; background: linear-gradient(180deg, rgba(13,115,119,0.03), var(--bg-warm)); }
+.t-newsletter-inner { max-width: 600px; margin: 0 auto; text-align: center; }
+.t-newsletter .t-slbl { color: var(--teal); }
+.t-newsletter h2 { font-family: var(--serif); font-size: 36px; font-weight: 400; color: var(--navy-darkest); letter-spacing: -0.8px; margin-bottom: 12px; }
+.t-newsletter-sub { font-size: 16px; line-height: 1.65; color: var(--text-secondary); margin-bottom: 32px; }
+.t-newsletter-form { display: flex; gap: 12px; align-items: center; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+.t-newsletter-input { flex: 1; min-width: 220px; padding: 14px 18px; border: 1px solid var(--t-border); border-radius: 10px; font-size: 15px; font-family: var(--sans); background: #fff; transition: border-color 0.2s; }
+.t-newsletter-input:focus { outline: none; border-color: var(--teal); }
+.t-newsletter-input.t-newsletter-input-error { border-color: var(--coral); }
+.t-newsletter-btn { padding: 14px 24px; background: var(--teal); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; font-family: var(--sans); cursor: pointer; transition: all 0.25s; white-space: nowrap; }
+.t-newsletter-btn:hover:not(:disabled) { background: var(--teal-dark); transform: translateY(-1px); }
+.t-newsletter-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+.t-newsletter-note { font-size: 13px; color: var(--text-tertiary); }
+.t-newsletter-success { display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 17px; font-weight: 500; color: var(--teal); }
+.t-newsletter-success-icon { animation: t-check-in 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+@keyframes t-check-in { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+.t-newsletter-msg { font-size: 14px; color: var(--text-secondary); margin-top: 8px; }
 
 .t-trust { padding: 96px 48px; background: var(--teal-light); }
 .t-trust-inner { max-width: 1200px; margin: 0 auto; }
@@ -414,10 +576,10 @@ const CSS = `
 @media (max-width: 900px) {
   .t-nav { padding: 0 24px; } .t-nav-links { display: none; } .t-nav-mob { display: block; }
   .t-hero { padding: 100px 24px 60px; } .t-hero-title { font-size: 40px; } .t-hero-content { max-width: 100%; }
-  .t-problem, .t-how, .t-product, .t-audiences, .t-network, .t-comingsoon, .t-fcta { padding: 80px 24px; }
-  .t-problem h2, .t-stitle, .t-network h2, .t-comingsoon h2 { font-size: 32px; } .t-fcta h2 { font-size: 36px; }
-  .t-pstats, .t-how-steps, .t-aud-grid, .t-nvis, .t-csoon-grid { grid-template-columns: 1fr; }
-  .t-pstat-n { font-size: 42px; } .t-how-step-conn { display: none; }
+  .t-problem, .t-product, .t-platform, .t-audiences, .t-network, .t-newsletter, .t-fcta { padding: 80px 24px; }
+  .t-problem h2, .t-stitle, .t-network h2, .t-platform h2 { font-size: 32px; } .t-fcta h2 { font-size: 36px; }
+  .t-pstats, .t-aud-grid, .t-nvis, .t-platform-row { grid-template-columns: 1fr; }
+  .t-pstat-n { font-size: 42px; }
   .t-footer-inner { flex-direction: column; gap: 40px; } .t-footer-links { gap: 32px; flex-wrap: wrap; }
   .t-trust-grid { grid-template-columns: 1fr; } .t-trust { padding: 64px 24px; }
   .t-footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
@@ -428,15 +590,21 @@ const CSS = `
   .t-prow-video, .t-prow-text { flex: none; width: 100%; }
   .t-prow-video { order: 1; }
   .t-prow-text { order: 2; }
-  .t-hero-demo-wrap { margin-top: 28px; }
+  .t-hero-demo-wrap { margin-top: 28px; width: 100%; }
+  .t-hero-demo-frame { border-radius: 8px; }
   .t-hero-demo-video { min-height: 280px; }
+}
+@media (max-width: 600px) {
+  .t-newsletter-form { flex-direction: column; align-items: stretch; }
+  .t-newsletter-input { min-width: 0; }
 }
 @media (max-width: 480px) {
   .t-hero-title { font-size: 34px; } .t-hero-actions { flex-direction: column; align-items: stretch; }
   .t-btn-p, .t-btn-s { justify-content: center; } .t-pstat { padding: 32px 24px; } .t-aud-card { padding: 32px 24px; }
   .t-nav { padding-left: 16px; padding-right: 16px; }
   .t-hero { padding-left: 16px; padding-right: 16px; }
-  .t-hero-demo-wrap { margin-top: 24px; }
+  .t-hero-demo-wrap { margin-top: 24px; width: 100%; }
+  .t-hero-demo-frame { border-radius: 8px; }
   .t-hero-demo-video { min-height: 220px; }
 }
 .t-demo-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
@@ -502,8 +670,8 @@ function ProductFeatureRow({ title, description, videoSrc, videoOnLeft }: { titl
       className="t-prow"
       style={{
         opacity: inView ? 1 : 0,
-        transform: inView ? "translateY(0)" : "translateY(40px)",
-        transition: "opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)",
+        transform: inView ? "translateY(0)" : "translateY(18px)",
+        transition: "opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1)",
       }}
     >
       {videoOnLeft ? (
@@ -563,20 +731,22 @@ function HeroVideo() {
 
   return (
     <div className="t-hero-demo-wrap">
-      <div ref={containerRef} className="t-hero-demo-video">
-        <button type="button" className="t-hero-demo-expand" onClick={handleExpandClick} aria-label="Expand to fullscreen"><IconExpand /></button>
-        <video
-          ref={videoRef}
-          autoPlay
-          muted
-          loop
-          playsInline
-          onTimeUpdate={handleTimeUpdate}
-          style={{ width: "100%", display: "block", borderRadius: "12px" }}
-        >
-          <source src="/demo-video.mp4?v=2" type="video/mp4" />
-        </video>
-        <div className="t-hero-demo-progress" style={{ width: `${progress}%` }} />
+      <div className="t-hero-demo-frame">
+        <div ref={containerRef} className="t-hero-demo-video">
+          <button type="button" className="t-hero-demo-expand" onClick={handleExpandClick} aria-label="Expand to fullscreen"><IconExpand /></button>
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            loop
+            playsInline
+            onTimeUpdate={handleTimeUpdate}
+            style={{ width: "100%", display: "block" }}
+          >
+            <source src="/demo-video.mp4?v=2" type="video/mp4" />
+          </video>
+          <div className="t-hero-demo-progress" style={{ width: `${progress}%` }} />
+        </div>
       </div>
       <p className="t-hero-demo-caption">Georgetown Family Medicine sending a referral via Tether</p>
       <div className="t-hero-demo-caption-expand"><IconExpand />Click to expand</div>
@@ -588,7 +758,6 @@ function HeroVideo() {
 const DEMO_FORM_ACTION = "https://formspree.io/f/xpqrqkzw"; // Create at formspree.io and replace with your form ID
 
 export default function TetherLanding() {
-  useFonts();
   const [scrolled, setScrolled] = useState(false);
   const [scrollPct, setScrollPct] = useState(0);
   const [showDemoForm, setShowDemoForm] = useState(false);
@@ -664,8 +833,8 @@ export default function TetherLanding() {
             <span className="t-nav-logo-text">Tether</span>
           </a>
           <ul className="t-nav-links">
-            <li><a href="#how">How It Works</a></li>
             <li><a href="#product">Product</a></li>
+            <li><a href="#platform">Platform</a></li>
             <li><a href="#specialists">For Specialists</a></li>
             <li><a href="#network">The Network</a></li>
             <li><a href="/security">Security</a></li>
@@ -681,8 +850,8 @@ export default function TetherLanding() {
             <button className="t-nav-overlay-close" aria-label="Close" onClick={() => setMobileMenuOpen(false)}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
-            <a href="#how" onClick={() => setMobileMenuOpen(false)}>How It Works</a>
             <a href="#product" onClick={() => setMobileMenuOpen(false)}>Product</a>
+            <a href="#platform" onClick={() => setMobileMenuOpen(false)}>Platform</a>
             <a href="#specialists" onClick={() => setMobileMenuOpen(false)}>For Specialists</a>
             <a href="#network" onClick={() => setMobileMenuOpen(false)}>The Network</a>
             <a href="/security" onClick={() => setMobileMenuOpen(false)}>Security</a>
@@ -705,7 +874,7 @@ export default function TetherLanding() {
               <p className="t-hero-sub">Tether is the referral network that connects primary care and specialty practices with real-time tracking, loop closure, and a shared directory your staff actually wants to use.</p>
               <div className="t-hero-actions">
                 <a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer" className="t-btn-p" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}>Request a Demo <IconArrowRight /></a>
-                <a href="#how" className="t-btn-s">See How It Works</a>
+                <a href="#product" className="t-btn-s">See the Product</a>
               </div>
             </div>
             <HeroVideo />
@@ -714,31 +883,14 @@ export default function TetherLanding() {
 
         {/* PROBLEM */}
         <section className="t-problem">
+          <div className="t-problem-fade" />
           <div className="t-problem-inner">
             <Reveal><div className="t-plbl">The Problem</div></Reveal>
             <Reveal delay={0.1}><h2>Referrals disappear into a black hole. Your revenue disappears with them.</h2></Reveal>
             <Reveal delay={0.2}><p className="t-problem-desc">Most referrals are still sent by fax. There is no confirmation, no tracking, and no follow-up. Patients fall through the cracks, specialists lose billable visits, and PCPs never know if their patient received care.</p></Reveal>
             <Reveal delay={0.3}>
-              <div className="t-pstats">
-                <div className="t-pstat"><div className="t-pstat-n"><Counter end={50} suffix="%" /></div><div className="t-pstat-l">of referrals never result in a completed specialist visit</div></div>
-                <div className="t-pstat"><div className="t-pstat-n"><Counter end={971} prefix="$" suffix="B" /></div><div className="t-pstat-l">in annual U.S. healthcare waste attributed to care coordination failures</div></div>
-                <div className="t-pstat"><div className="t-pstat-n"><Counter end={81} suffix="%" /></div><div className="t-pstat-l">of PCPs report dissatisfaction with the referral communication process</div></div>
-              </div>
+              <ProblemStats />
             </Reveal>
-          </div>
-        </section>
-
-        {/* HOW IT WORKS */}
-        <section className="t-how" id="how">
-          <div className="t-how-inner">
-            <Reveal><div className="t-slbl">How It Works</div></Reveal>
-            <Reveal delay={0.1}><div className="t-stitle">Three steps. Zero fax machines.</div></Reveal>
-            <Reveal delay={0.15}><p className="t-sdesc">Your front desk staff can be sending tracked referrals in under 10 minutes. No IT integration required. No workflow disruption.</p></Reveal>
-            <div className="t-how-steps">
-              <Reveal delay={0} translateY={30} duration={0.8}><TiltCard className="t-how-step"><div className="t-how-step-num">1</div><h3>Send or Receive</h3><p>Upload a referral PDF or use the built-in form. Tether&apos;s AI extracts patient details, insurance, and clinical context automatically.</p><div className="t-how-step-conn"><IconArrowRight /></div></TiltCard></Reveal>
-              <Reveal delay={0.1} translateY={30} duration={0.8}><TiltCard className="t-how-step"><div className="t-how-step-num">2</div><h3>Track in Real Time</h3><p>Both the sending and receiving practice see the referral status live. No more calling to ask &quot;did you get it?&quot; Every update is logged and visible.</p><div className="t-how-step-conn"><IconArrowRight /></div></TiltCard></Reveal>
-              <Reveal delay={0.2} translateY={30} duration={0.8}><TiltCard className="t-how-step"><div className="t-how-step-num">3</div><h3>Close the Loop</h3><p>When the visit is complete, the referring provider gets notified. The patient&apos;s care journey is documented, connected, and never lost.</p></TiltCard></Reveal>
-            </div>
           </div>
         </section>
 
@@ -759,6 +911,52 @@ export default function TetherLanding() {
           </div>
         </section>
 
+        {/* THE PLATFORM */}
+        <section className="t-platform" id="platform">
+          <div className="t-platform-inner">
+            <Reveal><div className="t-slbl">THE PLATFORM</div></Reveal>
+            <Reveal delay={0.1}><h2>Referral management is just the beginning.</h2></Reveal>
+            <Reveal delay={0.15}><p className="t-platform-desc">Tether&apos;s intelligent agent layer lives inside the EHRs your practice already uses. Starting with referrals, expanding into every workflow your staff touches.</p></Reveal>
+            <Reveal delay={0.2}>
+              <div className="t-platform-layout">
+                <TiltCard className="t-platform-ehr">
+                  <div className="t-platform-ehr-icon"><IconLink /></div>
+                  <h4>EHR Workflow Integration</h4>
+                  <p>Direct connections with leading EHRs. Patient data flows in, status flows back. Zero duplicate entry.</p>
+                  <EHRDiagram />
+                </TiltCard>
+                <div className="t-platform-divider">
+                  <div className="t-platform-divider-line" />
+                  <span className="t-platform-divider-badge">One agent. Every workflow.</span>
+                  <div className="t-platform-divider-line" />
+                </div>
+                <div className="t-platform-row">
+                  <TiltCard className="t-platform-card">
+                    <div className="t-platform-card-icon t-platform-icon-teal"><IconSend /></div>
+                    <h4>Referral Automation</h4>
+                    <p>Intelligent routing, automated intake parsing, real-time status tracking, and loop closure across every referral. The workflow that started it all.</p>
+                  </TiltCard>
+                  <TiltCard className="t-platform-card">
+                    <div className="t-platform-card-icon t-platform-icon-teal"><IconCalendarCheck /></div>
+                    <h4>Scheduling &amp; Verification</h4>
+                    <p>Automated insurance eligibility checks, patient scheduling, and appointment confirmations. All handled inside your EHR.</p>
+                  </TiltCard>
+                  <TiltCard className="t-platform-card">
+                    <div className="t-platform-card-icon t-platform-icon-teal"><IconMessageSquare /></div>
+                    <h4>Patient Communication</h4>
+                    <p>Automated appointment reminders, referral status notifications, and care coordination updates. Keep patients informed at every step without manual outreach.</p>
+                  </TiltCard>
+                </div>
+              </div>
+            </Reveal>
+            <Reveal delay={0.25}>
+              <div className="t-platform-footer">
+                <span className="t-platform-footer-live">Referral automation is live.</span> Scheduling, verification, and patient communication capabilities are in active development with pilot partners. <a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer">Request early access →</a>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+
         {/* AUDIENCES */}
         <section className="t-audiences" id="specialists">
           <div className="t-audiences-inner">
@@ -774,9 +972,8 @@ export default function TetherLanding() {
                   <div className="t-aud-feats">
                     <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Inbound referral management with auto-parsed intake</div>
                     <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Visibility into your referral network and top senders</div>
-                    <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Automated status updates back to referring providers</div>
-                    <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Presence in the Tether specialist directory for new referral sources</div>
-                    <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Grow referral volume from new PCP relationships through the Tether network</div>
+                    <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Automated status updates to referring providers</div>
+                    <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Grow volume through the Tether specialist directory</div>
                   </div>
                 </div>
               </Reveal>
@@ -786,11 +983,10 @@ export default function TetherLanding() {
                   <h3>For Primary Care</h3>
                   <p className="t-aud-card-sub">Know that your patient actually saw the specialist. Find the right provider, send the referral, and track it without a single phone call.</p>
                   <div className="t-aud-feats">
-                    <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Searchable directory of specialists by location and insurance</div>
-                    <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Real-time referral status tracking with zero follow-up calls</div>
+                    <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Specialist directory searchable by location and insurance</div>
+                    <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Real-time referral tracking with zero follow-up calls</div>
                     <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Loop closure notifications when the visit is completed</div>
-                    <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Always free. No contracts, no software fees.</div>
-                    <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Supports value-based care reporting with closed-loop referral documentation</div>
+                    <div className="t-aud-feat t-aud-feat-highlight"><div className="t-aud-feat-icon"><IconCheck /></div>Always free. No contracts, no software fees.</div>
                   </div>
                 </div>
               </Reveal>
@@ -814,38 +1010,8 @@ export default function TetherLanding() {
           </div>
         </section>
 
-        {/* COMING SOON */}
-        <section className="t-comingsoon" id="coming-soon">
-          <div className="t-comingsoon-inner">
-            <Reveal><div className="t-slbl">Coming Soon</div></Reveal>
-            <Reveal delay={0.1}><h2>Seamless integration with your existing systems.</h2></Reveal>
-            <Reveal delay={0.15}><p className="t-comingsoon-desc">We are building intelligent automation that lives inside the EHRs you already use, so referrals, patient data, and loop closure happen without leaving your workflow.</p></Reveal>
-            <Reveal delay={0.2}>
-              <div className="t-csoon-grid">
-                <TiltCard className="t-csoon-card">
-                  <div className="t-csoon-icon t-csoon-icon-navy"><IconLink /></div>
-                  <h4>EHR Workflow Integration</h4>
-                  <p>Direct connections with Athenahealth, ModMed EMA, and Epic. Patient data flows in, status flows back. Zero duplicate entry.</p>
-                </TiltCard>
-                <TiltCard className="t-csoon-card">
-                  <div className="t-csoon-icon t-csoon-icon-teal"><IconSparkles /></div>
-                  <h4>Intelligent Agents</h4>
-                  <p>AI-powered agents navigate your EHR securely to verify eligibility, route referrals, and close loops. Like an extra MA in your system.</p>
-                </TiltCard>
-                <TiltCard className="t-csoon-card">
-                  <div className="t-csoon-icon t-csoon-icon-coral"><IconCalendarCheck /></div>
-                  <h4>End-to-End Patient Experience</h4>
-                  <p>From referral to appointment: automated scheduling, insurance checks, and notifications so visits happen faster and nothing falls through.</p>
-                </TiltCard>
-              </div>
-            </Reveal>
-            <Reveal delay={0.25}>
-              <div className="t-csoon-footer">
-                Actively in development. <a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer">Early integration partners welcome</a>
-              </div>
-            </Reveal>
-          </div>
-        </section>
+        {/* NEWSLETTER */}
+        <NewsletterSection />
 
         {/* TRUST */}
         <section className="t-trust">
@@ -896,7 +1062,7 @@ export default function TetherLanding() {
               <p className="t-footer-tagline">The referral network for modern medical practices.</p>
             </div>
             <div className="t-footer-links">
-              <div className="t-footer-col"><h5>Product</h5><a href="#how">How It Works</a><a href="#product">Features</a><a href="#specialists">For Specialists</a><a href="#specialists">For Primary Care</a></div>
+              <div className="t-footer-col"><h5>Product</h5><a href="#product">Product</a><a href="#platform">Platform</a><a href="#specialists">For Specialists</a><a href="#specialists">For Primary Care</a></div>
               <div className="t-footer-col"><h5>Company</h5><a href="#">About</a><a href="/blog">Blog</a><a href="#">Careers</a><a href="mailto:sach@tetherhealth.com">Contact</a></div>
               <div className="t-footer-col"><h5>Legal</h5><a href="/legal#privacy">Privacy Policy</a><a href="/legal#terms">Terms of Service</a><a href="/legal#cookies">Cookie Policy</a><a href="/legal#hipaa">HIPAA Information</a></div>
             </div>

@@ -241,8 +241,8 @@ export default function BlogPage() {
           <span className="blog-nav-logo-text">Tether</span>
         </a>
         <ul className="blog-nav-links">
-          <li><a href="/#how">How It Works</a></li>
           <li><a href="/#product">Product</a></li>
+          <li><a href="/#platform">Platform</a></li>
           <li><a href="/#specialists">For Specialists</a></li>
           <li><a href="/#network">The Network</a></li>
           <li><a href="/security">Security</a></li>
@@ -258,8 +258,8 @@ export default function BlogPage() {
           <button className="blog-nav-overlay-close" aria-label="Close" onClick={() => setMobileMenuOpen(false)}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
-          <a href="/#how" onClick={() => setMobileMenuOpen(false)}>How It Works</a>
           <a href="/#product" onClick={() => setMobileMenuOpen(false)}>Product</a>
+          <a href="/#platform" onClick={() => setMobileMenuOpen(false)}>Platform</a>
           <a href="/#specialists" onClick={() => setMobileMenuOpen(false)}>For Specialists</a>
           <a href="/#network" onClick={() => setMobileMenuOpen(false)}>The Network</a>
           <a href="/security" onClick={() => setMobileMenuOpen(false)}>Security</a>

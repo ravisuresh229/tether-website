@@ -65,3 +65,17 @@
   }
 }
 
+/* Override accent serif font - direct declaration (partnership, network) */
+.t-accent-serif,
+.t-network h2 em {
+  font-family: Georgia, 'Times New Roman', serif !important;
+  font-style: italic !important;
+  text-decoration: none !important;
+  border-bottom: none !important;
+}
+.t-accent-serif a,
+a .t-accent-serif {
+  text-decoration: none !important;
+  border-bottom: none !important;
+}
+
