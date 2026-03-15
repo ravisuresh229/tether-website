@@ -226,6 +226,9 @@ function EHRDiagram() {
             <feComposite in2="blur" operator="in" />
             <feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge>
           </filter>
+          <clipPath id="ehr-logo-clip">
+            <circle cx="250" cy="100" r="24" />
+          </clipPath>
         </defs>
         <line x1="250" y1="100" x2="250" y2="40" stroke="#D1D5DB" strokeWidth="1.5" />
         <line x1="250" y1="100" x2="100" y2="100" stroke="#D1D5DB" strokeWidth="1.5" />
@@ -236,7 +239,7 @@ function EHRDiagram() {
         <circle cx="250" cy="100" r="3" fill="#0D7377" className="t-ehr-dot t-ehr-dot-3" />
         <circle cx="250" cy="100" r="3" fill="#0D7377" className="t-ehr-dot t-ehr-dot-4" />
         <circle cx="250" cy="100" r="24" fill="#0D7377" filter="url(#tether-glow)" />
-        <text x="250" y="107" textAnchor="middle" fill="white" fontSize="20" fontWeight="600" fontFamily="inherit">T</text>
+        <image href="/LOGO.jpeg" x="226" y="76" width="48" height="48" clipPath="url(#ehr-logo-clip)" preserveAspectRatio="xMidYMid meet" />
         <rect x="200" y="12" width="100" height="28" rx="14" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
         <text x="250" y="31" textAnchor="middle" fill="#374151" fontSize="12" fontWeight="500" fontFamily="inherit">Athena</text>
         <rect x="12" y="86" width="90" height="28" rx="14" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
