@@ -213,6 +213,7 @@ const IconPulse = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="no
 const IconCheckCircle = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>;
 const IconPlay = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>;
 const IconMessageSquare = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>;
+const IconPlug = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M6 8h.01"/><path d="M18 8h.01"/><path d="M6 12h12"/></svg>;
 
 // ─── EHR Connection Diagram ───
 function EHRDiagram() {
@@ -291,7 +292,7 @@ function NewsletterSection() {
     return (
       <section className="t-newsletter">
         <div className="t-newsletter-inner">
-          <Reveal><div className="t-slbl">Stay in the Loop</div></Reveal>
+          <Reveal><div className="t-slbl">STAY IN THE LOOP</div></Reveal>
           <Reveal delay={0.1}>
             <div className="t-newsletter-success">
               <span className="t-newsletter-success-icon"><IconCheckCircle /></span>
@@ -305,7 +306,7 @@ function NewsletterSection() {
   return (
     <section className="t-newsletter">
       <div className="t-newsletter-inner">
-        <Reveal><div className="t-slbl">Stay in the Loop</div></Reveal>
+        <Reveal><div className="t-slbl">STAY IN THE LOOP</div></Reveal>
         <Reveal delay={0.1}><h2>Get updates on Tether.</h2></Reveal>
         <Reveal delay={0.15}><p className="t-newsletter-sub">Product updates, referral management insights, and early access to new features. No spam, unsubscribe anytime.</p></Reveal>
         <Reveal delay={0.2}>
@@ -404,8 +405,6 @@ html { scroll-behavior: smooth; }
 .t-hero-demo-video { position: relative; min-height: 400px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .t-hero-demo-video video { display: block; width: 100%; height: auto; max-height: 70vh; object-fit: contain; }
 .t-hero-demo-caption { text-align: center; font-size: 13px; color: var(--text-tertiary); margin-top: 24px; font-weight: 400; }
-.t-hero-demo-caption-expand { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 4px; font-size: 12px; color: var(--text-tertiary); }
-.t-hero-demo-caption-expand svg { width: 12px; height: 12px; opacity: 0.8; }
 .t-hero-demo-expand { position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; color: #fff; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 50%; border: none; cursor: pointer; z-index: 10; opacity: 0; transition: opacity 0.2s, background 0.2s, transform 0.2s; }
 .t-hero-demo-video:hover .t-hero-demo-expand { opacity: 1; }
 .t-hero-demo-expand:hover { background: rgba(0,0,0,0.7); transform: scale(1.05); }
@@ -752,7 +751,6 @@ function HeroVideo() {
         </div>
       </div>
       <p className="t-hero-demo-caption">Georgetown Family Medicine sending a referral via Tether</p>
-      <div className="t-hero-demo-caption-expand"><IconExpand />Click to expand</div>
     </div>
   );
 }
@@ -923,7 +921,7 @@ export default function TetherLanding() {
             <Reveal delay={0.2}>
               <div className="t-platform-layout">
                 <TiltCard className="t-platform-ehr">
-                  <div className="t-platform-ehr-icon"><IconLink /></div>
+                  <div className="t-platform-ehr-icon"><IconPlug /></div>
                   <h4>EHR Workflow Integration</h4>
                   <p>Direct connections with leading EHRs. Patient data flows in, status flows back. Zero duplicate entry.</p>
                   <EHRDiagram />
@@ -1013,9 +1011,6 @@ export default function TetherLanding() {
           </div>
         </section>
 
-        {/* NEWSLETTER */}
-        <NewsletterSection />
-
         {/* TRUST */}
         <section className="t-trust">
           <div className="t-trust-inner">
@@ -1046,6 +1041,9 @@ export default function TetherLanding() {
             </div>
           </div>
         </section>
+
+        {/* NEWSLETTER */}
+        <NewsletterSection />
 
         {/* FINAL CTA */}
         <section className="t-fcta" id="demo">
