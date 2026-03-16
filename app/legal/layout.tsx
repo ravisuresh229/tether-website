@@ -4,7 +4,7 @@ export const metadata: Metadata = {
   title: "Legal",
   description:
     "Tether Health legal information including Terms of Service, Privacy Policy, and HIPAA compliance documentation.",
-  alternates: { canonical: "https://tetherhealth.co/legal" },
+  alternates: { canonical: "/legal" },
 };
 
 export default function LegalLayout({

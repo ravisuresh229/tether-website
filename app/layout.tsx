@@ -17,7 +17,7 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://tetherhealth.co"),
+  metadataBase: new URL("https://www.tetherhealth.co"),
   title: {
     default: "Healthcare Referral Management Software | Tether",
     template: "%s | Tether",

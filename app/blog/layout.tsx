@@ -4,7 +4,7 @@ export const metadata: Metadata = {
   title: "Blog: Referral Management Insights",
   description:
     "Expert insights on healthcare referral management, reducing referral leakage, and building specialist networks.",
-  alternates: { canonical: "https://tetherhealth.co/blog" },
+  alternates: { canonical: "/blog" },
 };
 
 export default function BlogLayout({
