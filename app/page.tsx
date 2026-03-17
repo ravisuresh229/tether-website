@@ -361,9 +361,11 @@ html { scroll-behavior: smooth; }
 .t-nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 1.5px; background: var(--teal); transition: width 0.3s cubic-bezier(0.16,1,0.3,1); pointer-events: none; }
 .t-nav-links a:hover { color: var(--navy-deep); }
 .t-nav-links a:hover::after { width: 100%; }
-.t-nav-cta { background: var(--navy) !important; color: #fff !important; padding: 10px 22px !important; border-radius: 8px !important; font-size: 14px !important; font-weight: 600 !important; transition: all 0.25s ease !important; }
+.t-nav-login { color: var(--text-secondary) !important; }
+.t-nav-login::after { display: none !important; }
+.t-nav-cta { background: var(--teal) !important; color: #fff !important; padding: 10px 22px !important; border-radius: 8px !important; font-size: 14px !important; font-weight: 600 !important; transition: all 0.25s ease !important; }
 .t-nav-cta::after { display: none !important; }
-.t-nav-cta:hover { background: var(--navy-deep) !important; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(45,58,78,0.2) !important; }
+.t-nav-cta:hover { background: var(--teal-dark) !important; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(13,115,119,0.25) !important; }
 .t-nav-mob { display: none; background: none; border: none; cursor: pointer; padding: 8px; color: var(--navy-deep); }
 .t-nav-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200; background: rgba(250,250,247,0.98); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 80px 24px; opacity: 0; animation: t-mob-in 0.3s ease forwards; }
 @keyframes t-mob-in { to { opacity: 1; } }
@@ -385,6 +387,8 @@ html { scroll-behavior: smooth; }
 .t-hero-title-line { display: block; overflow: hidden; }
 .t-hero-title-line-inner { display: block; animation: t-title-up 0.9s cubic-bezier(0.16,1,0.3,1) both; }
 .t-hero-title-line:nth-child(1) .t-hero-title-line-inner { animation-delay: 0.15s; }
+.t-hero-title-rotator-line { display: block; text-align: center; }
+.t-hero-title-rotator-line .t-hero-title-line-inner { display: inline-block; }
 .t-hero-title-line:nth-child(2) .t-hero-title-line-inner { animation-delay: 0.25s; }
 .t-hero-title-line:nth-child(3) .t-hero-title-line-inner { animation-delay: 0.35s; }
 @keyframes t-title-up { from { transform: translateY(110%); } to { transform: translateY(0); } }
@@ -535,6 +539,9 @@ html { scroll-behavior: smooth; }
 .t-newsletter-btn:hover:not(:disabled) { background: var(--teal-dark); transform: translateY(-1px); }
 .t-newsletter-btn:disabled { opacity: 0.7; cursor: not-allowed; }
 .t-newsletter-note { font-size: 13px; color: var(--text-tertiary); }
+.t-newsletter-demo-line { text-align: center; font-size: 15px; color: var(--text-secondary); margin: 32px 0 0; padding: 0 24px; }
+.t-newsletter-demo-link { color: var(--teal); font-weight: 600; text-decoration: none; transition: color 0.2s; }
+.t-newsletter-demo-link:hover { color: var(--teal-dark); }
 .t-newsletter-success { display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 17px; font-weight: 500; color: var(--teal); }
 .t-newsletter-success-icon { animation: t-check-in 0.4s cubic-bezier(0.16,1,0.3,1) both; }
 @keyframes t-check-in { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
@@ -745,7 +752,7 @@ function HeroVideo() {
             onTimeUpdate={handleTimeUpdate}
             style={{ width: "100%", display: "block" }}
           >
-            <source src="/demo-video.mp4?v=2" type="video/mp4" />
+            <source src="/main-demo.mp4" type="video/mp4" />
           </video>
           <div className="t-hero-demo-progress" style={{ width: `${progress}%` }} />
         </div>
@@ -837,10 +844,10 @@ export default function TetherLanding() {
             <li><a href="#product">Product</a></li>
             <li><a href="#platform">Platform</a></li>
             <li><a href="#specialists">For Specialists</a></li>
-            <li><a href="#network">The Network</a></li>
             <li><a href="/security">Security</a></li>
             <li><a href="/blog">Blog</a></li>
-            <li><a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer" className="t-nav-cta" style={{ textDecoration: "none", display: "inline-block" }}>Request Demo</a></li>
+            <li><a href="https://app.tetherhealth.co/login" className="t-nav-login">Log In</a></li>
+            <li><a href="/request-demo" className="t-nav-cta" style={{ textDecoration: "none", display: "inline-block" }}>Request Demo</a></li>
           </ul>
           <button className="t-nav-mob" aria-label="Menu" onClick={() => setMobileMenuOpen(true)}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -854,10 +861,10 @@ export default function TetherLanding() {
             <a href="#product" onClick={() => setMobileMenuOpen(false)}>Product</a>
             <a href="#platform" onClick={() => setMobileMenuOpen(false)}>Platform</a>
             <a href="#specialists" onClick={() => setMobileMenuOpen(false)}>For Specialists</a>
-            <a href="#network" onClick={() => setMobileMenuOpen(false)}>The Network</a>
             <a href="/security" onClick={() => setMobileMenuOpen(false)}>Security</a>
             <a href="/blog" onClick={() => setMobileMenuOpen(false)}>Blog</a>
-            <a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer" className="t-nav-overlay-cta" onClick={() => setMobileMenuOpen(false)}>Request Demo</a>
+            <a href="https://app.tetherhealth.co/login" onClick={() => setMobileMenuOpen(false)}>Log In</a>
+            <a href="/request-demo" className="t-nav-overlay-cta" onClick={() => setMobileMenuOpen(false)}>Request Demo</a>
           </div>
         )}
 
@@ -869,13 +876,12 @@ export default function TetherLanding() {
               <div className="t-hero-badge"><div className="t-hero-badge-dot" />Now accepting pilot practices</div>
               <h1 className="t-hero-title">
                 <span className="t-hero-title-line"><span className="t-hero-title-line-inner">Every referral is a</span></span>
-                <span className="t-hero-title-line"><span className="t-hero-title-line-inner"><WordRotator words={["relationship.", "connection.", "patient.", "partnership."]} /></span></span>
+                <span className="t-hero-title-line t-hero-title-rotator-line"><span className="t-hero-title-line-inner"><WordRotator words={["relationship.", "connection.", "patient.", "partnership."]} /></span></span>
                 <span className="t-hero-title-line"><span className="t-hero-title-line-inner">Stop losing them.</span></span>
               </h1>
               <p className="t-hero-sub">Tether is the referral network that connects primary care and specialty practices with real-time tracking, loop closure, and a shared directory your staff actually wants to use.</p>
               <div className="t-hero-actions">
-                <a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer" className="t-btn-p" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}>Request a Demo <IconArrowRight /></a>
-                <a href="#product" className="t-btn-s">See the Product</a>
+                <a href="#product" className="t-btn-p" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}>See the Product <IconArrowRight /></a>
               </div>
             </div>
             <HeroVideo />
@@ -952,7 +958,7 @@ export default function TetherLanding() {
             </Reveal>
             <Reveal delay={0.25}>
               <div className="t-platform-footer">
-                <span className="t-platform-footer-live">Referral automation is live.</span> Scheduling, verification, and patient communication capabilities are in active development with pilot partners. <a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer">Request early access →</a>
+                <span className="t-platform-footer-live">Referral automation is live.</span> Scheduling, verification, and patient communication capabilities are in active development with pilot partners. <a href="/request-demo">Request early access →</a>
               </div>
             </Reveal>
           </div>
@@ -1044,16 +1050,7 @@ export default function TetherLanding() {
 
         {/* NEWSLETTER */}
         <NewsletterSection />
-
-        {/* FINAL CTA */}
-        <section className="t-fcta" id="demo">
-          <div className="t-fcta-inner">
-            <Reveal><h2>Ready to connect<br />your practice?</h2></Reveal>
-            <Reveal delay={0.1}><p>Join the network of practices building a better referral experience for their patients and their teams.</p></Reveal>
-            <Reveal delay={0.2}><a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer" className="t-btn-p" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}>Request a Demo <IconArrowRight /></a></Reveal>
-            <Reveal delay={0.25}><p className="t-fcta-note">Free for referring providers. No contracts required.</p></Reveal>
-          </div>
-        </section>
+        <p className="t-newsletter-demo-line">Ready to see a demo? <a href="/request-demo" className="t-newsletter-demo-link">Request one here</a>.</p>
 
         {/* FOOTER */}
         <footer className="t-footer">

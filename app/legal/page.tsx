@@ -14,7 +14,8 @@ const CSS = `
 .legal-nav-links{display:flex;align-items:center;gap:36px;list-style:none}
 .legal-nav-links a{font-size:14px;font-weight:500;color:var(--text-secondary);text-decoration:none;transition:color .2s}
 .legal-nav-links a:hover{color:var(--navy-deep)}
-.legal-nav-cta{background:var(--navy);color:#fff!important;padding:10px 22px;border-radius:8px;font-weight:600!important}
+.legal-nav-login{color:var(--text-secondary)!important}
+.legal-nav-cta{background:var(--teal);color:#fff!important;padding:10px 22px;border-radius:8px;font-weight:600!important}
 .legal-nav-mob{display:none;background:none;border:none;cursor:pointer;padding:8px;color:var(--navy-deep)}
 .legal-nav-overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:rgba(250,250,247,0.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:80px 24px;opacity:0;animation:legal-mob-in .3s ease forwards}
 @keyframes legal-mob-in{to{opacity:1}}
@@ -39,7 +40,7 @@ const CSS = `
 .legal-h2{font-size:18px;font-weight:600;color:var(--navy-darkest);margin-top:36px;margin-bottom:12px}
 .legal-h3{font-size:15px;font-weight:600;color:var(--teal);margin-top:24px;margin-bottom:8px}
 .legal-p{font-size:15px;line-height:1.75;color:var(--text-secondary);margin-bottom:16px}
-.legal-list{font-size:15px;line-height:1.75;color:var(--text-secondary);margin-bottom:16px;padding-left:24px}
+.legal-list{font-size:15px;line-height:1.75;color:var(--text-secondary);margin-bottom:16px;padding-left:24px;list-style-type:disc;list-style-position:outside}
 .legal-list li{margin-bottom:6px}
 .legal-divider{height:1px;background:var(--border);margin:64px 0 0}
 .legal-contact{background:var(--bg-warm);border:1px solid var(--border);border-radius:12px;padding:24px 28px;margin-top:24px;font-size:14px;line-height:1.7;color:var(--text-secondary)}
@@ -111,7 +112,8 @@ export default function LegalPage() {
           <li><a href="/">Home</a></li>
           <li><a href="/security">Security</a></li>
           <li><a href="/blog">Blog</a></li>
-          <li><a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer" className="legal-nav-cta">Request Demo</a></li>
+          <li><a href="https://app.tetherhealth.co/login" className="legal-nav-login">Log In</a></li>
+          <li><a href="/request-demo" className="legal-nav-cta">Request Demo</a></li>
         </ul>
         <button className="legal-nav-mob" aria-label="Menu" onClick={() => setMobileMenuOpen(true)}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -125,7 +127,8 @@ export default function LegalPage() {
           <a href="/" onClick={() => setMobileMenuOpen(false)}>Home</a>
           <a href="/security" onClick={() => setMobileMenuOpen(false)}>Security</a>
           <a href="/blog" onClick={() => setMobileMenuOpen(false)}>Blog</a>
-          <a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer" className="legal-nav-overlay-cta" onClick={() => setMobileMenuOpen(false)}>Request Demo</a>
+          <a href="https://app.tetherhealth.co/login" onClick={() => setMobileMenuOpen(false)}>Log In</a>
+          <a href="/request-demo" className="legal-nav-overlay-cta" onClick={() => setMobileMenuOpen(false)}>Request Demo</a>
         </div>
       )}
 

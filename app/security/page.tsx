@@ -75,8 +75,9 @@ const CSS = `
 .sec-nav-links { display: flex; align-items: center; gap: 36px; list-style: none; }
 .sec-nav-links a { font-size: 14px; font-weight: 500; color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
 .sec-nav-links a:hover { color: var(--navy-deep); }
-.sec-nav-cta { background: var(--navy); color: #fff !important; padding: 10px 22px; border-radius: 8px; font-weight: 600 !important; transition: all 0.25s; }
-.sec-nav-cta:hover { background: var(--navy-deep); }
+.sec-nav-login { color: var(--text-secondary) !important; }
+.sec-nav-cta { background: var(--teal); color: #fff !important; padding: 10px 22px; border-radius: 8px; font-weight: 600 !important; transition: all 0.25s; }
+.sec-nav-cta:hover { background: var(--teal-dark); }
 .sec-nav-mob { display: none; background: none; border: none; cursor: pointer; padding: 8px; color: var(--navy-deep); }
 .sec-nav-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200; background: rgba(250,250,247,0.98); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 80px 24px; opacity: 0; animation: sec-mob-in 0.3s ease forwards; }
 @keyframes sec-mob-in { to { opacity: 1; } }
@@ -196,10 +197,10 @@ export default function SecurityPage() {
           <li><a href="/#product">Product</a></li>
           <li><a href="/#platform">Platform</a></li>
           <li><a href="/#specialists">For Specialists</a></li>
-          <li><a href="/#network">The Network</a></li>
           <li><a href="/security" style={{ color: "var(--navy-deep)", fontWeight: 600 }}>Security</a></li>
           <li><a href="/blog">Blog</a></li>
-          <li><a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer" className="sec-nav-cta">Request Demo</a></li>
+          <li><a href="https://app.tetherhealth.co/login" className="sec-nav-login">Log In</a></li>
+          <li><a href="/request-demo" className="sec-nav-cta">Request Demo</a></li>
         </ul>
         <button className="sec-nav-mob" aria-label="Menu" onClick={() => setMobileMenuOpen(true)}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -213,10 +214,10 @@ export default function SecurityPage() {
           <a href="/#product" onClick={() => setMobileMenuOpen(false)}>Product</a>
           <a href="/#platform" onClick={() => setMobileMenuOpen(false)}>Platform</a>
           <a href="/#specialists" onClick={() => setMobileMenuOpen(false)}>For Specialists</a>
-          <a href="/#network" onClick={() => setMobileMenuOpen(false)}>The Network</a>
           <a href="/security" onClick={() => setMobileMenuOpen(false)}>Security</a>
           <a href="/blog" onClick={() => setMobileMenuOpen(false)}>Blog</a>
-          <a href="https://calendly.com/tetherhealth-support/30min" target="_blank" rel="noopener noreferrer" className="sec-nav-overlay-cta" onClick={() => setMobileMenuOpen(false)}>Request Demo</a>
+          <a href="https://app.tetherhealth.co/login" onClick={() => setMobileMenuOpen(false)}>Log In</a>
+          <a href="/request-demo" className="sec-nav-overlay-cta" onClick={() => setMobileMenuOpen(false)}>Request Demo</a>
         </div>
       )}
 
