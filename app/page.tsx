@@ -403,6 +403,8 @@ html { scroll-behavior: smooth; }
 .t-btn-p:hover { background: var(--coral-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(212,97,62,0.25); }
 .t-btn-s { display: inline-flex; align-items: center; gap: 8px; padding: 14px 24px; background: transparent; color: var(--text); border: 1.5px solid var(--t-border); border-radius: 10px; font-size: 15px; font-weight: 500; font-family: var(--sans); cursor: pointer; transition: all 0.25s; text-decoration: none; }
 .t-btn-s:hover { border-color: var(--navy); color: var(--navy); background: rgba(45,58,78,0.04); }
+.t-btn-teal { display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: var(--teal); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; font-family: var(--sans); cursor: pointer; transition: all 0.25s; text-decoration: none; }
+.t-btn-teal:hover { background: var(--teal-dark); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(13,115,119,0.25); }
 
 .t-hero-demo-wrap { max-width: 1000px; margin: 40px auto 0; width: 100%; }
 .t-hero-demo-frame { border-radius: 14px; overflow: hidden; border: 1px solid #E5E7EB; box-shadow: 0 4px 24px rgba(0,0,0,0.08); background: #fff; }
@@ -539,9 +541,6 @@ html { scroll-behavior: smooth; }
 .t-newsletter-btn:hover:not(:disabled) { background: var(--teal-dark); transform: translateY(-1px); }
 .t-newsletter-btn:disabled { opacity: 0.7; cursor: not-allowed; }
 .t-newsletter-note { font-size: 13px; color: var(--text-tertiary); }
-.t-newsletter-demo-line { text-align: center; font-size: 15px; color: var(--text-secondary); margin: 32px 0 0; padding: 0 24px; }
-.t-newsletter-demo-link { color: var(--teal); font-weight: 600; text-decoration: none; transition: color 0.2s; }
-.t-newsletter-demo-link:hover { color: var(--teal-dark); }
 .t-newsletter-success { display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 17px; font-weight: 500; color: var(--teal); }
 .t-newsletter-success-icon { animation: t-check-in 0.4s cubic-bezier(0.16,1,0.3,1) both; }
 @keyframes t-check-in { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
@@ -609,7 +608,7 @@ html { scroll-behavior: smooth; }
 }
 @media (max-width: 480px) {
   .t-hero-title { font-size: 34px; } .t-hero-actions { flex-direction: column; align-items: stretch; }
-  .t-btn-p, .t-btn-s { justify-content: center; } .t-pstat { padding: 32px 24px; } .t-aud-card { padding: 32px 24px; }
+  .t-btn-p, .t-btn-s, .t-btn-teal { justify-content: center; } .t-pstat { padding: 32px 24px; } .t-aud-card { padding: 32px 24px; }
   .t-nav { padding-left: 16px; padding-right: 16px; }
   .t-hero { padding-left: 16px; padding-right: 16px; }
   .t-hero-demo-wrap { margin-top: 24px; width: 100%; }
@@ -843,7 +842,7 @@ export default function TetherLanding() {
           <ul className="t-nav-links">
             <li><a href="#product">Product</a></li>
             <li><a href="#platform">Platform</a></li>
-            <li><a href="#specialists">For Specialists</a></li>
+            <li><a href="/for-specialists">For Specialists</a></li>
             <li><a href="/security">Security</a></li>
             <li><a href="/blog">Blog</a></li>
             <li><a href="https://app.tetherhealth.co/login" className="t-nav-login">Log In</a></li>
@@ -860,7 +859,7 @@ export default function TetherLanding() {
             </button>
             <a href="#product" onClick={() => setMobileMenuOpen(false)}>Product</a>
             <a href="#platform" onClick={() => setMobileMenuOpen(false)}>Platform</a>
-            <a href="#specialists" onClick={() => setMobileMenuOpen(false)}>For Specialists</a>
+            <a href="/for-specialists" onClick={() => setMobileMenuOpen(false)}>For Specialists</a>
             <a href="/security" onClick={() => setMobileMenuOpen(false)}>Security</a>
             <a href="/blog" onClick={() => setMobileMenuOpen(false)}>Blog</a>
             <a href="https://app.tetherhealth.co/login" onClick={() => setMobileMenuOpen(false)}>Log In</a>
@@ -881,7 +880,8 @@ export default function TetherLanding() {
               </h1>
               <p className="t-hero-sub">Tether is the referral network that connects primary care and specialty practices with real-time tracking, loop closure, and a shared directory your staff actually wants to use.</p>
               <div className="t-hero-actions">
-                <a href="#product" className="t-btn-p" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}>See the Product <IconArrowRight /></a>
+                <a href="#problem" className="t-btn-p" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}>See Why It Matters <IconArrowRight /></a>
+                <a href="/request-demo" className="t-btn-teal" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}>Request Demo</a>
               </div>
             </div>
             <HeroVideo />
@@ -889,7 +889,7 @@ export default function TetherLanding() {
         </section>
 
         {/* PROBLEM */}
-        <section className="t-problem">
+        <section className="t-problem" id="problem">
           <div className="t-problem-fade" />
           <div className="t-problem-inner">
             <Reveal><div className="t-plbl">The Problem</div></Reveal>
@@ -910,10 +910,9 @@ export default function TetherLanding() {
               <Reveal delay={0.15}><p className="t-sdesc">Designed for medical assistants and front desk staff who manage referrals every day. Not physicians who review dashboards once a week.</p></Reveal>
             </div>
             <div className="t-prows">
-              <ProductFeatureRow title="Referral Dashboard" description="See every inbound and outbound referral in one place. Filter by status, provider, date, or insurance. Know exactly where every patient stands." videoSrc="/dashboard-demo.mp4" videoOnLeft={true} />
-              <ProductFeatureRow title="Specialist Directory" description="A curated, searchable map of specialists accepting referrals. Filter by specialty, insurance, distance, and availability." videoSrc="/directory-demo.mp4" videoOnLeft={false} />
-              <ProductFeatureRow title="AI-Powered Intake" description="Drop in a referral PDF. Tether extracts patient demographics, clinical notes, and insurance details in seconds." videoSrc="/parser-demo.mp4" videoOnLeft={true} />
-              <ProductFeatureRow title="Specialist Referral View" description="Receive referrals, contact patients, schedule visits, and update status. Close the loop without a single phone call." videoSrc="/specialist-demo.mp4" videoOnLeft={false} />
+              <ProductFeatureRow title="Referral Dashboard" description="One dashboard, two views. PCPs track outbound referrals, visit summaries, and loop closure. Specialists manage inbound referrals, assign providers, and update statuses. Both sides see the full picture in real time." videoSrc="/dashboard-demo.mp4" videoOnLeft={true} />
+              <ProductFeatureRow title="Specialist Directory" description="Search 940+ specialists by specialty, insurance, distance, and availability. Find the right provider and start a referral in one click." videoSrc="/directory-demo.mp4" videoOnLeft={false} />
+              <ProductFeatureRow title="EHR Integration + AI Intake" description="Pull patient data directly from your EHR, or drop in a referral PDF. Tether auto-fills demographics, insurance, and clinical details so your staff never retypes a thing." videoSrc="/parser-demo.mp4" videoOnLeft={true} />
             </div>
           </div>
         </section>
@@ -1050,7 +1049,6 @@ export default function TetherLanding() {
 
         {/* NEWSLETTER */}
         <NewsletterSection />
-        <p className="t-newsletter-demo-line">Ready to see a demo? <a href="/request-demo" className="t-newsletter-demo-link">Request one here</a>.</p>
 
         {/* FOOTER */}
         <footer className="t-footer">
@@ -1060,8 +1058,8 @@ export default function TetherLanding() {
               <p className="t-footer-tagline">The referral network for modern medical practices.</p>
             </div>
             <div className="t-footer-links">
-              <div className="t-footer-col"><h5>Product</h5><a href="#product">Product</a><a href="#platform">Platform</a><a href="#specialists">For Specialists</a><a href="#specialists">For Primary Care</a></div>
-              <div className="t-footer-col"><h5>Company</h5><a href="#">About</a><a href="/blog">Blog</a><a href="#">Careers</a><a href="mailto:sach@tetherhealth.com">Contact</a></div>
+              <div className="t-footer-col"><h5>Product</h5><a href="#product">Product</a><a href="#platform">Platform</a><a href="/for-specialists">For Specialists</a><a href="#specialists">For Primary Care</a></div>
+              <div className="t-footer-col"><h5>Company</h5><a href="#">About</a><a href="/blog">Blog</a><a href="/request-demo">Contact</a></div>
               <div className="t-footer-col"><h5>Legal</h5><a href="/legal#privacy">Privacy Policy</a><a href="/legal#terms">Terms of Service</a><a href="/legal#cookies">Cookie Policy</a><a href="/legal#hipaa">HIPAA Information</a></div>
             </div>
           </div>

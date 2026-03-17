@@ -196,7 +196,7 @@ export default function SecurityPage() {
         <ul className="sec-nav-links">
           <li><a href="/#product">Product</a></li>
           <li><a href="/#platform">Platform</a></li>
-          <li><a href="/#specialists">For Specialists</a></li>
+          <li><a href="/for-specialists">For Specialists</a></li>
           <li><a href="/security" style={{ color: "var(--navy-deep)", fontWeight: 600 }}>Security</a></li>
           <li><a href="/blog">Blog</a></li>
           <li><a href="https://app.tetherhealth.co/login" className="sec-nav-login">Log In</a></li>
@@ -213,7 +213,7 @@ export default function SecurityPage() {
           </button>
           <a href="/#product" onClick={() => setMobileMenuOpen(false)}>Product</a>
           <a href="/#platform" onClick={() => setMobileMenuOpen(false)}>Platform</a>
-          <a href="/#specialists" onClick={() => setMobileMenuOpen(false)}>For Specialists</a>
+          <a href="/for-specialists" onClick={() => setMobileMenuOpen(false)}>For Specialists</a>
           <a href="/security" onClick={() => setMobileMenuOpen(false)}>Security</a>
           <a href="/blog" onClick={() => setMobileMenuOpen(false)}>Blog</a>
           <a href="https://app.tetherhealth.co/login" onClick={() => setMobileMenuOpen(false)}>Log In</a>

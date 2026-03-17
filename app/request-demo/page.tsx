@@ -95,7 +95,7 @@ export default function RequestDemoPage() {
         <div className="rd-nav-links">
           <Link href="/#product">Product</Link>
           <Link href="/#platform">Platform</Link>
-          <Link href="/#specialists">For Specialists</Link>
+          <Link href="/for-specialists">For Specialists</Link>
           <Link href="/security">Security</Link>
           <Link href="/blog">Blog</Link>
           <a href={APP_LOGIN_URL} className="rd-nav-login">Log In</a>
@@ -112,7 +112,7 @@ export default function RequestDemoPage() {
           </button>
           <Link href="/#product" onClick={() => setMobileOpen(false)}>Product</Link>
           <Link href="/#platform" onClick={() => setMobileOpen(false)}>Platform</Link>
-          <Link href="/#specialists" onClick={() => setMobileOpen(false)}>For Specialists</Link>
+          <Link href="/for-specialists" onClick={() => setMobileOpen(false)}>For Specialists</Link>
           <Link href="/security" onClick={() => setMobileOpen(false)}>Security</Link>
           <Link href="/blog" onClick={() => setMobileOpen(false)}>Blog</Link>
           <a href={APP_LOGIN_URL} onClick={() => setMobileOpen(false)}>Log In</a>

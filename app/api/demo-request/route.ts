@@ -47,7 +47,7 @@ export async function POST(req: Request) {
 
         await resend.emails.send({
           from: "Tether Health <updates@tetherhealth.co>",
-          to: "sach@tetherhealth.co",
+          to: "support@tetherhealth.co",
           subject: `Demo Request: ${firstName} ${lastName} - ${practiceName || "No practice name"}`,
           html: `
             <p><strong>New demo request:</strong></p>
