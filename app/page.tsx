@@ -317,6 +317,45 @@ function AnimatedChatDemo() {
   );
 }
 
+// ─── EHR Connection Diagram ───
+function EHRDiagram() {
+  return (
+    <div className="t-ehr-diagram">
+      <svg viewBox="0 0 500 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="tether-glow">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feFlood floodColor="#0D7377" floodOpacity="0.3" />
+            <feComposite in2="blur" operator="in" />
+            <feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+          <clipPath id="ehr-logo-clip">
+            <circle cx="250" cy="100" r="24" />
+          </clipPath>
+        </defs>
+        <line x1="250" y1="100" x2="250" y2="40" stroke="#D1D5DB" strokeWidth="1.5" />
+        <line x1="250" y1="100" x2="100" y2="100" stroke="#D1D5DB" strokeWidth="1.5" />
+        <line x1="250" y1="100" x2="400" y2="100" stroke="#D1D5DB" strokeWidth="1.5" />
+        <line x1="250" y1="100" x2="250" y2="160" stroke="#D1D5DB" strokeWidth="1.5" />
+        <circle cx="250" cy="100" r="3" fill="#0D7377" className="t-ehr-dot t-ehr-dot-1" />
+        <circle cx="250" cy="100" r="3" fill="#0D7377" className="t-ehr-dot t-ehr-dot-2" />
+        <circle cx="250" cy="100" r="3" fill="#0D7377" className="t-ehr-dot t-ehr-dot-3" />
+        <circle cx="250" cy="100" r="3" fill="#0D7377" className="t-ehr-dot t-ehr-dot-4" />
+        <circle cx="250" cy="100" r="24" fill="#0D7377" filter="url(#tether-glow)" />
+        <image href="/LOGO.jpeg" x="226" y="76" width="48" height="48" clipPath="url(#ehr-logo-clip)" preserveAspectRatio="xMidYMid meet" />
+        <rect x="200" y="12" width="100" height="28" rx="14" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
+        <image href="/athena.png" x="210" y="16" width="80" height="20" preserveAspectRatio="xMidYMid meet" />
+        <rect x="12" y="86" width="90" height="28" rx="14" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
+        <image href="/modmed.png" x="20" y="90" width="74" height="20" preserveAspectRatio="xMidYMid meet" />
+        <rect x="398" y="86" width="90" height="28" rx="14" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
+        <image href="/epic.png" x="408" y="90" width="70" height="20" preserveAspectRatio="xMidYMid meet" />
+        <rect x="175" y="172" width="150" height="28" rx="14" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
+        <image href="/ecw.jpg" x="185" y="176" width="130" height="20" preserveAspectRatio="xMidYMid meet" />
+      </svg>
+    </div>
+  );
+}
+
 // ─── Newsletter Section ───
 function NewsletterSection() {
   const [email, setEmail] = useState("");
@@ -596,6 +635,17 @@ html { scroll-behavior: smooth; }
 .t-platform-ehr h4 { font-size: 20px; font-weight: 600; color: var(--navy-darkest); margin-bottom: 12px; }
 .t-platform-ehr p { font-size: 15px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px; max-width: 560px; margin-left: auto; margin-right: auto; }
 .t-platform-ehr-note { font-size: 13px; color: var(--text-tertiary); line-height: 1.5; margin-top: 16px !important; margin-bottom: 0 !important; }
+.t-ehr-diagram { width: 100%; max-width: 500px; height: 200px; margin: 24px auto 0; font-family: var(--sans); }
+.t-ehr-diagram svg { width: 100%; height: 100%; }
+.t-ehr-dot { transform-origin: 250px 100px; }
+.t-ehr-dot-1 { animation: t-ehr-dot-up 2.5s ease-in-out infinite; }
+.t-ehr-dot-2 { animation: t-ehr-dot-left 2.5s ease-in-out infinite 0.6s; }
+.t-ehr-dot-3 { animation: t-ehr-dot-right 2.5s ease-in-out infinite 1.2s; }
+.t-ehr-dot-4 { animation: t-ehr-dot-down 2.5s ease-in-out infinite 1.8s; }
+@keyframes t-ehr-dot-up { 0%,100% { transform: translate(0, 0); opacity: 1; } 50% { transform: translate(0, -60px); opacity: 1; } }
+@keyframes t-ehr-dot-left { 0%,100% { transform: translate(0, 0); opacity: 1; } 50% { transform: translate(-150px, 0); opacity: 1; } }
+@keyframes t-ehr-dot-right { 0%,100% { transform: translate(0, 0); opacity: 1; } 50% { transform: translate(150px, 0); opacity: 1; } }
+@keyframes t-ehr-dot-down { 0%,100% { transform: translate(0, 0); opacity: 1; } 50% { transform: translate(0, 60px); opacity: 1; } }
 .t-platform-divider { display: flex; align-items: center; gap: 16px; width: 100%; margin: 8px 0 24px; }
 .t-platform-divider-line { flex: 1; height: 1px; background: #E5E7EB; }
 .t-platform-divider-badge { font-size: 12px; font-weight: 500; color: var(--teal); background: rgba(13,115,119,0.1); padding: 6px 14px; border-radius: 9999px; white-space: nowrap; }
@@ -1048,6 +1098,7 @@ export default function TetherLanding() {
                   <div className="t-platform-ehr-icon"><IconPlug /></div>
                   <h4>EHR Workflow Integration</h4>
                   <p>Direct integrations with multiple EHR systems. Patient data flows in, visit summaries flow back. Tether&apos;s AI agents use everything in the EHR to give your staff real-time, actionable intelligence.</p>
+                  <EHRDiagram />
                   <p className="t-platform-ehr-note">Integrates with your existing EHR.</p>
                 </TiltCard>
                 <div className="t-platform-divider">
