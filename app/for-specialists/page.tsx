@@ -272,7 +272,7 @@ export default function ForSpecialistsPage() {
               <div className="fs-trust-card">
                 <div className="fs-trust-icon"><IconGlobe /></div>
                 <h4>Works Alongside Your EMR</h4>
-                <p>Runs parallel to Epic, Athena, and others</p>
+                <p>Runs alongside your existing EHR</p>
               </div>
             </div>
             <div className="fs-trust-link-wrap">

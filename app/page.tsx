@@ -317,45 +317,6 @@ function AnimatedChatDemo() {
   );
 }
 
-// ─── EHR Connection Diagram ───
-function EHRDiagram() {
-  return (
-    <div className="t-ehr-diagram">
-      <svg viewBox="0 0 500 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <filter id="tether-glow">
-            <feGaussianBlur stdDeviation="4" result="blur" />
-            <feFlood floodColor="#0D7377" floodOpacity="0.3" />
-            <feComposite in2="blur" operator="in" />
-            <feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge>
-          </filter>
-          <clipPath id="ehr-logo-clip">
-            <circle cx="250" cy="100" r="24" />
-          </clipPath>
-        </defs>
-        <line x1="250" y1="100" x2="250" y2="40" stroke="#D1D5DB" strokeWidth="1.5" />
-        <line x1="250" y1="100" x2="100" y2="100" stroke="#D1D5DB" strokeWidth="1.5" />
-        <line x1="250" y1="100" x2="400" y2="100" stroke="#D1D5DB" strokeWidth="1.5" />
-        <line x1="250" y1="100" x2="250" y2="160" stroke="#D1D5DB" strokeWidth="1.5" />
-        <circle cx="250" cy="100" r="3" fill="#0D7377" className="t-ehr-dot t-ehr-dot-1" />
-        <circle cx="250" cy="100" r="3" fill="#0D7377" className="t-ehr-dot t-ehr-dot-2" />
-        <circle cx="250" cy="100" r="3" fill="#0D7377" className="t-ehr-dot t-ehr-dot-3" />
-        <circle cx="250" cy="100" r="3" fill="#0D7377" className="t-ehr-dot t-ehr-dot-4" />
-        <circle cx="250" cy="100" r="24" fill="#0D7377" filter="url(#tether-glow)" />
-        <image href="/LOGO.jpeg" x="226" y="76" width="48" height="48" clipPath="url(#ehr-logo-clip)" preserveAspectRatio="xMidYMid meet" />
-        <rect x="200" y="12" width="100" height="28" rx="14" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
-        <image href="/athena.png" x="210" y="16" width="80" height="20" preserveAspectRatio="xMidYMid meet" />
-        <rect x="12" y="86" width="90" height="28" rx="14" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
-        <image href="/modmed.png" x="20" y="90" width="74" height="20" preserveAspectRatio="xMidYMid meet" />
-        <rect x="398" y="86" width="90" height="28" rx="14" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
-        <image href="/epic.png" x="408" y="90" width="70" height="20" preserveAspectRatio="xMidYMid meet" />
-        <rect x="175" y="172" width="150" height="28" rx="14" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
-        <image href="/ecw.jpg" x="185" y="176" width="130" height="20" preserveAspectRatio="xMidYMid meet" />
-      </svg>
-    </div>
-  );
-}
-
 // ─── Newsletter Section ───
 function NewsletterSection() {
   const [email, setEmail] = useState("");
@@ -635,17 +596,6 @@ html { scroll-behavior: smooth; }
 .t-platform-ehr h4 { font-size: 20px; font-weight: 600; color: var(--navy-darkest); margin-bottom: 12px; }
 .t-platform-ehr p { font-size: 15px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px; max-width: 560px; margin-left: auto; margin-right: auto; }
 .t-platform-ehr-note { font-size: 13px; color: var(--text-tertiary); line-height: 1.5; margin-top: 16px !important; margin-bottom: 0 !important; }
-.t-ehr-diagram { width: 100%; max-width: 500px; height: 200px; margin: 24px auto 0; font-family: var(--sans); }
-.t-ehr-diagram svg { width: 100%; height: 100%; }
-.t-ehr-dot { transform-origin: 250px 100px; }
-.t-ehr-dot-1 { animation: t-ehr-dot-up 2.5s ease-in-out infinite; }
-.t-ehr-dot-2 { animation: t-ehr-dot-left 2.5s ease-in-out infinite 0.6s; }
-.t-ehr-dot-3 { animation: t-ehr-dot-right 2.5s ease-in-out infinite 1.2s; }
-.t-ehr-dot-4 { animation: t-ehr-dot-down 2.5s ease-in-out infinite 1.8s; }
-@keyframes t-ehr-dot-up { 0%,100% { transform: translate(0, 0); opacity: 1; } 50% { transform: translate(0, -60px); opacity: 1; } }
-@keyframes t-ehr-dot-left { 0%,100% { transform: translate(0, 0); opacity: 1; } 50% { transform: translate(-150px, 0); opacity: 1; } }
-@keyframes t-ehr-dot-right { 0%,100% { transform: translate(0, 0); opacity: 1; } 50% { transform: translate(150px, 0); opacity: 1; } }
-@keyframes t-ehr-dot-down { 0%,100% { transform: translate(0, 0); opacity: 1; } 50% { transform: translate(0, 60px); opacity: 1; } }
 .t-platform-divider { display: flex; align-items: center; gap: 16px; width: 100%; margin: 8px 0 24px; }
 .t-platform-divider-line { flex: 1; height: 1px; background: #E5E7EB; }
 .t-platform-divider-badge { font-size: 12px; font-weight: 500; color: var(--teal); background: rgba(13,115,119,0.1); padding: 6px 14px; border-radius: 9999px; white-space: nowrap; }
@@ -1016,7 +966,7 @@ export default function TetherLanding() {
                 <span className="t-hero-title-line t-hero-title-rotator-line"><span className="t-hero-title-line-inner"><WordRotator words={["relationship.", "connection.", "patient.", "partnership."]} /></span></span>
                 <span className="t-hero-title-line"><span className="t-hero-title-line-inner">Stop losing them.</span></span>
               </h1>
-              <p className="t-hero-sub">Tether is the intelligent referral network with an AI agent that pulls from your EHR, coordinates with specialists, and closes the loop automatically. Your staff talks to Tether like a colleague — it handles the rest.</p>
+              <p className="t-hero-sub">Tether is the intelligent referral network powered by AI agents that pull from your EHR, coordinate with specialists, and close the loop automatically. Your staff talks to Tether like a colleague — the agents handle the rest.</p>
               <div className="t-hero-actions">
                 <a href="#problem" className="t-btn-p" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}>See Why It Matters <IconArrowRight /></a>
                 <a href="/request-demo" className="t-btn-teal" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}>Request Demo</a>
@@ -1050,7 +1000,7 @@ export default function TetherLanding() {
             <div className="t-prows">
               <ProductFeatureRow title="Referral Dashboard" description="One dashboard, two views. PCPs track outbound referrals, visit summaries, and loop closure. Specialists manage inbound referrals, assign providers, and update statuses. Both sides see the full picture in real time." videoSrc="/dashboard-demo.mp4" videoOnLeft={true} />
               <ProductFeatureRow title="Specialist Directory" description="Search 1,200+ providers across 338 clinics in the DMV by specialty, insurance, distance, and availability. Find the right provider and start a referral in one click." videoSrc="/directory-demo.mp4" videoOnLeft={false} />
-              <ProductFeatureRow title="EHR Integration + AI Intelligence" description="Pull patient demographics, conditions, medications, allergies, and insurance directly from your EHR. When specialists send visit summaries, Tether pushes them back to the PCP's chart automatically. The AI agent uses all of this data to answer questions, flag issues, and execute follow-ups. Direct integrations with Athena and eClinicalWorks. 50+ EHRs supported via Redox middleware." videoSrc="/parser-demo.mp4" videoOnLeft={true} />
+              <ProductFeatureRow title="EHR Integration + AI Intelligence" description="Pull patient demographics, conditions, medications, allergies, and insurance directly from your EHR. When specialists send visit summaries, Tether pushes them back to the PCP's chart automatically. Tether's AI agents use all of this data to answer questions, flag issues, and execute follow-ups. Direct integrations with multiple EHR systems, with more being added continuously." videoSrc="/parser-demo.mp4" videoOnLeft={true} />
             </div>
           </div>
         </section>
@@ -1079,7 +1029,7 @@ export default function TetherLanding() {
                 <TiltCard className="t-ask-card">
                   <div className="t-ask-card-icon"><IconSparkles /></div>
                   <h4>Gets smarter with every referral</h4>
-                  <p>Every specialist that configures requirements, every referral that flows through, every information request teaches the agent. After 1,000 referrals, Tether knows your referral patterns better than any coordinator could.</p>
+                  <p>Every specialist that configures requirements, every referral that flows through, every information request teaches the agents. After 1,000 referrals, Tether knows your referral patterns better than any coordinator could.</p>
                 </TiltCard>
               </div>
             </Reveal>
@@ -1091,26 +1041,25 @@ export default function TetherLanding() {
           <div className="t-platform-inner">
             <Reveal><div className="t-slbl">THE PLATFORM</div></Reveal>
             <Reveal delay={0.1}><h2>Referral management is just the beginning.</h2></Reveal>
-            <Reveal delay={0.15}><p className="t-platform-desc">Tether&apos;s intelligent agent layer lives inside the EHRs your practice already uses. Starting with referrals, expanding into every workflow your staff touches.</p></Reveal>
+            <Reveal delay={0.15}><p className="t-platform-desc">Tether&apos;s intelligent agents live inside the EHRs your practice already uses. Starting with referrals, expanding into every workflow your staff touches.</p></Reveal>
             <Reveal delay={0.2}>
               <div className="t-platform-layout">
                 <TiltCard className="t-platform-ehr">
                   <div className="t-platform-ehr-icon"><IconPlug /></div>
                   <h4>EHR Workflow Integration</h4>
-                  <p>Direct FHIR R4 integrations with Athena and eClinicalWorks. Patient data flows in, visit summaries flow back. The AI agent uses everything in the EHR to give your staff real-time, actionable intelligence.</p>
-                  <EHRDiagram />
-                  <p className="t-platform-ehr-note">Direct integrations live with Athena. eClinicalWorks integration in pilot. Epic and ModMed on roadmap. 50+ EHRs accessible via Redox.</p>
+                  <p>Direct integrations with multiple EHR systems. Patient data flows in, visit summaries flow back. Tether&apos;s AI agents use everything in the EHR to give your staff real-time, actionable intelligence.</p>
+                  <p className="t-platform-ehr-note">Integrates with your existing EHR.</p>
                 </TiltCard>
                 <div className="t-platform-divider">
                   <div className="t-platform-divider-line" />
-                  <span className="t-platform-divider-badge">Ask Tether — AI Agent</span>
+                  <span className="t-platform-divider-badge">Intelligent agents. Every workflow.</span>
                   <div className="t-platform-divider-line" />
                 </div>
                 <div className="t-platform-row">
                   <TiltCard className="t-platform-card">
                     <div className="t-platform-card-icon t-platform-icon-teal"><IconMessageSquare /></div>
-                    <h4>Ask Tether — AI Agent</h4>
-                    <p>An intelligent assistant on every page. Answers practice-specific questions, surfaces what needs attention, and executes referral actions from a single conversation. Powered by Claude on HIPAA-compliant infrastructure.</p>
+                    <h4>Ask Tether — AI Agents</h4>
+                    <p>Intelligent agents built into every page. They answer practice-specific questions, surface what needs attention, and execute referral actions from a single conversation. Powered by HIPAA-compliant AI infrastructure.</p>
                   </TiltCard>
                   <TiltCard className="t-platform-card">
                     <div className="t-platform-card-icon t-platform-icon-teal"><IconSend /></div>
@@ -1215,7 +1164,7 @@ export default function TetherLanding() {
               <div className="t-trust-card">
                 <div className="t-trust-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
                 <h4>Works Alongside Your EMR</h4>
-                <p>Runs parallel to Epic, Athena, and others</p>
+                <p>Runs alongside your existing EHR</p>
               </div>
             </div>
             <div className="t-trust-link-wrap">
