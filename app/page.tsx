@@ -215,6 +215,108 @@ const IconPlay = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="cur
 const IconMessageSquare = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>;
 const IconPlug = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M6 8h.01"/><path d="M18 8h.01"/><path d="M6 12h12"/></svg>;
 
+// ─── Animated Ask Tether Chat Demo ───
+const CHAT_MESSAGES = [
+  { type: "user" as const, text: "What needs my attention today?" },
+  { type: "tether" as const, text: "You have 2 referrals awaiting visit summaries and 3 new referrals to process. Kim Jones was seen by Dr. Demory at Forefront Dermatology 5 days ago but no summary has been sent back yet.", typingMs: 1200 },
+  { type: "user" as const, text: "Request the summary for Kim Jones" },
+  { type: "tether" as const, text: "Summary request sent to Forefront Dermatology. I'll notify you when it arrives. You can also reach their office directly at (301) 668-3004.", typingMs: 800 },
+  { type: "user" as const, text: "I need to refer a new patient to endocrinology. Do any take Aetna near Fairfax?" },
+  { type: "tether" as const, text: "I found 3 endocrinologists near Fairfax that accept Aetna. Virginia Diabetes & Endocrine Associates has availability this week and requires a recent A1C, metabolic panel, and medication list with the referral. Want me to start the referral?", typingMs: 1200 },
+];
+
+function AnimatedChatDemo() {
+  const [visibleCount, setVisibleCount] = useState(0);
+  const [showTyping, setShowTyping] = useState(false);
+  const [inView, setInView] = useState(false);
+  const [completed, setCompleted] = useState(false);
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        const nowInView = e.isIntersecting;
+        setInView(nowInView);
+        if (!nowInView) {
+          setVisibleCount(0);
+          setShowTyping(false);
+          setCompleted(false);
+        }
+      },
+      { threshold: 0.2 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!inView || completed) return;
+    const seq: [number, () => void][] = [
+      [300, () => setVisibleCount(1)],
+      [500, () => setShowTyping(true)],
+      [1200, () => { setShowTyping(false); setVisibleCount(2); }],
+      [2000, () => setVisibleCount(3)],
+      [500, () => setShowTyping(true)],
+      [800, () => { setShowTyping(false); setVisibleCount(4); }],
+      [2000, () => setVisibleCount(5)],
+      [500, () => setShowTyping(true)],
+      [1200, () => { setShowTyping(false); setVisibleCount(6); }],
+      [3000, () => setCompleted(true)],
+    ];
+    let t = 0;
+    const ids: ReturnType<typeof setTimeout>[] = [];
+    for (const [delay, fn] of seq) {
+      t += delay;
+      ids.push(setTimeout(fn, t));
+    }
+    return () => ids.forEach((id) => clearTimeout(id));
+  }, [inView, completed]);
+
+  const visibleMessages = CHAT_MESSAGES.slice(0, visibleCount);
+
+  return (
+    <div ref={sectionRef} className="t-ask-chat-demo">
+      <div className="t-ask-chat-panel">
+        <div className="t-ask-chat-header">
+          <span className="t-ask-chat-title">Ask Tether</span>
+          <div className="t-ask-chat-header-actions">
+            <span className="t-ask-chat-btn" aria-hidden="true">—</span>
+            <span className="t-ask-chat-btn" aria-hidden="true">×</span>
+          </div>
+        </div>
+        <div className="t-ask-chat-messages">
+          {visibleMessages.map((m, i) => (
+            <div
+              key={i}
+              className={`t-ask-bubble t-ask-bubble-${m.type}`}
+              style={{
+                animation: inView ? "t-bubble-in 0.3s ease forwards" : "none",
+              }}
+            >
+              <p>{m.text}</p>
+            </div>
+          ))}
+          {showTyping && (
+            <div className="t-ask-typing" style={{ animation: "t-bubble-in 0.3s ease forwards" }}>
+              <span className="t-ask-typing-dot" />
+              <span className="t-ask-typing-dot" />
+              <span className="t-ask-typing-dot" />
+            </div>
+          )}
+        </div>
+        <div className="t-ask-chat-input">
+          <input type="text" placeholder="Ask about referrals or dashboard..." readOnly disabled aria-hidden="true" />
+          <button type="button" className="t-ask-chat-send" aria-label="Send" disabled>
+            <IconSend />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── EHR Connection Diagram ───
 function EHRDiagram() {
   return (
@@ -242,13 +344,13 @@ function EHRDiagram() {
         <circle cx="250" cy="100" r="24" fill="#0D7377" filter="url(#tether-glow)" />
         <image href="/LOGO.jpeg" x="226" y="76" width="48" height="48" clipPath="url(#ehr-logo-clip)" preserveAspectRatio="xMidYMid meet" />
         <rect x="200" y="12" width="100" height="28" rx="14" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
-        <text x="250" y="31" textAnchor="middle" fill="#374151" fontSize="12" fontWeight="500" fontFamily="inherit">Athena</text>
+        <image href="/athena.png" x="210" y="16" width="80" height="20" preserveAspectRatio="xMidYMid meet" />
         <rect x="12" y="86" width="90" height="28" rx="14" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
-        <text x="57" y="105" textAnchor="middle" fill="#374151" fontSize="12" fontWeight="500" fontFamily="inherit">ModMed</text>
+        <image href="/modmed.png" x="20" y="90" width="74" height="20" preserveAspectRatio="xMidYMid meet" />
         <rect x="398" y="86" width="90" height="28" rx="14" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
-        <text x="443" y="105" textAnchor="middle" fill="#374151" fontSize="12" fontWeight="500" fontFamily="inherit">Epic</text>
+        <image href="/epic.png" x="408" y="90" width="70" height="20" preserveAspectRatio="xMidYMid meet" />
         <rect x="175" y="172" width="150" height="28" rx="14" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
-        <text x="250" y="191" textAnchor="middle" fill="#374151" fontSize="12" fontWeight="500" fontFamily="inherit">eClinicalWorks</text>
+        <image href="/ecw.jpg" x="185" y="176" width="130" height="20" preserveAspectRatio="xMidYMid meet" />
       </svg>
     </div>
   );
@@ -415,6 +517,39 @@ html { scroll-behavior: smooth; }
 .t-hero-demo-video:hover .t-hero-demo-expand { opacity: 1; }
 .t-hero-demo-expand:hover { background: rgba(0,0,0,0.7); transform: scale(1.05); }
 .t-hero-demo-progress { position: absolute; bottom: 0; left: 0; height: 3px; background: var(--teal); border-top-right-radius: 3px; border-bottom-right-radius: 3px; transition: width 0.1s linear; }
+
+.t-ask { padding: 120px 48px; background: linear-gradient(180deg, var(--bg-warm), var(--bg)); }
+.t-ask-inner { max-width: 900px; margin: 0 auto; text-align: center; }
+.t-ask-title { font-family: var(--serif); font-size: 44px; line-height: 1.15; font-weight: 400; color: var(--navy-darkest); letter-spacing: -0.8px; margin-bottom: 20px; }
+.t-ask-sub { font-size: 17px; line-height: 1.7; color: var(--text-secondary); max-width: 680px; margin: 0 auto 48px; }
+.t-ask-chat-demo { margin-bottom: 56px; display: flex; justify-content: center; }
+.t-ask-chat-panel { max-width: 520px; width: 100%; background: #fff; border: 1px solid var(--t-border); border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); overflow: hidden; }
+.t-ask-chat-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--t-border); background: #fff; }
+.t-ask-chat-title { font-size: 15px; font-weight: 600; color: #1e293b; }
+.t-ask-chat-header-actions { display: flex; gap: 8px; }
+.t-ask-chat-btn { font-size: 18px; color: var(--text-tertiary); line-height: 1; cursor: default; }
+.t-ask-chat-messages { padding: 20px 16px 16px; min-height: 240px; display: flex; flex-direction: column; gap: 12px; text-align: left; }
+.t-ask-bubble { padding: 12px 16px; font-size: 15px; line-height: 1.5; margin: 0; text-align: left; }
+.t-ask-bubble-user { align-self: flex-end; max-width: 75%; background: #0D9488; color: #fff; border-radius: 16px 16px 4px 16px; }
+.t-ask-bubble-tether { align-self: flex-start; max-width: 85%; background: #f1f5f9; color: #1e293b; border-radius: 16px 16px 16px 4px; }
+.t-ask-bubble p { margin: 0; font-size: inherit; font-weight: inherit; }
+@keyframes t-bubble-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.t-ask-typing { align-self: flex-start; display: flex; align-items: center; gap: 6px; padding: 14px 18px; background: #f1f5f9; border-radius: 16px 16px 16px 4px; }
+.t-ask-typing-dot { width: 6px; height: 6px; border-radius: 50%; background: #94a3b8; animation: t-typing-dot 0.6s ease-in-out infinite both; }
+.t-ask-typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.t-ask-typing-dot:nth-child(3) { animation-delay: 0.3s; }
+@keyframes t-typing-dot { 0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; } 40% { transform: scale(1.2); opacity: 1; } }
+.t-ask-chat-input { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--t-border); }
+.t-ask-chat-input input { flex: 1; padding: 10px 14px; border: 1px solid var(--t-border); border-radius: 10px; font-size: 14px; font-family: inherit; color: var(--text-tertiary); background: #fafafa; }
+.t-ask-chat-send { width: 40px; height: 40px; border-radius: 10px; background: var(--teal); color: #fff; border: none; display: flex; align-items: center; justify-content: center; cursor: default; }
+.t-ask-chat-send svg { width: 18px; height: 18px; }
+.t-ask-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.t-ask-card { background: #fff; border: 1px solid var(--t-border); border-radius: 16px; padding: 32px 24px; text-align: center; transition: all 0.3s; }
+.t-ask-card:hover { border-color: var(--teal); box-shadow: 0 8px 24px rgba(13,115,119,0.08); }
+.t-ask-card-icon { width: 48px; height: 48px; border-radius: 12px; background: var(--teal-light); color: var(--teal); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+.t-ask-card h4 { font-size: 18px; font-weight: 600; color: var(--navy-darkest); margin-bottom: 12px; }
+.t-ask-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin: 0; }
+
 .t-video-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 48px; background: rgba(0,0,0,0.8); }
 .t-video-modal-inner { position: relative; max-width: 90vw; max-height: 90vh; }
 .t-video-modal video { max-width: 90vw; max-height: 90vh; border-radius: 12px; }
@@ -499,6 +634,7 @@ html { scroll-behavior: smooth; }
 .t-platform-ehr:hover .t-platform-ehr-icon { background: var(--navy); color: #fff; }
 .t-platform-ehr h4 { font-size: 20px; font-weight: 600; color: var(--navy-darkest); margin-bottom: 12px; }
 .t-platform-ehr p { font-size: 15px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px; max-width: 560px; margin-left: auto; margin-right: auto; }
+.t-platform-ehr-note { font-size: 13px; color: var(--text-tertiary); line-height: 1.5; margin-top: 16px !important; margin-bottom: 0 !important; }
 .t-ehr-diagram { width: 100%; max-width: 500px; height: 200px; margin: 24px auto 0; font-family: var(--sans); }
 .t-ehr-diagram svg { width: 100%; height: 100%; }
 .t-ehr-dot { transform-origin: 250px 100px; }
@@ -513,7 +649,7 @@ html { scroll-behavior: smooth; }
 .t-platform-divider { display: flex; align-items: center; gap: 16px; width: 100%; margin: 8px 0 24px; }
 .t-platform-divider-line { flex: 1; height: 1px; background: #E5E7EB; }
 .t-platform-divider-badge { font-size: 12px; font-weight: 500; color: var(--teal); background: rgba(13,115,119,0.1); padding: 6px 14px; border-radius: 9999px; white-space: nowrap; }
-.t-platform-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.t-platform-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
 .t-platform-card { background: #fff; border: 1px solid var(--t-border); border-radius: 14px; padding: 32px 24px; text-align: center; transition: all 0.3s; }
 .t-platform-card:hover { border-color: var(--navy); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(45,58,78,0.08); }
 .t-platform-card-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; transition: all 0.3s; }
@@ -584,6 +720,8 @@ html { scroll-behavior: smooth; }
 @media (max-width: 900px) {
   .t-nav { padding: 0 24px; } .t-nav-links { display: none; } .t-nav-mob { display: block; }
   .t-hero { padding: 100px 24px 60px; } .t-hero-title { font-size: 40px; } .t-hero-content { max-width: 100%; }
+  .t-ask { padding: 80px 24px; } .t-ask-title { font-size: 32px; } .t-ask-cards { grid-template-columns: 1fr; }
+  .t-ask-chat-demo { padding: 0 16px; } .t-ask-chat-panel { max-width: 100%; }
   .t-problem, .t-product, .t-platform, .t-audiences, .t-network, .t-newsletter, .t-fcta { padding: 80px 24px; }
   .t-problem h2, .t-stitle, .t-network h2, .t-platform h2 { font-size: 32px; } .t-fcta h2 { font-size: 36px; }
   .t-pstats, .t-aud-grid, .t-nvis, .t-platform-row { grid-template-columns: 1fr; }
@@ -878,7 +1016,7 @@ export default function TetherLanding() {
                 <span className="t-hero-title-line t-hero-title-rotator-line"><span className="t-hero-title-line-inner"><WordRotator words={["relationship.", "connection.", "patient.", "partnership."]} /></span></span>
                 <span className="t-hero-title-line"><span className="t-hero-title-line-inner">Stop losing them.</span></span>
               </h1>
-              <p className="t-hero-sub">Tether is the referral network that connects primary care and specialty practices with real-time tracking, loop closure, and a shared directory your staff actually wants to use.</p>
+              <p className="t-hero-sub">Tether is the intelligent referral network with an AI agent that pulls from your EHR, coordinates with specialists, and closes the loop automatically. Your staff talks to Tether like a colleague — it handles the rest.</p>
               <div className="t-hero-actions">
                 <a href="#problem" className="t-btn-p" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}>See Why It Matters <IconArrowRight /></a>
                 <a href="/request-demo" className="t-btn-teal" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}>Request Demo</a>
@@ -911,9 +1049,40 @@ export default function TetherLanding() {
             </div>
             <div className="t-prows">
               <ProductFeatureRow title="Referral Dashboard" description="One dashboard, two views. PCPs track outbound referrals, visit summaries, and loop closure. Specialists manage inbound referrals, assign providers, and update statuses. Both sides see the full picture in real time." videoSrc="/dashboard-demo.mp4" videoOnLeft={true} />
-              <ProductFeatureRow title="Specialist Directory" description="Search 940+ specialists by specialty, insurance, distance, and availability. Find the right provider and start a referral in one click." videoSrc="/directory-demo.mp4" videoOnLeft={false} />
-              <ProductFeatureRow title="EHR Integration + AI Intake" description="Pull patient data directly from your EHR, or drop in a referral PDF. Tether auto-fills demographics, insurance, and clinical details so your staff never retypes a thing." videoSrc="/parser-demo.mp4" videoOnLeft={true} />
+              <ProductFeatureRow title="Specialist Directory" description="Search 1,200+ providers across 338 clinics in the DMV by specialty, insurance, distance, and availability. Find the right provider and start a referral in one click." videoSrc="/directory-demo.mp4" videoOnLeft={false} />
+              <ProductFeatureRow title="EHR Integration + AI Intelligence" description="Pull patient demographics, conditions, medications, allergies, and insurance directly from your EHR. When specialists send visit summaries, Tether pushes them back to the PCP's chart automatically. The AI agent uses all of this data to answer questions, flag issues, and execute follow-ups. Direct integrations with Athena and eClinicalWorks. 50+ EHRs supported via Redox middleware." videoSrc="/parser-demo.mp4" videoOnLeft={true} />
             </div>
+          </div>
+        </section>
+
+        {/* ASK TETHER — AI INTELLIGENCE LAYER */}
+        <section className="t-ask" id="ask-tether">
+          <div className="t-ask-inner">
+            <Reveal><div className="t-slbl">Ask Tether — AI Intelligence Layer</div></Reveal>
+            <Reveal delay={0.1}><h2 className="t-ask-title">Meet your referral coordinator that never sleeps.</h2></Reveal>
+            <Reveal delay={0.15}><p className="t-ask-sub">Ask Tether is an AI assistant built into every page. It knows every referral, every specialist&apos;s requirements, and every patient&apos;s history. Ask it anything. Tell it to do anything.</p></Reveal>
+            <Reveal delay={0.2}>
+              <AnimatedChatDemo />
+            </Reveal>
+            <Reveal delay={0.25}>
+              <div className="t-ask-cards">
+                <TiltCard className="t-ask-card">
+                  <div className="t-ask-card-icon"><IconZap /></div>
+                  <h4>Answers questions instantly</h4>
+                  <p>Your MA asks about a patient&apos;s insurance, a specialist&apos;s requirements, or which referrals are overdue. Tether answers in seconds with real data — not generic advice.</p>
+                </TiltCard>
+                <TiltCard className="t-ask-card">
+                  <div className="t-ask-card-icon"><IconSend /></div>
+                  <h4>Executes actions from chat</h4>
+                  <p>Request visit summaries, notify patients, mark referrals as seen, find specialists — all from one conversation. No clicking through menus.</p>
+                </TiltCard>
+                <TiltCard className="t-ask-card">
+                  <div className="t-ask-card-icon"><IconSparkles /></div>
+                  <h4>Gets smarter with every referral</h4>
+                  <p>Every specialist that configures requirements, every referral that flows through, every information request teaches the agent. After 1,000 referrals, Tether knows your referral patterns better than any coordinator could.</p>
+                </TiltCard>
+              </div>
+            </Reveal>
           </div>
         </section>
 
@@ -928,15 +1097,21 @@ export default function TetherLanding() {
                 <TiltCard className="t-platform-ehr">
                   <div className="t-platform-ehr-icon"><IconPlug /></div>
                   <h4>EHR Workflow Integration</h4>
-                  <p>Direct connections with leading EHRs. Patient data flows in, status flows back. Zero duplicate entry.</p>
+                  <p>Direct FHIR R4 integrations with Athena and eClinicalWorks. Patient data flows in, visit summaries flow back. The AI agent uses everything in the EHR to give your staff real-time, actionable intelligence.</p>
                   <EHRDiagram />
+                  <p className="t-platform-ehr-note">Direct integrations live with Athena. eClinicalWorks integration in pilot. Epic and ModMed on roadmap. 50+ EHRs accessible via Redox.</p>
                 </TiltCard>
                 <div className="t-platform-divider">
                   <div className="t-platform-divider-line" />
-                  <span className="t-platform-divider-badge">One agent. Every workflow.</span>
+                  <span className="t-platform-divider-badge">Ask Tether — AI Agent</span>
                   <div className="t-platform-divider-line" />
                 </div>
                 <div className="t-platform-row">
+                  <TiltCard className="t-platform-card">
+                    <div className="t-platform-card-icon t-platform-icon-teal"><IconMessageSquare /></div>
+                    <h4>Ask Tether — AI Agent</h4>
+                    <p>An intelligent assistant on every page. Answers practice-specific questions, surfaces what needs attention, and executes referral actions from a single conversation. Powered by Claude on HIPAA-compliant infrastructure.</p>
+                  </TiltCard>
                   <TiltCard className="t-platform-card">
                     <div className="t-platform-card-icon t-platform-icon-teal"><IconSend /></div>
                     <h4>Referral Automation</h4>
@@ -957,7 +1132,7 @@ export default function TetherLanding() {
             </Reveal>
             <Reveal delay={0.25}>
               <div className="t-platform-footer">
-                <span className="t-platform-footer-live">Referral automation is live.</span> Scheduling, verification, and patient communication capabilities are in active development with pilot partners. <a href="/request-demo">Request early access →</a>
+                <span className="t-platform-footer-live">Referral automation and AI intelligence are live.</span> Scheduling automation and insurance verification launching Q2 2026 with pilot partners. <a href="/request-demo">Request early access →</a>
               </div>
             </Reveal>
           </div>
@@ -977,6 +1152,7 @@ export default function TetherLanding() {
                   <p className="t-aud-card-sub">Turn every referral into a scheduled visit. See who is sending you patients, and make it effortless for them to send more.</p>
                   <div className="t-aud-feats">
                     <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Inbound referral management with auto-parsed intake</div>
+                    <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>AI-powered assistant that helps your staff manage incoming referrals, track what&apos;s missing, and close the loop faster</div>
                     <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Visibility into your referral network and top senders</div>
                     <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Automated status updates to referring providers</div>
                     <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Grow volume through the Tether specialist directory</div>
@@ -989,6 +1165,7 @@ export default function TetherLanding() {
                   <h3>For Primary Care</h3>
                   <p className="t-aud-card-sub">Know that your patient actually saw the specialist. Find the right provider, send the referral, and track it without a single phone call.</p>
                   <div className="t-aud-feats">
+                    <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Ask Tether anything — which referrals need follow-up, what a specialist requires, or what happened at a patient&apos;s visit</div>
                     <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Specialist directory searchable by location and insurance</div>
                     <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Real-time referral tracking with zero follow-up calls</div>
                     <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Loop closure notifications when the visit is completed</div>
