@@ -321,7 +321,7 @@ function AnimatedChatDemo() {
 function EHRDiagram() {
   return (
     <div className="t-ehr-diagram">
-      <svg viewBox="0 0 500 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 500 254" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <filter id="tether-glow">
             <feGaussianBlur stdDeviation="4" result="blur" />
@@ -333,24 +333,24 @@ function EHRDiagram() {
             <circle cx="250" cy="100" r="24" />
           </clipPath>
         </defs>
-        <line x1="250" y1="100" x2="250" y2="40" stroke="#D1D5DB" strokeWidth="1.5" />
-        <line x1="250" y1="100" x2="100" y2="100" stroke="#D1D5DB" strokeWidth="1.5" />
-        <line x1="250" y1="100" x2="400" y2="100" stroke="#D1D5DB" strokeWidth="1.5" />
-        <line x1="250" y1="100" x2="250" y2="160" stroke="#D1D5DB" strokeWidth="1.5" />
+        <line x1="250" y1="100" x2="250" y2="54" stroke="#D1D5DB" strokeWidth="1.5" />
+        <line x1="250" y1="100" x2="134" y2="100" stroke="#D1D5DB" strokeWidth="1.5" />
+        <line x1="250" y1="100" x2="366" y2="100" stroke="#D1D5DB" strokeWidth="1.5" />
+        <line x1="250" y1="100" x2="250" y2="186" stroke="#D1D5DB" strokeWidth="1.5" />
         <circle cx="250" cy="100" r="3" fill="#0D7377" className="t-ehr-dot t-ehr-dot-1" />
         <circle cx="250" cy="100" r="3" fill="#0D7377" className="t-ehr-dot t-ehr-dot-2" />
         <circle cx="250" cy="100" r="3" fill="#0D7377" className="t-ehr-dot t-ehr-dot-3" />
         <circle cx="250" cy="100" r="3" fill="#0D7377" className="t-ehr-dot t-ehr-dot-4" />
         <circle cx="250" cy="100" r="24" fill="#0D7377" filter="url(#tether-glow)" />
         <image href="/LOGO.jpeg" x="226" y="76" width="48" height="48" clipPath="url(#ehr-logo-clip)" preserveAspectRatio="xMidYMid meet" />
-        <rect x="200" y="12" width="100" height="28" rx="14" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
-        <image href="/athena.png" x="210" y="16" width="80" height="20" preserveAspectRatio="xMidYMid meet" />
-        <rect x="12" y="86" width="90" height="28" rx="14" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
-        <image href="/modmed.png" x="20" y="90" width="74" height="20" preserveAspectRatio="xMidYMid meet" />
-        <rect x="398" y="86" width="90" height="28" rx="14" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
-        <image href="/epic.png" x="408" y="90" width="70" height="20" preserveAspectRatio="xMidYMid meet" />
-        <rect x="175" y="172" width="150" height="28" rx="14" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
-        <image href="/ecw.jpg" x="185" y="176" width="130" height="20" preserveAspectRatio="xMidYMid meet" />
+        <rect x="140" y="2" width="220" height="56" rx="28" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
+        <image href="/athena.png" x="150" y="10" width="200" height="40" preserveAspectRatio="xMidYMid meet" />
+        <rect x="2" y="70" width="150" height="56" rx="28" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
+        <image href="/modmed.png" x="10" y="78" width="134" height="40" preserveAspectRatio="xMidYMid meet" />
+        <rect x="348" y="70" width="150" height="56" rx="28" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
+        <image href="/epic.png" x="356" y="78" width="134" height="40" preserveAspectRatio="xMidYMid meet" />
+        <rect x="140" y="186" width="220" height="56" rx="28" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
+        <image href="/ecw.jpg" x="150" y="194" width="200" height="40" preserveAspectRatio="xMidYMid meet" />
       </svg>
     </div>
   );
@@ -635,7 +635,7 @@ html { scroll-behavior: smooth; }
 .t-platform-ehr h4 { font-size: 20px; font-weight: 600; color: var(--navy-darkest); margin-bottom: 12px; }
 .t-platform-ehr p { font-size: 15px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px; max-width: 560px; margin-left: auto; margin-right: auto; }
 .t-platform-ehr-note { font-size: 13px; color: var(--text-tertiary); line-height: 1.5; margin-top: 16px !important; margin-bottom: 0 !important; }
-.t-ehr-diagram { width: 100%; max-width: 500px; height: 200px; margin: 24px auto 0; font-family: var(--sans); }
+.t-ehr-diagram { width: 100%; max-width: 640px; height: 320px; margin: 24px auto 0; font-family: var(--sans); }
 .t-ehr-diagram svg { width: 100%; height: 100%; }
 .t-ehr-dot { transform-origin: 250px 100px; }
 .t-ehr-dot-1 { animation: t-ehr-dot-up 2.5s ease-in-out infinite; }
@@ -1099,7 +1099,7 @@ export default function TetherLanding() {
                   <h4>EHR Workflow Integration</h4>
                   <p>Direct integrations with multiple EHR systems. Patient data flows in, visit summaries flow back. Tether&apos;s AI agents use everything in the EHR to give your staff real-time, actionable intelligence.</p>
                   <EHRDiagram />
-                  <p className="t-platform-ehr-note">Integrates with your existing EHR.</p>
+                  <p className="t-platform-ehr-note">Integrates with your existing EHR. Direct integrations with additional systems being added continuously.</p>
                 </TiltCard>
                 <div className="t-platform-divider">
                   <div className="t-platform-divider-line" />
