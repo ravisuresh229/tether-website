@@ -243,7 +243,7 @@ export default function ForSpecialistsPage() {
         <section className="fs-cta">
           <div className="fs-cta-inner">
             <h2 className="fs-cta-title">Join the Tether network.</h2>
-            <p className="fs-cta-sub">Free during pilot. No contracts, no setup fees, no IT integration required.</p>
+            <p className="fs-cta-sub">Free during pilot. No contracts, no setup fees.</p>
             <div className="fs-cta-buttons">
               <Link href="/request-demo" className="fs-btn-teal">Request Demo</Link>
               <a href={APP_SIGNUP_URL} className="fs-btn-outline">Set Up Your Practice</a>
@@ -261,13 +261,13 @@ export default function ForSpecialistsPage() {
               </div>
               <div className="fs-trust-card">
                 <div className="fs-trust-icon"><IconLock /></div>
-                <h4>End-to-End Encryption</h4>
-                <p>Zero-knowledge architecture for all PHI</p>
+                <h4>Enterprise-Grade Encryption</h4>
+                <p>All PHI encrypted at rest (AES-256) and in transit (TLS 1.2+)</p>
               </div>
               <div className="fs-trust-card">
                 <div className="fs-trust-icon"><IconClock /></div>
-                <h4>5-Minute Onboarding</h4>
-                <p>No IT integration or setup required</p>
+                <h4>Quick Onboarding</h4>
+                <p>Minimal setup, works alongside your existing EHR</p>
               </div>
               <div className="fs-trust-card">
                 <div className="fs-trust-icon"><IconGlobe /></div>

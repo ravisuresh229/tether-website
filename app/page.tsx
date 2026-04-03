@@ -348,7 +348,7 @@ function EHRDiagram() {
         <rect x="2" y="70" width="150" height="56" rx="28" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
         <image href="/modmed.png" x="10" y="78" width="134" height="40" preserveAspectRatio="xMidYMid meet" />
         <rect x="348" y="70" width="150" height="56" rx="28" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
-        <image href="/epic.png" x="356" y="78" width="134" height="40" preserveAspectRatio="xMidYMid meet" />
+        <text x="423" y="104" textAnchor="middle" fill="#6B7280" fontSize="14" fontFamily="DM Sans, sans-serif" fontWeight="500">&amp; More</text>
         <rect x="140" y="186" width="220" height="56" rx="28" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
         <image href="/ecw.jpg" x="150" y="194" width="200" height="40" preserveAspectRatio="xMidYMid meet" />
       </svg>
@@ -1049,7 +1049,7 @@ export default function TetherLanding() {
             </div>
             <div className="t-prows">
               <ProductFeatureRow title="Referral Dashboard" description="One dashboard, two views. PCPs track outbound referrals, visit summaries, and loop closure. Specialists manage inbound referrals, assign providers, and update statuses. Both sides see the full picture in real time." videoSrc="/dashboard-demo.mp4" videoOnLeft={true} />
-              <ProductFeatureRow title="Specialist Directory" description="Search 1,200+ providers across 338 clinics in the DMV by specialty, insurance, distance, and availability. Find the right provider and start a referral in one click." videoSrc="/directory-demo.mp4" videoOnLeft={false} />
+              <ProductFeatureRow title="Specialist Directory" description="Search providers across clinics in the DMV by specialty, insurance, distance, and availability. Find the right provider and start a referral in one click." videoSrc="/directory-demo.mp4" videoOnLeft={false} />
               <ProductFeatureRow title="EHR Integration + AI Intelligence" description="Pull patient demographics, conditions, medications, allergies, and insurance directly from your EHR. When specialists send visit summaries, Tether pushes them back to the PCP's chart automatically. Tether's AI agents use all of this data to answer questions, flag issues, and execute follow-ups. Direct integrations with multiple EHR systems, with more being added continuously." videoSrc="/parser-demo.mp4" videoOnLeft={true} />
             </div>
           </div>
@@ -1204,13 +1204,13 @@ export default function TetherLanding() {
               </div>
               <div className="t-trust-card">
                 <div className="t-trust-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-                <h4>End-to-End Encryption</h4>
-                <p>Zero-knowledge architecture for all PHI</p>
+                <h4>Enterprise-Grade Encryption</h4>
+                <p>All PHI encrypted at rest (AES-256) and in transit (TLS 1.2+)</p>
               </div>
               <div className="t-trust-card">
                 <div className="t-trust-card-icon"><IconClock /></div>
-                <h4>5-Minute Onboarding</h4>
-                <p>No IT integration or setup required</p>
+                <h4>Simple Onboarding</h4>
+                <p>Get started in minutes</p>
               </div>
               <div className="t-trust-card">
                 <div className="t-trust-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>

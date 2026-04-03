@@ -239,7 +239,7 @@ export default function SecurityPage() {
             <div className="sec-hero-badges">
               <div className="sec-hero-badge"><div className="sec-hero-badge-dot" />HIPAA Compliant</div>
               <div className="sec-hero-badge"><div className="sec-hero-badge-dot" />BAA Available</div>
-              <div className="sec-hero-badge"><div className="sec-hero-badge-dot" />SOC 2 In Progress</div>
+              <div className="sec-hero-badge"><div className="sec-hero-badge-dot" />SOC 2 Planned</div>
             </div>
           </Reveal>
         </div>
@@ -255,7 +255,7 @@ export default function SecurityPage() {
               <div className="sec-card">
                 <div className="sec-card-icon"><IconLock /></div>
                 <h3>Encryption Everywhere</h3>
-                <p>All protected health information (PHI) is encrypted at rest using AES-256 and in transit using TLS 1.3. Database fields containing patient data use column-level encryption with keys managed through a dedicated key management service.</p>
+                <p>All protected health information (PHI) is encrypted at rest using AES-256 and in transit using TLS 1.2+. Row-level security (RLS) policies ensure complete practice-level data isolation at the database layer.</p>
               </div>
             </Reveal>
             <Reveal delay={0.15}>
@@ -283,7 +283,7 @@ export default function SecurityPage() {
               <div className="sec-card">
                 <div className="sec-card-icon"><IconUsers /></div>
                 <h3>Workforce Training</h3>
-                <p>All Tether team members complete HIPAA training before accessing any system that handles PHI. Training is refreshed annually and supplemented with ongoing security awareness education.</p>
+                <p>HIPAA training required for all team members with access to PHI. Training is supplemented with ongoing security awareness education.</p>
               </div>
             </Reveal>
             <Reveal delay={0.35}>
@@ -308,13 +308,13 @@ export default function SecurityPage() {
             <Reveal delay={0.1}>
               <div className="sec-detail-item">
                 <h4><span className="sec-check"><IconCheck /></span>Data Encryption</h4>
-                <p>AES-256 encryption at rest. TLS 1.3 for all data in transit. Column-level encryption for PHI fields in PostgreSQL. Encryption keys rotated on a scheduled basis.</p>
+                <p>AES-256 encryption at rest. TLS 1.2+ for all data in transit. Row-level security (RLS) policies ensure practice-level data isolation in PostgreSQL. Encryption keys managed through secure infrastructure.</p>
               </div>
             </Reveal>
             <Reveal delay={0.15}>
               <div className="sec-detail-item">
                 <h4><span className="sec-check"><IconCheck /></span>Authentication</h4>
-                <p>Multi-factor authentication available for all accounts. Session tokens are short-lived with automatic expiration. Password policies enforce complexity and rotation requirements.</p>
+                <p>Multi-factor authentication for administrative access. Session tokens are short-lived with automatic expiration. Password policies enforce complexity requirements.</p>
               </div>
             </Reveal>
             <Reveal delay={0.2}>
@@ -326,7 +326,7 @@ export default function SecurityPage() {
             <Reveal delay={0.25}>
               <div className="sec-detail-item">
                 <h4><span className="sec-check"><IconCheck /></span>Data Backup &amp; Recovery</h4>
-                <p>Automated daily backups with point-in-time recovery capability. Backups are encrypted and stored in geographically separate regions. Recovery procedures tested quarterly.</p>
+                <p>Automated daily backups with point-in-time recovery capability. Backups are encrypted and stored in geographically separate regions.</p>
               </div>
             </Reveal>
             <Reveal delay={0.3}>
@@ -368,7 +368,7 @@ export default function SecurityPage() {
                 <div className="sec-arch-num">1</div>
                 <div>
                   <h4>Referral Created</h4>
-                  <p>Practice user uploads a referral PDF or fills the form. Data is transmitted over TLS 1.3 to Tether&apos;s API. Input is validated and sanitized server-side before processing.</p>
+                  <p>Practice user uploads a referral PDF or fills the form. Data is transmitted over TLS 1.2+ to Tether&apos;s API. Input is validated and sanitized server-side before processing.</p>
                 </div>
               </div>
             </Reveal>
@@ -427,7 +427,7 @@ export default function SecurityPage() {
             <div className="sec-baa-items">
               <div className="sec-baa-item"><div className="sec-baa-item-icon"><IconCheck /></div>BAA provided to all practices at no additional cost</div>
               <div className="sec-baa-item"><div className="sec-baa-item-icon"><IconCheck /></div>Covers referral data, patient communications, and document storage</div>
-              <div className="sec-baa-item"><div className="sec-baa-item-icon"><IconCheck /></div>Signed BAAs in place with all subprocessors (database, fax, SMS)</div>
+              <div className="sec-baa-item"><div className="sec-baa-item-icon"><IconCheck /></div>BAAs executed with infrastructure providers handling PHI. Full subprocessor list available upon request</div>
               <div className="sec-baa-item"><div className="sec-baa-item-icon"><IconCheck /></div>Available for review before onboarding begins</div>
             </div>
           </Reveal>

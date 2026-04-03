@@ -216,8 +216,8 @@ export default function LegalPage() {
             <li>Role-based access controls limiting access to authorized personnel</li>
             <li>Multi-factor authentication for administrative and production system access</li>
             <li>Comprehensive audit logging of all access to sensitive data</li>
-            <li>Regular security assessments, vulnerability scanning, and penetration testing</li>
-            <li>HIPAA workforce training and signed confidentiality agreements for all team members</li>
+            <li>Security assessments and vulnerability monitoring</li>
+            <li>HIPAA training required for all team members with access to PHI, with signed confidentiality agreements</li>
             <li>HIPAA-compliant infrastructure for all health data storage and processing</li>
           </ul>
           <p className="legal-p">While we take reasonable measures to protect your information, no method of electronic transmission or storage is completely secure. We cannot guarantee absolute security.</p>
@@ -408,9 +408,9 @@ export default function LegalPage() {
             <li>AES-256 encryption at rest; TLS 1.2+ in transit</li>
             <li>Role-based access controls and multi-factor authentication</li>
             <li>Comprehensive audit logging of all PHI access</li>
-            <li>Regular risk assessments, vulnerability scanning, and penetration testing</li>
+            <li>Security assessments and vulnerability monitoring</li>
             <li>Documented incident response and breach notification procedures</li>
-            <li>Workforce HIPAA training and signed confidentiality agreements</li>
+            <li>HIPAA training required for all team members with access to PHI</li>
           </ul>
           <p className="legal-p">For a detailed overview of our security architecture, visit our <a href="/security" style={{ color: "var(--teal)" }}>Security page</a>.</p>
 
