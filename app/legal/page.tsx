@@ -1,60 +1,40 @@
 "use client";
 import { useState, useEffect } from "react";
-import Image from "next/image";
 
 const CSS = `
-:root{--navy:#2D3A4E;--navy-deep:#1E2A3A;--navy-darkest:#151F2B;--bg:#FAFAF7;--bg-warm:#F5F3EE;--teal:#0D7377;--teal-light:#E8F4F4;--coral:#D4613E;--text:#2D2D2D;--text-secondary:#6B6B6B;--text-tertiary:#9A9A9A;--border:#E0DDD5;--serif:'Instrument Serif',Georgia,serif;--sans:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif}
-.legal-page,.legal-page *{margin:0;padding:0;box-sizing:border-box}
-.legal-page{font-family:var(--sans);color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased;overflow-x:hidden}
-.legal-page ::selection{background:var(--navy);color:#fff}
+.legal-page, .legal-page * { box-sizing: border-box; }
+.legal-page { font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif; color: #0C0D0F; background: #F7F5F0; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+.legal-page ::selection { background: #00A882; color: #fff; }
 
-.legal-nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 48px;height:72px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(16px) saturate(1.8);background:rgba(250,250,247,0.85);border-bottom:1px solid rgba(224,221,213,0.5)}
-.legal-nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--navy-deep)}
-.legal-nav-logo-text{font-family:var(--sans);font-weight:600;font-size:22px;letter-spacing:-0.5px}
-.legal-nav-links{display:flex;align-items:center;gap:36px;list-style:none}
-.legal-nav-links a{font-size:14px;font-weight:500;color:var(--text-secondary);text-decoration:none;transition:color .2s}
-.legal-nav-links a:hover{color:var(--navy-deep)}
-.legal-nav-login{color:var(--text-secondary)!important}
-.legal-nav-cta{background:var(--teal);color:#fff!important;padding:10px 22px;border-radius:8px;font-weight:600!important}
-.legal-nav-mob{display:none;background:none;border:none;cursor:pointer;padding:8px;color:var(--navy-deep)}
-.legal-nav-overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:rgba(250,250,247,0.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:80px 24px;opacity:0;animation:legal-mob-in .3s ease forwards}
-@keyframes legal-mob-in{to{opacity:1}}
-.legal-nav-overlay a{font-size:24px;font-weight:500;color:var(--navy-deep);text-decoration:none}
-.legal-nav-overlay-close{position:absolute;top:24px;right:24px;background:none;border:none;cursor:pointer;padding:8px;color:var(--navy-deep)}
-.legal-nav-overlay-cta{display:inline-flex;padding:14px 28px;background:var(--coral);color:#fff;border-radius:10px;font-size:15px;font-weight:600;text-decoration:none;margin-top:16px}
-.legal-nav-overlay-cta:hover{background:#BF5535}
+.legal-hero { padding: 132px 48px 56px; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.legal-hero h1 { font-family: var(--font-serif), Georgia, serif; font-size: clamp(32px, 4vw, 44px); font-weight: 400; color: #0C0D0F; letter-spacing: -1px; margin: 0 0 12px; }
+.legal-hero p { font-size: 16px; color: #3D3B38; max-width: 540px; margin: 0 auto; line-height: 1.55; }
 
-.legal-hero{padding:140px 48px 60px;text-align:center;border-bottom:1px solid var(--border)}
-.legal-hero h1{font-family:var(--serif);font-size:44px;font-weight:400;color:var(--navy-darkest);letter-spacing:-1px;margin-bottom:12px}
-.legal-hero p{font-size:16px;color:var(--text-secondary);max-width:500px;margin:0 auto}
+.legal-tabs { position: sticky; top: 64px; z-index: 50; background: rgba(247,245,240,0.95); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid rgba(0,0,0,0.06); padding: 0 48px; display: flex; gap: 0; overflow-x: auto; }
+.legal-tab { padding: 16px 22px; font-size: 14px; font-weight: 500; color: #3D3B38; text-decoration: none; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; white-space: nowrap; cursor: pointer; background: none; border-top: none; border-left: none; border-right: none; font-family: inherit; }
+.legal-tab:hover { color: #0C0D0F; }
+.legal-tab-active { color: #00A882; border-bottom-color: #00A882; }
 
-.legal-tabs{position:sticky;top:72px;z-index:50;background:var(--bg);border-bottom:1px solid var(--border);padding:0 48px;display:flex;gap:0;overflow-x:auto}
-.legal-tab{padding:16px 24px;font-size:14px;font-weight:500;color:var(--text-secondary);text-decoration:none;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;cursor:pointer;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--sans)}
-.legal-tab:hover{color:var(--navy)}
-.legal-tab-active{color:var(--teal);border-bottom-color:var(--teal)}
+.legal-body { max-width: 800px; margin: 0 auto; padding: 56px 48px 96px; }
+.legal-section { padding-top: 48px; margin-bottom: 64px; }
+.legal-section-title { font-family: var(--font-serif), Georgia, serif; font-size: 32px; font-weight: 400; color: #0C0D0F; letter-spacing: -0.5px; margin-bottom: 8px; }
+.legal-section-meta { font-size: 13px; color: #8C8A85; margin-bottom: 32px; }
+.legal-h2 { font-size: 18px; font-weight: 600; color: #0C0D0F; margin-top: 36px; margin-bottom: 12px; }
+.legal-h3 { font-size: 14px; font-weight: 700; color: #00A882; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 24px; margin-bottom: 8px; }
+.legal-p { font-size: 15px; line-height: 1.75; color: #3D3B38; margin-bottom: 16px; }
+.legal-p strong { color: #0C0D0F; font-weight: 600; }
+.legal-list { font-size: 15px; line-height: 1.75; color: #3D3B38; margin-bottom: 16px; padding-left: 24px; list-style-type: disc; list-style-position: outside; }
+.legal-list li { margin-bottom: 6px; }
+.legal-list strong { color: #0C0D0F; font-weight: 600; }
+.legal-divider { height: 1px; background: rgba(0,0,0,0.08); margin: 64px 0 0; }
+.legal-contact { background: #EFEDE8; border: 1px solid rgba(0,0,0,0.06); border-radius: 12px; padding: 24px 28px; margin-top: 24px; font-size: 14px; line-height: 1.7; color: #3D3B38; }
+.legal-contact strong { color: #0C0D0F; font-weight: 600; }
 
-.legal-body{max-width:800px;margin:0 auto;padding:64px 48px 96px}
-.legal-section{padding-top:48px;margin-bottom:64px}
-.legal-section-title{font-family:var(--serif);font-size:32px;font-weight:400;color:var(--navy-darkest);letter-spacing:-0.5px;margin-bottom:8px}
-.legal-section-meta{font-size:13px;color:var(--text-tertiary);margin-bottom:32px}
-.legal-h2{font-size:18px;font-weight:600;color:var(--navy-darkest);margin-top:36px;margin-bottom:12px}
-.legal-h3{font-size:15px;font-weight:600;color:var(--teal);margin-top:24px;margin-bottom:8px}
-.legal-p{font-size:15px;line-height:1.75;color:var(--text-secondary);margin-bottom:16px}
-.legal-list{font-size:15px;line-height:1.75;color:var(--text-secondary);margin-bottom:16px;padding-left:24px;list-style-type:disc;list-style-position:outside}
-.legal-list li{margin-bottom:6px}
-.legal-divider{height:1px;background:var(--border);margin:64px 0 0}
-.legal-contact{background:var(--bg-warm);border:1px solid var(--border);border-radius:12px;padding:24px 28px;margin-top:24px;font-size:14px;line-height:1.7;color:var(--text-secondary)}
-.legal-contact strong{color:var(--text);font-weight:600}
-
-.legal-footer{padding:48px;background:var(--navy-darkest);text-align:center}
-.legal-footer p{font-size:13px;color:rgba(255,255,255,0.4)}
-.legal-footer a{color:rgba(255,255,255,0.6);text-decoration:none}
-.legal-footer a:hover{color:#fff}
-
-@media(max-width:900px){
-.legal-nav{padding:0 24px}.legal-nav-links{display:none}.legal-nav-mob{display:block}
-.legal-hero{padding:110px 24px 48px}.legal-hero h1{font-size:32px}
-.legal-tabs{padding:0 24px}.legal-body{padding:48px 24px 72px}
+@media (max-width: 900px) {
+  .legal-hero { padding: 110px 24px 48px; }
+  .legal-hero h1 { font-size: 32px; }
+  .legal-tabs { padding: 0 24px; }
+  .legal-body { padding: 48px 24px 72px; }
 }
 `;
 
@@ -67,23 +47,6 @@ const TABS = [
 
 export default function LegalPage() {
   const [activeTab, setActiveTab] = useState("privacy");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    if (mobileMenuOpen) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "";
-    return () => { document.body.style.overflow = ""; };
-  }, [mobileMenuOpen]);
-
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    if (document.getElementById("tether-fonts")) return;
-    const link = document.createElement("link");
-    link.id = "tether-fonts";
-    link.rel = "stylesheet";
-    link.href = "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap";
-    document.head.appendChild(link);
-  }, []);
 
   useEffect(() => {
     const hash = window.location.hash.replace("#", "");
@@ -102,35 +65,6 @@ export default function LegalPage() {
   return (
     <><style>{CSS}</style>
     <div className="legal-page">
-
-      <nav className="legal-nav">
-        <a href="/" className="legal-nav-logo">
-          <Image src="/LOGO.jpeg" alt="Tether" width={30} height={30} style={{ objectFit: "contain" }} />
-          <span className="legal-nav-logo-text">Tether</span>
-        </a>
-        <ul className="legal-nav-links">
-          <li><a href="/">Home</a></li>
-          <li><a href="/security">Security</a></li>
-          <li><a href="/blog">Blog</a></li>
-          <li><a href="https://app.tetherhealth.co/login" className="legal-nav-login">Log In</a></li>
-          <li><a href="/request-demo" className="legal-nav-cta">Request Demo</a></li>
-        </ul>
-        <button className="legal-nav-mob" aria-label="Menu" onClick={() => setMobileMenuOpen(true)}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        </button>
-      </nav>
-      {mobileMenuOpen && (
-        <div className="legal-nav-overlay">
-          <button className="legal-nav-overlay-close" aria-label="Close" onClick={() => setMobileMenuOpen(false)}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-          <a href="/" onClick={() => setMobileMenuOpen(false)}>Home</a>
-          <a href="/security" onClick={() => setMobileMenuOpen(false)}>Security</a>
-          <a href="/blog" onClick={() => setMobileMenuOpen(false)}>Blog</a>
-          <a href="https://app.tetherhealth.co/login" onClick={() => setMobileMenuOpen(false)}>Log In</a>
-          <a href="/request-demo" className="legal-nav-overlay-cta" onClick={() => setMobileMenuOpen(false)}>Request Demo</a>
-        </div>
-      )}
 
       <div className="legal-hero">
         <h1>Legal</h1>
@@ -427,10 +361,6 @@ export default function LegalPage() {
         </div>
 
       </div>
-
-      <footer className="legal-footer">
-        <p>&copy; 2026 Tether Health, Inc. All rights reserved. <a href="/" style={{ marginLeft: 16 }}>Back to Home</a> <a href="/blog" style={{ marginLeft: 16 }}>Blog</a></p>
-      </footer>
 
     </div></>
   );

@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import Image from "next/image";
 
 const POSTS = [
   {
@@ -9,7 +8,7 @@ const POSTS = [
     date: "March 13, 2026",
     readTime: "7 min read",
     category: "Education",
-    categoryColor: "#0D7377",
+    categoryColor: "#00A882",
     excerpt: "Referral leakage is the silent revenue drain affecting every practice in America. Here is what it means, why it happens, and what it costs you.",
     content: `When a primary care physician refers a patient to a specialist, the assumption is simple: the patient goes, gets seen, and the referring doctor hears back. In reality, that handoff fails roughly half the time. And the consequences of that failure ripple across the entire healthcare system.
 
@@ -44,7 +43,7 @@ Referral leakage is not an unsolvable problem. It is an infrastructure problem. 
     date: "March 6, 2026",
     readTime: "6 min read",
     category: "Product",
-    categoryColor: "#D4613E",
+    categoryColor: "#E8501A",
     excerpt: "Closed-loop tracking means the referring provider knows exactly what happened after the referral was sent. Here is how it works and why it matters for patient safety, revenue, and quality reporting.",
     content: `In most medical practices, the referral process ends the moment the fax goes out. The PCP has no way of knowing whether the specialist received the referral, whether the patient scheduled an appointment, or whether the visit ever happened. This one-directional workflow is what the industry calls an "open loop," and it is the single biggest reason referrals fail at scale.
 
@@ -77,7 +76,7 @@ The technology to close the referral loop is not futuristic. It exists today. Th
     date: "February 27, 2026",
     readTime: "6 min read",
     category: "Data",
-    categoryColor: "#2D3A4E",
+    categoryColor: "#0C0D0F",
     excerpt: "The average physician loses nearly $1 million per year to referral leakage. Here is how the numbers break down for PCPs, specialists, and health systems.",
     content: `The headline statistic is one that most practice leaders have a hard time believing the first time they see it: each physician's referral leakage translates to an average annual revenue loss of $821,000 to $971,000, according to research compiled by Dialog Health. That number captures the direct revenue from specialist visits that never happen, the downstream revenue from follow-up care and procedures that are lost when the patient leaves the network, and the ancillary service revenue that evaporates when the care relationship breaks.
 
@@ -105,97 +104,55 @@ The $971,000 per physician per year is not a number that any practice can afford
 ];
 
 const CSS = `
-:root{--navy:#2D3A4E;--navy-deep:#1E2A3A;--navy-darkest:#151F2B;--bg:#FAFAF7;--bg-warm:#F5F3EE;--teal:#0D7377;--teal-light:#E8F4F4;--coral:#D4613E;--text:#2D2D2D;--text-secondary:#6B6B6B;--text-tertiary:#9A9A9A;--border:#E0DDD5;--serif:'Instrument Serif',Georgia,serif;--sans:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif}
-.blog-page,.blog-page *{margin:0;padding:0;box-sizing:border-box}
-.blog-page{font-family:var(--sans);color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased;overflow-x:hidden}
-.blog-page ::selection{background:var(--navy);color:#fff}
+.blog-page, .blog-page * { box-sizing: border-box; }
+.blog-page { font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif; color: #0C0D0F; background: #F7F5F0; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+.blog-page ::selection { background: #00A882; color: #fff; }
 
-/* Nav */
-.blog-nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 48px;height:72px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(16px) saturate(1.8);background:rgba(250,250,247,0.85);border-bottom:1px solid rgba(224,221,213,0.5)}
-.blog-nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--navy-deep)}
-.blog-nav-logo-text{font-family:var(--sans);font-weight:600;font-size:22px;letter-spacing:-0.5px}
-.blog-nav-links{display:flex;align-items:center;gap:36px;list-style:none}
-.blog-nav-links a{font-size:14px;font-weight:500;color:var(--text-secondary);text-decoration:none;transition:color .2s}
-.blog-nav-links a:hover{color:var(--navy-deep)}
-.blog-nav-login{color:var(--text-secondary)!important}
-.blog-nav-cta{background:var(--teal);color:#fff!important;padding:10px 22px;border-radius:8px;font-weight:600!important}
-.blog-nav-mob{display:none;background:none;border:none;cursor:pointer;padding:8px;color:var(--navy-deep)}
-.blog-nav-overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:rgba(250,250,247,0.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:80px 24px;opacity:0;animation:blog-mob-in .3s ease forwards}
-@keyframes blog-mob-in{to{opacity:1}}
-.blog-nav-overlay a{font-size:24px;font-weight:500;color:var(--navy-deep);text-decoration:none}
-.blog-nav-overlay-close{position:absolute;top:24px;right:24px;background:none;border:none;cursor:pointer;padding:8px;color:var(--navy-deep)}
-.blog-nav-overlay-cta{display:inline-flex;padding:14px 28px;background:var(--coral);color:#fff;border-radius:10px;font-size:15px;font-weight:600;text-decoration:none;margin-top:16px}
-.blog-nav-overlay-cta:hover{background:#BF5535}
+.blog-hero { padding: 132px 48px 56px; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.blog-hero-inner { max-width: 800px; margin: 0 auto; }
+.blog-hero h1 { font-family: var(--font-serif), Georgia, serif; font-size: clamp(34px, 5vw, 48px); font-weight: 400; color: #0C0D0F; letter-spacing: -1px; margin-bottom: 12px; }
+.blog-hero p { font-size: 17px; color: #3D3B38; line-height: 1.6; }
 
-/* Hero */
-.blog-hero{padding:140px 48px 64px;border-bottom:1px solid var(--border)}
-.blog-hero-inner{max-width:800px;margin:0 auto}
-.blog-hero h1{font-family:var(--serif);font-size:48px;font-weight:400;color:var(--navy-darkest);letter-spacing:-1px;margin-bottom:12px}
-.blog-hero p{font-size:17px;color:var(--text-secondary);line-height:1.6}
+.blog-list { max-width: 800px; margin: 0 auto; padding: 48px 48px 96px; }
+.blog-card { display: block; text-decoration: none; color: inherit; padding: 40px 0; border-bottom: 1px solid rgba(0,0,0,0.06); transition: all 0.2s; }
+.blog-card:first-child { padding-top: 24px; }
+.blog-card:last-child { border-bottom: none; }
+.blog-card:hover .blog-card-title { color: #00A882; }
+.blog-card-meta { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; font-size: 13px; color: #8C8A85; }
+.blog-card-cat { padding: 3px 10px; border-radius: 100px; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: #fff; }
+.blog-card-title { font-family: var(--font-serif), Georgia, serif; font-size: 28px; font-weight: 400; color: #0C0D0F; letter-spacing: -0.5px; margin-bottom: 10px; transition: color 0.2s; line-height: 1.25; }
+.blog-card-excerpt { font-size: 15px; line-height: 1.65; color: #3D3B38; }
+.blog-card-read { display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; font-size: 14px; font-weight: 600; color: #00A882; transition: gap 0.2s; }
+.blog-card:hover .blog-card-read { gap: 10px; }
 
-/* Post list */
-.blog-list{max-width:800px;margin:0 auto;padding:48px 48px 96px}
-.blog-card{display:block;text-decoration:none;color:inherit;padding:40px 0;border-bottom:1px solid var(--border);transition:all .2s}
-.blog-card:first-child{padding-top:0}
-.blog-card:last-child{border-bottom:none}
-.blog-card:hover .blog-card-title{color:var(--teal)}
-.blog-card-meta{display:flex;align-items:center;gap:16px;margin-bottom:12px;font-size:13px;color:var(--text-tertiary)}
-.blog-card-cat{padding:3px 10px;border-radius:100px;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#fff}
-.blog-card-title{font-family:var(--serif);font-size:28px;font-weight:400;color:var(--navy-darkest);letter-spacing:-0.5px;margin-bottom:10px;transition:color .2s;line-height:1.25}
-.blog-card-excerpt{font-size:15px;line-height:1.65;color:var(--text-secondary)}
-.blog-card-read{display:inline-flex;align-items:center;gap:6px;margin-top:16px;font-size:14px;font-weight:600;color:var(--teal);transition:gap .2s}
-.blog-card:hover .blog-card-read{gap:10px}
+.blog-post { max-width: 720px; margin: 0 auto; padding: 132px 48px 96px; }
+.blog-post-back { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 500; color: #3D3B38; text-decoration: none; margin-bottom: 32px; transition: color 0.2s; }
+.blog-post-back:hover { color: #00A882; }
+.blog-post-cat { display: inline-block; padding: 3px 10px; border-radius: 100px; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: #fff; margin-bottom: 16px; }
+.blog-post h1 { font-family: var(--font-serif), Georgia, serif; font-size: clamp(28px, 4vw, 40px); font-weight: 400; color: #0C0D0F; letter-spacing: -0.8px; line-height: 1.2; margin-bottom: 16px; }
+.blog-post-meta { font-size: 14px; color: #8C8A85; margin-bottom: 48px; padding-bottom: 32px; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.blog-post-body { font-size: 16px; line-height: 1.85; color: #3D3B38; }
+.blog-post-body p { margin-bottom: 24px; }
+.blog-post-sources { margin-top: 48px; padding-top: 32px; border-top: 1px solid rgba(0,0,0,0.06); font-size: 13px; color: #8C8A85; line-height: 1.7; }
+.blog-post-sources strong { color: #0C0D0F; font-weight: 600; }
+.blog-post-cta { margin-top: 56px; padding: 36px; background: #EFEDE8; border: 1px solid rgba(0,0,0,0.06); border-radius: 16px; text-align: center; }
+.blog-post-cta p { font-family: var(--font-serif), Georgia, serif; font-size: 22px; color: #0C0D0F; margin-bottom: 6px; }
+.blog-post-cta span { font-size: 14px; color: #3D3B38; display: block; margin-bottom: 20px; }
+.blog-post-cta a { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: #E8501A; color: #fff; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; transition: all 0.25s; }
+.blog-post-cta a:hover { background: #CC4615; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(232,80,26,0.25); }
 
-/* Post page */
-.blog-post{max-width:700px;margin:0 auto;padding:140px 48px 96px}
-.blog-post-back{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:var(--text-secondary);text-decoration:none;margin-bottom:32px;transition:color .2s}
-.blog-post-back:hover{color:var(--teal)}
-.blog-post-cat{display:inline-block;padding:3px 10px;border-radius:100px;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#fff;margin-bottom:16px;margin-left:0.75rem}
-.blog-post h1{font-family:var(--serif);font-size:40px;font-weight:400;color:var(--navy-darkest);letter-spacing:-0.8px;line-height:1.2;margin-bottom:16px}
-.blog-post-meta{font-size:14px;color:var(--text-tertiary);margin-bottom:48px;padding-bottom:32px;border-bottom:1px solid var(--border)}
-.blog-post-body{font-size:16px;line-height:1.85;color:var(--text-secondary)}
-.blog-post-body p{margin-bottom:24px}
-.blog-post-sources{margin-top:48px;padding-top:32px;border-top:1px solid var(--border);font-size:13px;color:var(--text-tertiary);line-height:1.7}
-.blog-post-sources strong{color:var(--text);font-weight:600}
-.blog-post-cta{margin-top:56px;padding:40px;background:var(--bg-warm);border:1px solid var(--border);border-radius:16px;text-align:center}
-.blog-post-cta p{font-family:var(--serif);font-size:22px;color:var(--navy-darkest);margin-bottom:6px}
-.blog-post-cta span{font-size:14px;color:var(--text-secondary);display:block;margin-bottom:20px}
-.blog-post-cta a{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:var(--coral);color:#fff;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;transition:all .25s}
-.blog-post-cta a:hover{background:#BF5535;transform:translateY(-2px);box-shadow:0 6px 20px rgba(212,97,62,.25)}
-
-/* Footer */
-.blog-footer{padding:48px;background:var(--navy-darkest);text-align:center}
-.blog-footer p{font-size:13px;color:rgba(255,255,255,0.4)}
-.blog-footer a{color:rgba(255,255,255,0.6);text-decoration:none}
-
-@media(max-width:768px){
-.blog-nav{padding:0 24px}.blog-nav-links{display:none}.blog-nav-mob{display:block}
-.blog-hero{padding:110px 24px 48px}.blog-hero h1{font-size:34px}
-.blog-list{padding:32px 24px 72px}
-.blog-card-title{font-size:22px}
-.blog-post{padding:110px 28px 72px}.blog-post h1{font-size:30px;padding-right:8px}.blog-post-back{margin-left:4px}.blog-post-cat{margin-left:0.75rem}
+@media (max-width: 768px) {
+  .blog-hero { padding: 110px 24px 48px; }
+  .blog-hero h1 { font-size: 32px; }
+  .blog-list { padding: 32px 24px 72px; }
+  .blog-card-title { font-size: 22px; }
+  .blog-post { padding: 110px 28px 72px; }
+  .blog-post h1 { font-size: 28px; }
 }
 `;
 
 export default function BlogPage() {
   const [currentPost, setCurrentPost] = useState<typeof POSTS[0] | null>(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    if (mobileMenuOpen) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "";
-    return () => { document.body.style.overflow = ""; };
-  }, [mobileMenuOpen]);
-
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    if (document.getElementById("tether-fonts")) return;
-    const link = document.createElement("link");
-    link.id = "tether-fonts";
-    link.rel = "stylesheet";
-    link.href = "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap";
-    document.head.appendChild(link);
-  }, []);
 
   useEffect(() => {
     const sync = () => {
@@ -235,39 +192,6 @@ export default function BlogPage() {
   return (
     <><style>{CSS}</style>
     <div className="blog-page">
-
-      <nav className="blog-nav">
-        <a href="/" className="blog-nav-logo">
-          <Image src="/LOGO.jpeg" alt="Tether" width={30} height={30} style={{ objectFit: "contain" }} />
-          <span className="blog-nav-logo-text">Tether</span>
-        </a>
-        <ul className="blog-nav-links">
-          <li><a href="/#product">Product</a></li>
-          <li><a href="/#platform">Platform</a></li>
-          <li><a href="/#specialists">For Specialists</a></li>
-          <li><a href="/security">Security</a></li>
-          <li><a href="/blog" style={{ color: "var(--navy-deep)", fontWeight: 600 }}>Blog</a></li>
-          <li><a href="https://app.tetherhealth.co/login" className="blog-nav-login">Log In</a></li>
-          <li><a href="/request-demo" className="blog-nav-cta">Request Demo</a></li>
-        </ul>
-        <button className="blog-nav-mob" aria-label="Menu" onClick={() => setMobileMenuOpen(true)}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        </button>
-      </nav>
-      {mobileMenuOpen && (
-        <div className="blog-nav-overlay">
-          <button className="blog-nav-overlay-close" aria-label="Close" onClick={() => setMobileMenuOpen(false)}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-          <a href="/#product" onClick={() => setMobileMenuOpen(false)}>Product</a>
-          <a href="/#platform" onClick={() => setMobileMenuOpen(false)}>Platform</a>
-          <a href="/#specialists" onClick={() => setMobileMenuOpen(false)}>For Specialists</a>
-          <a href="/security" onClick={() => setMobileMenuOpen(false)}>Security</a>
-          <a href="/blog" onClick={() => setMobileMenuOpen(false)}>Blog</a>
-          <a href="https://app.tetherhealth.co/login" onClick={() => setMobileMenuOpen(false)}>Log In</a>
-          <a href="/request-demo" className="blog-nav-overlay-cta" onClick={() => setMobileMenuOpen(false)}>Request Demo</a>
-        </div>
-      )}
 
       {!currentPost ? (
         <>
@@ -318,10 +242,6 @@ export default function BlogPage() {
           </div>
         </article>
       )}
-
-      <footer className="blog-footer">
-        <p>&copy; 2026 Tether Health, Inc. All rights reserved. <a href="/" style={{ marginLeft: 16 }}>Back to Home</a> <a href="/blog" style={{ marginLeft: 16 }}>Blog</a></p>
-      </footer>
 
     </div></>
   );

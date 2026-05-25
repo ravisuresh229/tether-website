@@ -65,17 +65,266 @@
   }
 }
 
-/* Override accent serif font - direct declaration (partnership, network) */
-.t-accent-serif,
-.t-network h2 em {
-  font-family: Georgia, 'Times New Roman', serif !important;
-  font-style: italic !important;
-  text-decoration: none !important;
-  border-bottom: none !important;
+/* ────────────────────────────────────────────────────────────────
+   Global light-theme defaults (apply on every route)
+   ──────────────────────────────────────────────────────────────── */
+html {
+  background-color: #F7F5F0;
+  color-scheme: light;
 }
-.t-accent-serif a,
-a .t-accent-serif {
-  text-decoration: none !important;
-  border-bottom: none !important;
+body {
+  background-color: #F7F5F0;
+  color: #0C0D0F;
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   GLOBAL NAV (components/Nav.tsx)
+   ──────────────────────────────────────────────────────────────── */
+.t-gnav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 0 32px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid transparent;
+  transition: background-color 250ms ease, border-color 250ms ease, backdrop-filter 250ms ease;
+}
+.t-gnav-home {
+  background: transparent;
+}
+.t-gnav-home.t-gnav-scrolled,
+.t-gnav-solid {
+  background: rgba(247, 245, 240, 0.94);
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+.t-gnav-solid {
+  background: #F7F5F0;
+}
+.t-gnav-logo {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: #0C0D0F;
+}
+.t-gnav-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.t-gnav-brand-text {
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 600;
+  font-size: 1.125rem;
+  letter-spacing: -0.02em;
+  color: #0C0D0F;
+}
+.t-gnav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.t-gnav-links a {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #0C0D0F;
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+.t-gnav-links a:hover {
+  color: #00A882;
+}
+.t-gnav-cta {
+  background: #E8501A !important;
+  color: #ffffff !important;
+  padding: 10px 20px !important;
+  border-radius: 8px !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  transition: background-color 150ms ease;
+}
+.t-gnav-cta:hover {
+  background: #CC4615 !important;
+}
+.t-gnav-mob {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: #0C0D0F;
+}
+
+.t-gnav-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(247, 245, 240, 0.98);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 80px 24px;
+}
+.t-gnav-overlay a {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #0C0D0F;
+  text-decoration: none;
+}
+.t-gnav-overlay-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  padding: 8px;
+  color: #0C0D0F;
+  cursor: pointer;
+}
+.t-gnav-overlay-cta {
+  display: inline-flex;
+  padding: 12px 28px;
+  background: #E8501A !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+@media (max-width: 900px) {
+  .t-gnav {
+    padding: 0 20px;
+  }
+  .t-gnav-links {
+    display: none;
+  }
+  .t-gnav-mob {
+    display: block;
+  }
+}
+
+/* ────────────────────────────────────────────────────────────────
+   GLOBAL FOOTER (components/Footer.tsx) — dark on light pages
+   ──────────────────────────────────────────────────────────────── */
+.t-gfooter {
+  background: #0C0D0F;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 64px 24px 32px;
+}
+.t-gfooter-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+}
+.t-gfooter-top {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 56px;
+  align-items: start;
+}
+.t-gfooter-brand-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.t-gfooter-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #ffffff;
+}
+.t-gfooter-brand-text {
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 600;
+  font-size: 1.125rem;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+.t-gfooter-tagline {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+  max-width: 280px;
+  line-height: 1.55;
+  margin: 0;
+}
+.t-gfooter-cols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+}
+.t-gfooter-col {
+  display: flex;
+  flex-direction: column;
+}
+.t-gfooter-col h5 {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #ffffff;
+  margin: 0 0 14px;
+}
+.t-gfooter-col a {
+  display: block;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 10px;
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+.t-gfooter-col a:hover {
+  color: #ffffff;
+}
+.t-gfooter-rule {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 56px 0 24px;
+}
+.t-gfooter-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+.t-gfooter-social {
+  color: rgba(255, 255, 255, 0.5);
+  transition: color 150ms ease;
+}
+.t-gfooter-social:hover {
+  color: #ffffff;
+}
+
+@media (max-width: 768px) {
+  .t-gfooter-top {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .t-gfooter-cols {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
+}
+@media (max-width: 540px) {
+  .t-gfooter-cols {
+    grid-template-columns: 1fr;
+  }
 }
 

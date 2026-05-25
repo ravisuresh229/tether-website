@@ -115,7 +115,6 @@ function TetherWordmark({ size = 22 }: { size?: number }) {
 // ─── Icons ───
 const IconArrowRight = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>;
 const IconCheck = () => <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>;
-const IconLinkedIn = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14zM8.5 9.5H6V18h2.5V9.5zM7.25 8.25a1.25 1.25 0 1 0 0-2.5 1.25 1.25 0 0 0 0 2.5zM18 13.5c0-2.04-1.31-3.25-3-3.25a2.6 2.6 0 0 0-2.36 1.27V10H10v8h2.64v-4.32c0-1.06.69-1.6 1.51-1.6.79 0 1.35.52 1.35 1.6V18H18v-4.5z"/></svg>;
 const IconBolt = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>;
 const IconSend = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>;
 const IconSpark = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/><path d="M19 14l.9 2.6L22 17l-2.1.4L19 20l-.9-2.6L16 17l2.1-.4L19 14z"/></svg>;
@@ -747,21 +746,6 @@ html { scroll-behavior: smooth; background: var(--bg); color-scheme: light; }
 .t-wordmark svg { flex-shrink: 0; }
 .t-wordmark-text { font-family: var(--sans); font-weight: 600; font-size: 1.125rem; letter-spacing: -0.02em; color: var(--text); }
 
-/* ─── NAV ─── */
-.t-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 0 32px; height: 64px; display: flex; align-items: center; justify-content: space-between; background: rgba(247,245,240,0.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid transparent; transition: background-color 250ms ease, border-color 250ms ease, backdrop-filter 250ms ease; }
-.t-nav-s { background: rgba(247,245,240,0.96); backdrop-filter: blur(14px) saturate(1.4); -webkit-backdrop-filter: blur(14px) saturate(1.4); border-bottom-color: var(--t-border); }
-.t-nav-links { display: flex; align-items: center; gap: 28px; list-style: none; }
-.t-nav-links a { font-size: 0.875rem; color: var(--ink); font-weight: 500; transition: color 150ms ease; }
-.t-nav-links a:hover { color: var(--teal-on-light); }
-.t-nav-cta { background: var(--coral); color: #fff !important; padding: 9px 18px; border-radius: 999px; font-weight: 600; font-size: 0.875rem; transition: background-color 150ms ease; }
-.t-nav-cta:hover { background: var(--coral-hover); color: #fff !important; }
-.t-nav-mob { display: none; background: none; border: none; cursor: pointer; padding: 8px; color: var(--ink); }
-
-.t-nav-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(247,245,240,0.98); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 80px 24px; }
-.t-nav-overlay a { font-size: 1.25rem; color: var(--ink); }
-.t-nav-overlay-close { position: absolute; top: 20px; right: 20px; background: none; border: none; padding: 8px; color: var(--ink); }
-.t-nav-overlay-cta { display: inline-flex; padding: 12px 28px; background: var(--coral); color: #fff !important; font-weight: 600; border-radius: 999px; margin-top: 8px; }
-
 /* ─── HERO ─── */
 .t-hero { position: relative; padding: 132px 32px 120px; overflow: hidden; min-height: 100vh; display: flex; align-items: center; background: #EFEDE8; }
 .t-hero::before { content: ""; position: absolute; inset: -200px 0 auto 0; height: 800px; pointer-events: none; background: radial-gradient(ellipse 70% 50% at 30% 30%, rgba(0,168,130,0.07) 0%, transparent 70%); }
@@ -960,31 +944,13 @@ html { scroll-behavior: smooth; background: var(--bg); color-scheme: light; }
 .t-cta-title { font-family: var(--serif); font-size: clamp(2rem, 4vw, 3rem); font-weight: 400; line-height: 1.1; letter-spacing: -0.035em; color: #FFFFFF; margin-bottom: 16px; text-wrap: balance; }
 .t-cta-sub { font-size: 1.0625rem; color: rgba(255,255,255,0.7); max-width: 560px; margin: 0 auto 36px; line-height: 1.65; }
 
-/* ─── FOOTER ─── */
-.t-footer { padding: 64px 24px 32px; background: #EFEDE8; border-top: 1px solid var(--t-border); }
-.t-footer-inner { max-width: 1080px; margin: 0 auto; display: grid; grid-template-columns: 1fr 2fr; gap: 56px; align-items: start; }
-.t-footer-brand { display: flex; flex-direction: column; gap: 12px; }
-.t-footer-tagline { font-size: 0.875rem; color: var(--tertiary); max-width: 280px; line-height: 1.55; }
-.t-footer-links { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
-.t-footer-col h5 { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink); margin-bottom: 14px; }
-.t-footer-col a { display: block; font-size: 0.875rem; color: var(--secondary); margin-bottom: 10px; transition: color 150ms ease; }
-.t-footer-col a:hover { color: var(--teal-on-light); }
-.t-footer-bottom { max-width: 1080px; margin: 56px auto 0; padding-top: 24px; border-top: 1px solid var(--t-border); display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; font-size: 0.8125rem; color: var(--tertiary); }
-.t-footer-social { color: var(--secondary); transition: color 150ms ease; }
-.t-footer-social:hover { color: var(--teal-on-light); }
-
 /* ─── RESPONSIVE ─── */
 @media (max-width: 900px) {
-  .t-nav { padding: 0 20px; }
-  .t-nav-links { display: none; }
-  .t-nav-mob { display: block; }
   .t-section, .t-social, .t-stats-section, .t-cta { padding-left: 20px; padding-right: 20px; }
   .t-how-grid { grid-template-columns: 1fr; gap: 16px; }
   .t-stats { grid-template-columns: 1fr; }
   .t-stat { padding: 32px 24px; }
   .t-stat + .t-stat::before { left: 12%; right: 12%; top: 0; bottom: auto; width: auto; height: 1px; }
-  .t-footer-inner { grid-template-columns: 1fr; gap: 40px; }
-  .t-footer-links { grid-template-columns: repeat(3, 1fr); }
 }
 @media (max-width: 900px) {
   .t-proof-grid { grid-template-columns: 1fr; }
@@ -1011,7 +977,6 @@ html { scroll-behavior: smooth; background: var(--bg); color-scheme: light; }
   .t-illus-ai-action { font-size: 0.625rem; padding: 4px 10px; }
   .t-illus-ai-text { font-size: 0.75rem; }
   .t-cta-card { padding: 56px 28px; }
-  .t-footer-links { grid-template-columns: 1fr; gap: 28px; }
   .t-trust-strip { gap: 14px 22px; }
   .t-social-closer { font-size: 1.0625rem; margin-top: 40px; }
 }
@@ -1163,19 +1128,10 @@ html { scroll-behavior: smooth; background: var(--bg); color-scheme: light; }
 
 // ─── Main Component ───
 export default function TetherLanding() {
-  const [scrolled, setScrolled] = useState(false);
   const [scrollPct, setScrollPct] = useState(0);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const scrollY = useScrollY();
 
   useEffect(() => {
-    if (mobileMenuOpen) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "";
-    return () => { document.body.style.overflow = ""; };
-  }, [mobileMenuOpen]);
-
-  useEffect(() => {
-    setScrolled(scrollY > 24);
     const h = document.documentElement.scrollHeight - window.innerHeight;
     setScrollPct(h > 0 ? (scrollY / h) * 100 : 0);
   }, [scrollY]);
@@ -1217,31 +1173,6 @@ export default function TetherLanding() {
       <style>{CSS}</style>
       <div className="tether-lp">
         <div className="t-scroll-prog" style={{ width: `${scrollPct}%` }} />
-
-        {/* NAV */}
-        <nav className={`t-nav ${scrolled ? "t-nav-s" : ""}`}>
-          <a href="#" aria-label="Tether — home"><TetherWordmark /></a>
-          <ul className="t-nav-links">
-            <li><a href="#how">How It Works</a></li>
-            <li><a href="/security">Security</a></li>
-            <li><a href="https://app.tetherhealth.co/login">Log In</a></li>
-            <li><a href="/request-demo" className="t-nav-cta">Request Demo</a></li>
-          </ul>
-          <button className="t-nav-mob" aria-label="Menu" onClick={() => setMobileMenuOpen(true)}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-          </button>
-        </nav>
-        {mobileMenuOpen && (
-          <div className="t-nav-overlay">
-            <button className="t-nav-overlay-close" aria-label="Close" onClick={() => setMobileMenuOpen(false)}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-            <a href="#how" onClick={() => setMobileMenuOpen(false)}>How It Works</a>
-            <a href="/security" onClick={() => setMobileMenuOpen(false)}>Security</a>
-            <a href="https://app.tetherhealth.co/login" onClick={() => setMobileMenuOpen(false)}>Log In</a>
-            <a href="/request-demo" className="t-nav-overlay-cta" onClick={() => setMobileMenuOpen(false)}>Request Demo</a>
-          </div>
-        )}
 
         {/* HERO */}
         <section className="t-hero">
@@ -1440,41 +1371,6 @@ export default function TetherLanding() {
           </div>
         </section>
 
-        {/* FOOTER */}
-        <footer className="t-footer">
-          <div className="t-footer-inner">
-            <div className="t-footer-brand">
-              <TetherWordmark />
-              <p className="t-footer-tagline">The referral network for modern medical practices.</p>
-            </div>
-            <div className="t-footer-links">
-              <div className="t-footer-col">
-                <h5>Product</h5>
-                <a href="#how">How It Works</a>
-                <a href="/security">Security</a>
-                <a href="/for-specialists">For Specialists</a>
-              </div>
-              <div className="t-footer-col">
-                <h5>Company</h5>
-                <a href="#">About</a>
-                <a href="/blog">Blog</a>
-                <a href="/request-demo">Contact</a>
-              </div>
-              <div className="t-footer-col">
-                <h5>Legal</h5>
-                <a href="/legal#privacy">Privacy</a>
-                <a href="/legal#terms">Terms</a>
-                <a href="/legal#hipaa">HIPAA</a>
-              </div>
-            </div>
-          </div>
-          <div className="t-footer-bottom">
-            <span>&copy; 2026 Tether Health, Inc.</span>
-            <a href="https://www.linkedin.com/company/111649326/" target="_blank" rel="noopener noreferrer" className="t-footer-social" aria-label="Tether on LinkedIn">
-              <IconLinkedIn />
-            </a>
-          </div>
-        </footer>
       </div>
     </>
   );

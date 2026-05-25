@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import Image from "next/image";
 
 function useInView(opts: IntersectionObserverInit = {}) {
   const ref = useRef<HTMLDivElement>(null);
@@ -41,121 +40,95 @@ const IconArrowRight = () => <svg width="18" height="18" viewBox="0 0 24 24" fil
 
 const CSS = `
 :root {
-  --navy: #2D3A4E;
-  --navy-deep: #1E2A3A;
-  --navy-darkest: #151F2B;
-  --bg: #FAFAF7;
-  --bg-warm: #F5F3EE;
-  --surface: #EDEADF;
-  --teal: #0D7377;
-  --teal-dark: #095456;
-  --teal-light: #E8F4F4;
-  --coral: #D4613E;
-  --text: #2D2D2D;
-  --text-secondary: #6B6B6B;
-  --text-tertiary: #9A9A9A;
-  --border: #E0DDD5;
-  --serif: 'Instrument Serif', Georgia, serif;
-  --sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --sec-bg: #F7F5F0;
+  --sec-bg-warm: #EFEDE8;
+  --sec-surface: #FFFFFF;
+  --sec-text: #0C0D0F;
+  --sec-text-secondary: #3D3B38;
+  --sec-text-tertiary: #8C8A85;
+  --sec-teal: #00A882;
+  --sec-teal-dark: #007A5E;
+  --sec-teal-tint: rgba(0,168,130,0.08);
+  --sec-teal-border: rgba(0,168,130,0.15);
+  --sec-coral: #E8501A;
+  --sec-coral-hover: #CC4615;
+  --sec-orange-muted: #A03A10;
+  --sec-border: rgba(0,0,0,0.08);
+  --sec-border-soft: rgba(0,0,0,0.06);
+  --sec-serif: var(--font-serif), Georgia, serif;
+  --sec-sans: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
 }
-.sec-page, .sec-page * { margin: 0; padding: 0; box-sizing: border-box; }
+.sec-page, .sec-page * { box-sizing: border-box; }
 .sec-page {
-  font-family: var(--sans);
-  color: var(--text);
-  background: var(--bg);
+  font-family: var(--sec-sans);
+  color: var(--sec-text);
+  background: var(--sec-bg);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
-.sec-page ::selection { background: var(--navy); color: #fff; }
-
-/* Nav */
-.sec-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 0 48px; height: 72px; display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(16px) saturate(1.8); background: rgba(250,250,247,0.85); border-bottom: 1px solid rgba(224,221,213,0.5); }
-.sec-nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--navy-deep); }
-.sec-nav-logo-text { font-family: var(--sans); font-weight: 600; font-size: 22px; letter-spacing: -0.5px; }
-.sec-nav-links { display: flex; align-items: center; gap: 36px; list-style: none; }
-.sec-nav-links a { font-size: 14px; font-weight: 500; color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
-.sec-nav-links a:hover { color: var(--navy-deep); }
-.sec-nav-login { color: var(--text-secondary) !important; }
-.sec-nav-cta { background: var(--teal); color: #fff !important; padding: 10px 22px; border-radius: 8px; font-weight: 600 !important; transition: all 0.25s; }
-.sec-nav-cta:hover { background: var(--teal-dark); }
-.sec-nav-mob { display: none; background: none; border: none; cursor: pointer; padding: 8px; color: var(--navy-deep); }
-.sec-nav-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200; background: rgba(250,250,247,0.98); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 80px 24px; opacity: 0; animation: sec-mob-in 0.3s ease forwards; }
-@keyframes sec-mob-in { to { opacity: 1; } }
-.sec-nav-overlay a { font-size: 24px; font-weight: 500; color: var(--navy-deep); text-decoration: none; }
-.sec-nav-overlay-close { position: absolute; top: 24px; right: 24px; background: none; border: none; cursor: pointer; padding: 8px; color: var(--navy-deep); }
-.sec-nav-overlay-cta { display: inline-flex; padding: 14px 28px; background: var(--coral); color: #fff; border-radius: 10px; font-size: 15px; font-weight: 600; text-decoration: none; margin-top: 16px; }
-.sec-nav-overlay-cta:hover { background: #BF5535; }
+.sec-page ::selection { background: var(--sec-teal); color: #fff; }
 
 /* Hero */
-.sec-hero { padding: 160px 48px 80px; text-align: center; position: relative; overflow: hidden; }
-.sec-hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 400px; background: linear-gradient(180deg, var(--teal-light) 0%, transparent 100%); opacity: 0.4; pointer-events: none; }
+.sec-hero { padding: 152px 48px 80px; text-align: center; position: relative; overflow: hidden; }
+.sec-hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 380px; background: radial-gradient(ellipse 60% 100% at 50% 0%, rgba(0,168,130,0.08) 0%, transparent 70%); pointer-events: none; }
 .sec-hero-inner { max-width: 800px; margin: 0 auto; position: relative; z-index: 1; }
-.sec-hero-icon { width: 72px; height: 72px; border-radius: 20px; background: var(--teal-light); border: 1px solid rgba(13,115,119,0.15); color: var(--teal); display: flex; align-items: center; justify-content: center; margin: 0 auto 32px; }
+.sec-hero-icon { width: 72px; height: 72px; border-radius: 12px; background: var(--sec-teal-tint); border: 1px solid var(--sec-teal-border); color: var(--sec-teal); display: flex; align-items: center; justify-content: center; margin: 0 auto 32px; }
 .sec-hero-icon svg { width: 36px; height: 36px; }
-.sec-hero h1 { font-family: var(--serif); font-size: 52px; line-height: 1.1; font-weight: 400; color: var(--navy-darkest); letter-spacing: -1.2px; margin-bottom: 20px; }
-.sec-hero-sub { font-size: 18px; line-height: 1.65; color: var(--text-secondary); max-width: 600px; margin: 0 auto 40px; }
-.sec-hero-badges { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
-.sec-hero-badge { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: white; border: 1px solid var(--border); border-radius: 100px; font-size: 13px; font-weight: 500; color: var(--navy); }
-.sec-hero-badge-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); }
+.sec-hero h1 { font-family: var(--sec-serif); font-size: clamp(36px, 5vw, 52px); line-height: 1.08; font-weight: 400; color: var(--sec-text); letter-spacing: -1.2px; margin-bottom: 20px; }
+.sec-hero-sub { font-size: 18px; line-height: 1.65; color: var(--sec-text-secondary); max-width: 600px; margin: 0 auto 40px; }
+.sec-hero-badges { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.sec-hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--sec-surface); border: 1px solid var(--sec-border); border-radius: 100px; font-size: 13px; font-weight: 500; color: var(--sec-text); }
+.sec-hero-badge-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--sec-teal); }
+.sec-hero-badge-dot-planned { background: var(--sec-coral); opacity: 0.7; }
 
 /* Principles */
-.sec-principles { padding: 96px 48px; background: var(--bg); }
+.sec-principles { padding: 96px 48px; background: var(--sec-bg); }
 .sec-principles-inner { max-width: 1100px; margin: 0 auto; }
-.sec-slbl { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--teal); margin-bottom: 16px; }
-.sec-stitle { font-family: var(--serif); font-size: 40px; line-height: 1.15; font-weight: 400; color: var(--navy-darkest); letter-spacing: -0.8px; margin-bottom: 56px; }
-.sec-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; align-items: stretch; }
+.sec-slbl { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--sec-teal); margin-bottom: 16px; }
+.sec-stitle { font-family: var(--sec-serif); font-size: clamp(28px, 4vw, 40px); line-height: 1.12; font-weight: 400; color: var(--sec-text); letter-spacing: -0.8px; margin-bottom: 56px; }
+.sec-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: stretch; }
 .sec-grid > * { min-width: 0; }
-.sec-card { height: 100%; min-height: 280px; display: flex; flex-direction: column; background: white; border: 1px solid var(--border); border-radius: 16px; padding: 36px 32px; transition: all 0.35s cubic-bezier(0.16,1,0.3,1); }
-.sec-card:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,0.06); border-color: rgba(13,115,119,0.2); }
-.sec-card-icon { width: 52px; height: 52px; border-radius: 14px; background: var(--teal-light); color: var(--teal); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
-.sec-card h3 { font-family: var(--serif); font-size: 22px; font-weight: 400; color: var(--navy-darkest); margin-bottom: 10px; }
-.sec-card p { flex: 1; font-size: 14.5px; line-height: 1.6; color: var(--text-secondary); }
+.sec-card { height: 100%; min-height: 280px; display: flex; flex-direction: column; background: var(--sec-surface); border: 1px solid rgba(0,0,0,0.07); border-radius: 16px; padding: 32px 28px; transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease, border-color 0.3s ease; }
+.sec-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(10,11,15,0.06); border-color: rgba(0,168,130,0.2); }
+.sec-card-icon { width: 44px; height: 44px; border-radius: 12px; background: var(--sec-teal-tint); color: var(--sec-teal); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+.sec-card h3 { font-family: var(--sec-serif); font-size: 22px; font-weight: 400; color: var(--sec-text); margin-bottom: 10px; letter-spacing: -0.01em; }
+.sec-card p { flex: 1; font-size: 14.5px; line-height: 1.6; color: var(--sec-text-secondary); }
 
-/* Details */
-.sec-details { padding: 96px 48px; background: var(--navy-deep); color: white; }
+/* Details — dark island on light page */
+.sec-details { padding: 96px 48px; background: #0C0D0F; color: #fff; }
 .sec-details-inner { max-width: 1100px; margin: 0 auto; }
-.sec-details .sec-slbl { color: var(--coral); }
-.sec-details .sec-stitle { color: white; }
-.sec-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
-.sec-detail-item { padding: 32px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; transition: all 0.3s; }
+.sec-details .sec-slbl { color: #4CE7CC; }
+.sec-details .sec-stitle { color: #fff; }
+.sec-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.sec-detail-item { padding: 28px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; transition: all 0.3s; }
 .sec-detail-item:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); }
-.sec-detail-item h4 { font-family: var(--sans); font-size: 16px; font-weight: 600; color: white; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
-.sec-detail-item h4 .sec-check { width: 22px; height: 22px; border-radius: 6px; background: rgba(13,115,119,0.2); color: var(--teal); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.sec-detail-item p { font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.55); padding-left: 32px; }
+.sec-detail-item h4 { font-family: var(--sec-sans); font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+.sec-detail-item h4 .sec-check { width: 22px; height: 22px; border-radius: 6px; background: rgba(0,168,130,0.2); color: #4CE7CC; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.sec-detail-item p { font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.65); padding-left: 32px; margin: 0; }
 
 /* BAA */
-.sec-baa { padding: 96px 48px; background: var(--bg-warm); }
+.sec-baa { padding: 96px 48px; background: var(--sec-bg-warm); }
 .sec-baa-inner { max-width: 900px; margin: 0 auto; text-align: center; }
-.sec-baa h2 { font-family: var(--serif); font-size: 38px; font-weight: 400; color: var(--navy-darkest); letter-spacing: -0.6px; margin-bottom: 16px; }
-.sec-baa-desc { font-size: 17px; line-height: 1.65; color: var(--text-secondary); max-width: 600px; margin: 0 auto 40px; }
-.sec-baa-items { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 700px; margin: 0 auto 40px; text-align: left; }
-.sec-baa-item { display: flex; align-items: flex-start; gap: 12px; font-size: 15px; color: var(--text); line-height: 1.5; padding: 16px 20px; background: white; border: 1px solid var(--border); border-radius: 12px; }
-.sec-baa-item-icon { flex-shrink: 0; width: 22px; height: 22px; border-radius: 6px; background: var(--teal-light); color: var(--teal); display: flex; align-items: center; justify-content: center; margin-top: 1px; }
-.sec-baa-cta { display: inline-flex; align-items: center; gap: 10px; padding: 14px 28px; background: var(--coral); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; font-family: var(--sans); cursor: pointer; text-decoration: none; transition: all 0.25s; }
-.sec-baa-cta:hover { background: #BF5535; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(212,97,62,0.25); }
+.sec-baa h2 { font-family: var(--sec-serif); font-size: clamp(28px, 4vw, 38px); font-weight: 400; color: var(--sec-text); letter-spacing: -0.6px; margin-bottom: 16px; }
+.sec-baa-desc { font-size: 17px; line-height: 1.65; color: var(--sec-text-secondary); max-width: 600px; margin: 0 auto 40px; }
+.sec-baa-items { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; max-width: 700px; margin: 0 auto 40px; text-align: left; }
+.sec-baa-item { display: flex; align-items: flex-start; gap: 12px; font-size: 14.5px; color: var(--sec-text); line-height: 1.5; padding: 16px 20px; background: var(--sec-surface); border: 1px solid var(--sec-border); border-radius: 12px; }
+.sec-baa-item-icon { flex-shrink: 0; width: 22px; height: 22px; border-radius: 6px; background: var(--sec-teal-tint); color: var(--sec-teal); display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+.sec-baa-cta { display: inline-flex; align-items: center; gap: 10px; padding: 13px 26px; background: var(--sec-coral); color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; font-family: var(--sec-sans); cursor: pointer; text-decoration: none; transition: all 0.25s; }
+.sec-baa-cta:hover { background: var(--sec-coral-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(232,80,26,0.25); }
 
 /* Architecture */
-.sec-arch { padding: 96px 48px; background: var(--bg); }
+.sec-arch { padding: 96px 48px; background: var(--sec-bg); }
 .sec-arch-inner { max-width: 900px; margin: 0 auto; }
 .sec-arch-flow { display: flex; flex-direction: column; gap: 0; margin-top: 48px; }
-.sec-arch-step { display: flex; align-items: flex-start; gap: 24px; padding: 28px 0; border-bottom: 1px solid var(--border); }
+.sec-arch-step { display: flex; align-items: flex-start; gap: 24px; padding: 28px 0; border-bottom: 1px solid var(--sec-border-soft); }
 .sec-arch-step:last-child { border-bottom: none; }
-.sec-arch-num { width: 36px; height: 36px; border-radius: 10px; background: rgba(45,58,78,0.06); color: var(--navy); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; margin-top: 2px; }
-.sec-arch-step h4 { font-size: 16px; font-weight: 600; color: var(--navy-darkest); margin-bottom: 6px; }
-.sec-arch-step p { font-size: 14.5px; line-height: 1.6; color: var(--text-secondary); }
-
-/* Footer */
-.sec-footer { padding: 48px; background: var(--navy-darkest); text-align: center; }
-.sec-footer-inner { max-width: 600px; margin: 0 auto; }
-.sec-footer p { font-size: 14px; color: rgba(255,255,255,0.4); line-height: 1.6; margin-bottom: 16px; }
-.sec-footer a { color: rgba(255,255,255,0.6); text-decoration: none; transition: color 0.2s; }
-.sec-footer a:hover { color: white; }
+.sec-arch-num { width: 36px; height: 36px; border-radius: 10px; background: var(--sec-teal-tint); color: var(--sec-teal); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; margin-top: 2px; }
+.sec-arch-step h4 { font-size: 16px; font-weight: 600; color: var(--sec-text); margin-bottom: 6px; }
+.sec-arch-step p { font-size: 14.5px; line-height: 1.6; color: var(--sec-text-secondary); }
 
 /* Responsive */
 @media (max-width: 900px) {
-  .sec-nav { padding: 0 24px; }
-  .sec-nav-links { display: none; }
-  .sec-nav-mob { display: block; }
   .sec-hero { padding: 120px 24px 60px; }
   .sec-hero h1 { font-size: 36px; }
   .sec-principles, .sec-details, .sec-baa, .sec-arch { padding: 72px 24px; }
@@ -167,59 +140,9 @@ const CSS = `
 `;
 
 export default function SecurityPage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  useEffect(() => {
-    if (mobileMenuOpen) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "";
-    return () => { document.body.style.overflow = ""; };
-  }, [mobileMenuOpen]);
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    if (document.getElementById("tether-fonts")) return;
-    const link = document.createElement("link");
-    link.id = "tether-fonts";
-    link.rel = "stylesheet";
-    link.href = "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap";
-    document.head.appendChild(link);
-  }, []);
-
   return (
     <><style>{CSS}</style>
     <div className="sec-page">
-
-      {/* NAV */}
-      <nav className="sec-nav">
-        <a href="/" className="sec-nav-logo">
-          <Image src="/LOGO.jpeg" alt="Tether" width={30} height={30} style={{ objectFit: "contain" }} />
-          <span className="sec-nav-logo-text">Tether</span>
-        </a>
-        <ul className="sec-nav-links">
-          <li><a href="/#product">Product</a></li>
-          <li><a href="/#platform">Platform</a></li>
-          <li><a href="/for-specialists">For Specialists</a></li>
-          <li><a href="/security" style={{ color: "var(--navy-deep)", fontWeight: 600 }}>Security</a></li>
-          <li><a href="/blog">Blog</a></li>
-          <li><a href="https://app.tetherhealth.co/login" className="sec-nav-login">Log In</a></li>
-          <li><a href="/request-demo" className="sec-nav-cta">Request Demo</a></li>
-        </ul>
-        <button className="sec-nav-mob" aria-label="Menu" onClick={() => setMobileMenuOpen(true)}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        </button>
-      </nav>
-      {mobileMenuOpen && (
-        <div className="sec-nav-overlay">
-          <button className="sec-nav-overlay-close" aria-label="Close" onClick={() => setMobileMenuOpen(false)}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-          <a href="/#product" onClick={() => setMobileMenuOpen(false)}>Product</a>
-          <a href="/#platform" onClick={() => setMobileMenuOpen(false)}>Platform</a>
-          <a href="/for-specialists" onClick={() => setMobileMenuOpen(false)}>For Specialists</a>
-          <a href="/security" onClick={() => setMobileMenuOpen(false)}>Security</a>
-          <a href="/blog" onClick={() => setMobileMenuOpen(false)}>Blog</a>
-          <a href="https://app.tetherhealth.co/login" onClick={() => setMobileMenuOpen(false)}>Log In</a>
-          <a href="/request-demo" className="sec-nav-overlay-cta" onClick={() => setMobileMenuOpen(false)}>Request Demo</a>
-        </div>
-      )}
 
       {/* HERO */}
       <section className="sec-hero">
@@ -239,7 +162,7 @@ export default function SecurityPage() {
             <div className="sec-hero-badges">
               <div className="sec-hero-badge"><div className="sec-hero-badge-dot" />HIPAA Compliant</div>
               <div className="sec-hero-badge"><div className="sec-hero-badge-dot" />BAA Available</div>
-              <div className="sec-hero-badge"><div className="sec-hero-badge-dot" />SOC 2 Planned</div>
+              <div className="sec-hero-badge"><div className="sec-hero-badge-dot sec-hero-badge-dot-planned" />SOC 2 Planned</div>
             </div>
           </Reveal>
         </div>
@@ -438,21 +361,6 @@ export default function SecurityPage() {
           </Reveal>
         </div>
       </section>
-
-      {/* FOOTER */}
-      <footer className="sec-footer">
-        <div className="sec-footer-inner">
-          <p>
-            Have questions about Tether&apos;s security practices? Contact our team at{" "}
-            <a href="mailto:support@tetherhealth.co">support@tetherhealth.co</a>
-          </p>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.3)" }}>
-            &copy; 2026 Tether Health, Inc. All rights reserved.{" "}
-            <a href="/" style={{ marginLeft: 16 }}>Back to Home</a>
-            <a href="/blog" style={{ marginLeft: 16 }}>Blog</a>
-          </p>
-        </div>
-      </footer>
 
     </div></>
   );
