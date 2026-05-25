@@ -19,11 +19,11 @@ const instrumentSerif = Instrument_Serif({
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.tetherhealth.co"),
   title: {
-    default: "Healthcare Referral Management Software | Tether",
+    default: "Tether — Intelligent Referral Coordination for Medical Practices",
     template: "%s | Tether",
   },
   description:
-    "Tether connects primary care and specialty practices with real-time referral tracking, loop closure, and a shared provider directory. Reduce referral leakage and grow your network.",
+    "AI agents that connect PCPs and specialists, close the referral loop, and integrate directly with your EHR. Built for practices that are done losing patients to referral black holes.",
   keywords: [
     "referral management software",
     "healthcare referral",
@@ -39,17 +39,15 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://tetherhealth.co",
     siteName: "Tether",
-    title: "Healthcare Referral Management Software | Tether",
+    title: "Tether — Intelligent Referral Coordination for Medical Practices",
     description:
-      "Tether connects primary care and specialty practices with real-time referral tracking, loop closure, and a shared provider directory.",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Tether Health" }],
+      "AI agents that connect PCPs and specialists, close the referral loop, and integrate directly with your EHR. Built for practices that are done losing patients to referral black holes.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Healthcare Referral Management Software | Tether",
+    title: "Tether — Intelligent Referral Coordination for Medical Practices",
     description:
-      "Real-time referral tracking, loop closure, and a shared provider directory for modern medical practices.",
-    images: ["/og-image.png"],
+      "AI agents that connect PCPs and specialists, close the referral loop, and integrate directly with your EHR.",
   },
   robots: {
     index: true,

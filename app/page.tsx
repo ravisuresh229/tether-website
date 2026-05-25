@@ -1,6 +1,5 @@
 "use client";
-import { useState, useEffect, useRef, useCallback } from "react";
-import Image from "next/image";
+import { useState, useEffect, useRef } from "react";
 import { JsonLd } from "@/components/JsonLd";
 
 // ─── IntersectionObserver hook (SSR-safe) ───
@@ -13,7 +12,7 @@ function useInView(opts: IntersectionObserverInit = {}) {
     if (typeof IntersectionObserver === "undefined") { setV(true); return; }
     const obs = new IntersectionObserver(
       ([e]) => { if (e.isIntersecting) { setV(true); obs.unobserve(el); } },
-      { threshold: 0.1, rootMargin: "0px 0px -40px 0px", ...opts }
+      { threshold: 0.15, rootMargin: "0px 0px -40px 0px", ...opts }
     );
     obs.observe(el);
     return () => obs.disconnect();
@@ -32,34 +31,45 @@ function useScrollY() {
   return y;
 }
 
-// ─── Animated Stat Counter (easeOutExpo, stagger, threshold 0.3) ───
-function easeOutExpo(t: number) {
-  return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+// ─── Reveal (scroll-up fade) ───
+function Reveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
+  const [ref, v] = useInView();
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        opacity: v ? 1 : 0,
+        transform: v ? "translateY(0)" : "translateY(24px)",
+        transition: `opacity 0.6s ease-out ${delay}s, transform 0.6s ease-out ${delay}s`,
+      }}
+    >
+      {children}
+    </div>
+  );
 }
 
-function StatCounter({ target, prefix = "", suffix = "", delay = 0, triggered }: { target: number; prefix?: string; suffix?: string; delay?: number; triggered: boolean }) {
-  const [val, setVal] = useState(target);
-  const ran = useRef(false);
+// ─── Stat counter (counts up on scroll into view) ───
+function easeOutExpo(t: number) { return t === 1 ? 1 : 1 - Math.pow(2, -10 * t); }
+
+function StatCounter({ target, prefix = "", suffix = "", durationMs = 1800, triggered }: { target: number; prefix?: string; suffix?: string; durationMs?: number; triggered: boolean }) {
+  const [val, setVal] = useState(0);
+  const started = useRef(false);
   useEffect(() => {
-    if (!triggered || ran.current) return;
-    ran.current = true;
-    requestAnimationFrame(() => {
-      setVal(0);
-      const animStart = performance.now() + delay;
-      const tick = (now: number) => {
-        const elapsed = Math.max(0, now - animStart);
-        const progress = Math.min(elapsed / 2000, 1);
-        const eased = easeOutExpo(progress);
-        setVal(Math.round(eased * target));
-        if (progress < 1) requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
-    });
-  }, [triggered, target, delay]);
-  return <span className="t-pstat-num">{prefix}{val}{suffix}</span>;
+    if (!triggered || started.current) return;
+    started.current = true;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const progress = Math.min((now - start) / durationMs, 1);
+      setVal(Math.round(easeOutExpo(progress) * target));
+      if (progress < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }, [triggered, target, durationMs]);
+  return <span>{prefix}{val}{suffix}</span>;
 }
 
-function ProblemStats() {
+function StatsRow() {
   const ref = useRef<HTMLDivElement>(null);
   const [triggered, setTriggered] = useState(false);
   useEffect(() => {
@@ -67,846 +77,1091 @@ function ProblemStats() {
     if (!el) return;
     const obs = new IntersectionObserver(
       ([e]) => { if (e.isIntersecting) { setTriggered(true); obs.disconnect(); } },
-      { threshold: 0.3 }
+      { threshold: 0.4 }
     );
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
   return (
-    <div ref={ref} className="t-pstats">
-      <div className="t-pstat"><div className="t-pstat-n"><StatCounter target={50} suffix="%" triggered={triggered} /></div><div className="t-pstat-l">of referrals never result in a completed specialist visit</div></div>
-      <div className="t-pstat"><div className="t-pstat-n"><StatCounter target={971} prefix="$" suffix="B" delay={200} triggered={triggered} /></div><div className="t-pstat-l">in annual U.S. healthcare waste attributed to care coordination failures</div></div>
-      <div className="t-pstat"><div className="t-pstat-n"><StatCounter target={81} suffix="%" delay={400} triggered={triggered} /></div><div className="t-pstat-l">of PCPs report dissatisfaction with the referral communication process</div></div>
+    <div ref={ref} className="t-stats">
+      <div className="t-stat">
+        <div className="t-stat-n"><StatCounter target={50} suffix="%" triggered={triggered} /></div>
+        <div className="t-stat-l">of referrals never reach a completed visit</div>
+      </div>
+      <div className="t-stat">
+        <div className="t-stat-n"><StatCounter target={971} prefix="$" suffix="B" triggered={triggered} /></div>
+        <div className="t-stat-l">in annual care coordination waste</div>
+      </div>
+      <div className="t-stat">
+        <div className="t-stat-n"><StatCounter target={81} suffix="%" triggered={triggered} /></div>
+        <div className="t-stat-l">of PCPs frustrated with referral communication</div>
+      </div>
     </div>
   );
 }
 
-// ─── Reveal ───
-function Reveal({ children, delay = 0, className = "", translateY = 18, duration = 0.55 }: { children: React.ReactNode; delay?: number; className?: string; translateY?: number; duration?: number }) {
-  const [ref, v] = useInView();
+// ─── Wordmark (inline SVG) ───
+function TetherWordmark({ size = 22 }: { size?: number }) {
   return (
-    <div ref={ref} className={className} style={{
-      opacity: v ? 1 : 0,
-      transform: v ? "translateY(0)" : `translateY(${translateY}px)`,
-      transition: `opacity ${duration}s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s, transform ${duration}s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s`,
-    }}>{children}</div>
-  );
-}
-
-// ─── Word rotator ───
-function WordRotator({ words }: { words: string[] }) {
-  const [idx, setIdx] = useState(0);
-  const [show, setShow] = useState(true);
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setShow(false);
-      setTimeout(() => { setIdx(i => (i + 1) % words.length); setShow(true); }, 400);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [words.length]);
-  return (
-    <span style={{ display: "inline-block", position: "relative", overflow: "hidden", verticalAlign: "bottom" }}>
-      <span
-        className="t-accent-serif"
-        style={{
-          display: "inline-block",
-          transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
-          transform: show ? "translateY(0)" : "translateY(110%)",
-          opacity: show ? 1 : 0,
-          color: "#0D7377",
-        }}
-      >{words[idx]}</span>
+    <span className="t-wordmark" aria-label="Tether">
+      <svg width={size} height={size} viewBox="0 0 22 22" fill="none" aria-hidden="true">
+        <path d="M3 6 H11 V16 H19" stroke="var(--teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      <span className="t-wordmark-text">Tether</span>
     </span>
   );
 }
 
-// ─── 3D tilt card ───
-function TiltCard({ children, className = "", style = {} }: { children: React.ReactNode; className?: string; style?: React.CSSProperties }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [transform, setTransform] = useState("");
-  const handleMove = useCallback((e: React.MouseEvent) => {
-    const el = ref.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    setTransform(`perspective(800px) rotateY(${x * 6}deg) rotateX(${-y * 6}deg) scale3d(1.02,1.02,1.02)`);
-  }, []);
-  const handleLeave = useCallback(() => setTransform(""), []);
-  return (
-    <div ref={ref} className={className} onMouseMove={handleMove} onMouseLeave={handleLeave}
-      style={{ ...style, transform: transform || undefined, transition: "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease", willChange: "transform" }}>
-      {children}
-    </div>
-  );
-}
-
-// ─── Network canvas ───
-function NetworkNodes() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const c = canvasRef.current;
-    if (!c) return;
-    const ctx = c.getContext("2d");
-    if (!ctx) return;
-    let id: number;
-    const nodes: { x: number; y: number; vx: number; vy: number; r: number }[] = [];
-    const resize = () => {
-      c.width = c.offsetWidth * 2;
-      c.height = c.offsetHeight * 2;
-      ctx.setTransform(2, 0, 0, 2, 0, 0);
-    };
-    resize();
-    window.addEventListener("resize", resize);
-    for (let i = 0; i < 20; i++) {
-      nodes.push({ x: Math.random() * c.offsetWidth, y: Math.random() * c.offsetHeight, vx: (Math.random() - 0.5) * 0.35, vy: (Math.random() - 0.5) * 0.35, r: Math.random() * 2.5 + 1.5 });
-    }
-    const draw = () => {
-      ctx.clearRect(0, 0, c.offsetWidth, c.offsetHeight);
-      nodes.forEach(n => { n.x += n.vx; n.y += n.vy; if (n.x < 0 || n.x > c.offsetWidth) n.vx *= -1; if (n.y < 0 || n.y > c.offsetHeight) n.vy *= -1; });
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          const d = Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y);
-          if (d < 150) { ctx.beginPath(); ctx.moveTo(nodes[i].x, nodes[i].y); ctx.lineTo(nodes[j].x, nodes[j].y); ctx.strokeStyle = `rgba(45,58,78,${0.07 * (1 - d / 150)})`; ctx.lineWidth = 1; ctx.stroke(); }
-        }
-      }
-      nodes.forEach(n => { ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2); ctx.fillStyle = "rgba(45,58,78,0.1)"; ctx.fill(); });
-      id = requestAnimationFrame(draw);
-    };
-    draw();
-    return () => { cancelAnimationFrame(id); window.removeEventListener("resize", resize); };
-  }, []);
-  return <canvas ref={canvasRef} style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 0 }} />;
-}
-
-// ─── Logo mark ───
-function TetherMark({ size = 32, color = "currentColor" }: { size?: number; color?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 64 64" fill="none">
-      <path d="M10 12C10 12 18 18 24 24C28 28 30 32 31 38L31 56" stroke={color} strokeWidth="2.2" strokeLinecap="round"/>
-      <path d="M14 10C14 10 20 16 26 22C29 25 31 30 32 36L32 56" stroke={color} strokeWidth="2.2" strokeLinecap="round"/>
-      <path d="M18 8C18 8 23 14 28 20C30 22 32 28 33 34L33 56" stroke={color} strokeWidth="2.2" strokeLinecap="round"/>
-      <path d="M22 7C22 7 26 12 30 18C31 20 33 26 33.5 32L33.5 56" stroke={color} strokeWidth="2.2" strokeLinecap="round"/>
-      <path d="M54 12C54 12 46 18 40 24C36 28 34 32 33 38L33 56" stroke={color} strokeWidth="2.2" strokeLinecap="round"/>
-      <path d="M50 10C50 10 44 16 38 22C35 25 33 30 32 36L32 56" stroke={color} strokeWidth="2.2" strokeLinecap="round"/>
-      <path d="M46 8C46 8 41 14 36 20C34 22 32 28 31 34L31 56" stroke={color} strokeWidth="2.2" strokeLinecap="round"/>
-      <path d="M42 7C42 7 38 12 34 18C33 20 31 26 30.5 32L30.5 56" stroke={color} strokeWidth="2.2" strokeLinecap="round"/>
-    </svg>
-  );
-}
-
 // ─── Icons ───
-const IconArrowRight = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>;
-const IconCheck = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>;
-const IconSend = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>;
-const IconNetwork = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><line x1="12" y1="7.5" x2="5" y2="16.5"/><line x1="12" y1="7.5" x2="19" y2="16.5"/><line x1="7.5" y1="19" x2="16.5" y2="19"/></svg>;
-const IconShield = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>;
-const IconClock = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
-const IconUsers = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
-const IconZap = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>;
-const IconRefresh = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>;
-const IconLink = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>;
-const IconSparkles = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/><path d="M19 12l.75 2.25L22 15l-2.25.75L19 18l-.75-2.25L16 15l2.25-.75L19 12z"/><path d="M5 12l.75 2.25L8 15l-2.25.75L5 18l-.75-2.25L2 15l2.25-.75L5 12z"/></svg>;
-const IconCalendarCheck = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg>;
-const IconUpload = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>;
-const IconPulse = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>;
-const IconCheckCircle = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>;
-const IconPlay = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>;
-const IconMessageSquare = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>;
-const IconPlug = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M6 8h.01"/><path d="M18 8h.01"/><path d="M6 12h12"/></svg>;
+const IconArrowRight = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>;
+const IconCheck = () => <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>;
+const IconLinkedIn = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14zM8.5 9.5H6V18h2.5V9.5zM7.25 8.25a1.25 1.25 0 1 0 0-2.5 1.25 1.25 0 0 0 0 2.5zM18 13.5c0-2.04-1.31-3.25-3-3.25a2.6 2.6 0 0 0-2.36 1.27V10H10v8h2.64v-4.32c0-1.06.69-1.6 1.51-1.6.79 0 1.35.52 1.35 1.6V18H18v-4.5z"/></svg>;
+const IconBolt = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>;
+const IconSend = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>;
+const IconSpark = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/><path d="M19 14l.9 2.6L22 17l-2.1.4L19 20l-.9-2.6L16 17l2.1-.4L19 14z"/></svg>;
 
-// ─── Animated Ask Tether Chat Demo ───
-const CHAT_MESSAGES = [
-  { type: "user" as const, text: "What needs my attention today?" },
-  { type: "tether" as const, text: "You have 2 referrals awaiting visit summaries and 3 new referrals to process. Kim Jones was seen by Dr. Demory at Forefront Dermatology 5 days ago but no summary has been sent back yet.", typingMs: 1200 },
-  { type: "user" as const, text: "Request the summary for Kim Jones" },
-  { type: "tether" as const, text: "Summary request sent to Forefront Dermatology. I'll notify you when it arrives. You can also reach their office directly at (301) 668-3004.", typingMs: 800 },
-  { type: "user" as const, text: "I need to refer a new patient to endocrinology. Do any take Aetna near Fairfax?" },
-  { type: "tether" as const, text: "I found 3 endocrinologists near Fairfax that accept Aetna. Virginia Diabetes & Endocrine Associates has availability this week and requires a recent A1C, metabolic panel, and medication list with the referral. Want me to start the referral?", typingMs: 1200 },
+// ─── Hero illustration (static designed UI mockup — no images, no video) ───
+// ─── Hero headline: rotating teal word ───
+const HEADLINE_WORDS = ["relationship", "coordination", "outcome", "relationship"];
+
+function RotatingWord() {
+  const [i, setI] = useState(0);
+  const [visible, setVisible] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    const tick = () => {
+      if (cancelled) return;
+      setVisible(false);
+      setTimeout(() => {
+        if (cancelled) return;
+        setI((x) => (x + 1) % HEADLINE_WORDS.length);
+        setVisible(true);
+      }, 400);
+    };
+    const id = setInterval(tick, 2500);
+    return () => { cancelled = true; clearInterval(id); };
+  }, []);
+  return (
+    <em
+      className="t-headline-word"
+      style={{ opacity: visible ? 1 : 0, transition: "opacity 0.4s ease" }}
+      aria-live="polite"
+    >
+      {HEADLINE_WORDS[i]}
+    </em>
+  );
+}
+
+// ─── Hero typewriter (Ask Tether strip) ───
+const TYPEWRITER: { text: string; action: string }[] = [
+  { text: "A.K.\u2019s specialist is not accepting new patients.", action: "Find alternative" },
+  { text: "3 referrals sent this week. 1 needs follow-up.", action: "Send follow-up" },
+  { text: "R.T. \u2014 Orthopedics awaiting visit summary.", action: "Send reminder" },
+  { text: "J.M. loop closed. Summary pushed to EHR.", action: "View summary" },
 ];
 
-function AnimatedChatDemo() {
-  const [visibleCount, setVisibleCount] = useState(0);
-  const [showTyping, setShowTyping] = useState(false);
-  const [inView, setInView] = useState(false);
-  const [completed, setCompleted] = useState(false);
-  const sectionRef = useRef<HTMLDivElement>(null);
+function HeroTypewriter({ onAction }: { onAction?: (action: string) => void }) {
+  const [idx, setIdx] = useState(0);
+  const [display, setDisplay] = useState("");
+  const [actionVisible, setActionVisible] = useState(false);
 
   useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => {
-        const nowInView = e.isIntersecting;
-        setInView(nowInView);
-        if (!nowInView) {
-          setVisibleCount(0);
-          setShowTyping(false);
-          setCompleted(false);
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let chars = 0;
+    let phase: "type" | "hold" | "delete" | "gap" = "type";
+    let local = 0;
+
+    const tick = () => {
+      if (cancelled) return;
+      const cur = TYPEWRITER[local];
+      if (phase === "type") {
+        chars++;
+        setDisplay(cur.text.slice(0, chars));
+        if (chars >= cur.text.length) {
+          phase = "hold";
+          setActionVisible(true);
+          timer = setTimeout(tick, 2800);
+        } else {
+          timer = setTimeout(tick, 38);
         }
-      },
-      { threshold: 0.2 }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!inView || completed) return;
-    const seq: [number, () => void][] = [
-      [300, () => setVisibleCount(1)],
-      [500, () => setShowTyping(true)],
-      [1200, () => { setShowTyping(false); setVisibleCount(2); }],
-      [2000, () => setVisibleCount(3)],
-      [500, () => setShowTyping(true)],
-      [800, () => { setShowTyping(false); setVisibleCount(4); }],
-      [2000, () => setVisibleCount(5)],
-      [500, () => setShowTyping(true)],
-      [1200, () => { setShowTyping(false); setVisibleCount(6); }],
-      [3000, () => setCompleted(true)],
-    ];
-    let t = 0;
-    const ids: ReturnType<typeof setTimeout>[] = [];
-    for (const [delay, fn] of seq) {
-      t += delay;
-      ids.push(setTimeout(fn, t));
-    }
-    return () => ids.forEach((id) => clearTimeout(id));
-  }, [inView, completed]);
-
-  const visibleMessages = CHAT_MESSAGES.slice(0, visibleCount);
-
-  return (
-    <div ref={sectionRef} className="t-ask-chat-demo">
-      <div className="t-ask-chat-panel">
-        <div className="t-ask-chat-header">
-          <span className="t-ask-chat-title">Ask Tether</span>
-          <div className="t-ask-chat-header-actions">
-            <span className="t-ask-chat-btn" aria-hidden="true">—</span>
-            <span className="t-ask-chat-btn" aria-hidden="true">×</span>
-          </div>
-        </div>
-        <div className="t-ask-chat-messages">
-          {visibleMessages.map((m, i) => (
-            <div
-              key={i}
-              className={`t-ask-bubble t-ask-bubble-${m.type}`}
-              style={{
-                animation: inView ? "t-bubble-in 0.3s ease forwards" : "none",
-              }}
-            >
-              <p>{m.text}</p>
-            </div>
-          ))}
-          {showTyping && (
-            <div className="t-ask-typing" style={{ animation: "t-bubble-in 0.3s ease forwards" }}>
-              <span className="t-ask-typing-dot" />
-              <span className="t-ask-typing-dot" />
-              <span className="t-ask-typing-dot" />
-            </div>
-          )}
-        </div>
-        <div className="t-ask-chat-input">
-          <input type="text" placeholder="Ask about referrals or dashboard..." readOnly disabled aria-hidden="true" />
-          <button type="button" className="t-ask-chat-send" aria-label="Send" disabled>
-            <IconSend />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── EHR Connection Diagram ───
-function EHRDiagram() {
-  return (
-    <div className="t-ehr-diagram">
-      <svg viewBox="0 0 500 254" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <filter id="tether-glow">
-            <feGaussianBlur stdDeviation="4" result="blur" />
-            <feFlood floodColor="#0D7377" floodOpacity="0.3" />
-            <feComposite in2="blur" operator="in" />
-            <feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge>
-          </filter>
-          <clipPath id="ehr-logo-clip">
-            <circle cx="250" cy="100" r="24" />
-          </clipPath>
-        </defs>
-        <line x1="250" y1="100" x2="250" y2="54" stroke="#D1D5DB" strokeWidth="1.5" />
-        <line x1="250" y1="100" x2="134" y2="100" stroke="#D1D5DB" strokeWidth="1.5" />
-        <line x1="250" y1="100" x2="366" y2="100" stroke="#D1D5DB" strokeWidth="1.5" />
-        <line x1="250" y1="100" x2="250" y2="186" stroke="#D1D5DB" strokeWidth="1.5" />
-        <circle cx="250" cy="100" r="3" fill="#0D7377" className="t-ehr-dot t-ehr-dot-1" />
-        <circle cx="250" cy="100" r="3" fill="#0D7377" className="t-ehr-dot t-ehr-dot-2" />
-        <circle cx="250" cy="100" r="3" fill="#0D7377" className="t-ehr-dot t-ehr-dot-3" />
-        <circle cx="250" cy="100" r="3" fill="#0D7377" className="t-ehr-dot t-ehr-dot-4" />
-        <circle cx="250" cy="100" r="24" fill="#0D7377" filter="url(#tether-glow)" />
-        <image href="/LOGO.jpeg" x="226" y="76" width="48" height="48" clipPath="url(#ehr-logo-clip)" preserveAspectRatio="xMidYMid meet" />
-        <rect x="140" y="2" width="220" height="56" rx="28" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
-        <image href="/athena.png" x="150" y="10" width="200" height="40" preserveAspectRatio="xMidYMid meet" />
-        <rect x="2" y="70" width="150" height="56" rx="28" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
-        <image href="/modmed.png" x="10" y="78" width="134" height="40" preserveAspectRatio="xMidYMid meet" />
-        <rect x="348" y="70" width="150" height="56" rx="28" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
-        <text x="423" y="104" textAnchor="middle" fill="#6B7280" fontSize="14" fontFamily="DM Sans, sans-serif" fontWeight="500">&amp; More</text>
-        <rect x="140" y="186" width="220" height="56" rx="28" fill="#fff" stroke="#E5E7EB" strokeWidth="1" />
-        <image href="/ecw.jpg" x="150" y="194" width="200" height="40" preserveAspectRatio="xMidYMid meet" />
-      </svg>
-    </div>
-  );
-}
-
-// ─── Newsletter Section ───
-function NewsletterSection() {
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "duplicate" | "error">("idle");
-  const [errorMsg, setErrorMsg] = useState("");
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMsg("");
-    const trimmed = email.trim().toLowerCase();
-    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-      setStatus("error");
-      setErrorMsg("Please enter a valid email");
-      return;
-    }
-    setStatus("loading");
-    try {
-      const res = await fetch("/api/newsletter", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: trimmed }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        if (data.duplicate) setStatus("duplicate");
-        else setStatus("success");
+      } else if (phase === "hold") {
+        setActionVisible(false);
+        phase = "delete";
+        timer = setTimeout(tick, 200);
+      } else if (phase === "delete") {
+        chars--;
+        setDisplay(cur.text.slice(0, Math.max(chars, 0)));
+        if (chars <= 0) {
+          phase = "gap";
+          timer = setTimeout(tick, 300);
+        } else {
+          timer = setTimeout(tick, 18);
+        }
       } else {
-        setStatus("error");
-        setErrorMsg(data.error || "Something went wrong.");
+        local = (local + 1) % TYPEWRITER.length;
+        setIdx(local);
+        phase = "type";
+        chars = 0;
+        timer = setTimeout(tick, 60);
       }
-    } catch {
-      setStatus("error");
-      setErrorMsg("Something went wrong. Please try again.");
-    }
-  };
-  if (status === "success" || status === "duplicate") {
-    return (
-      <section className="t-newsletter">
-        <div className="t-newsletter-inner">
-          <Reveal><div className="t-slbl">STAY IN THE LOOP</div></Reveal>
-          <Reveal delay={0.1}>
-            <div className="t-newsletter-success">
-              <span className="t-newsletter-success-icon"><IconCheckCircle /></span>
-              {status === "success" ? "You're in. We'll be in touch." : "You're already subscribed."}
-            </div>
-          </Reveal>
-        </div>
-      </section>
-    );
-  }
-  return (
-    <section className="t-newsletter">
-      <div className="t-newsletter-inner">
-        <Reveal><div className="t-slbl">STAY IN THE LOOP</div></Reveal>
-        <Reveal delay={0.1}><h2>Get updates on Tether.</h2></Reveal>
-        <Reveal delay={0.15}><p className="t-newsletter-sub">Product updates, referral management insights, and early access to new features. No spam, unsubscribe anytime.</p></Reveal>
-        <Reveal delay={0.2}>
-          <form className="t-newsletter-form" onSubmit={handleSubmit}>
-            <input
-              type="email"
-              className={`t-newsletter-input ${status === "error" && errorMsg ? "t-newsletter-input-error" : ""}`}
-              placeholder="your@email.com"
-              value={email}
-              onChange={(e) => { setEmail(e.target.value); setErrorMsg(""); setStatus("idle"); }}
-              disabled={status === "loading"}
-            />
-            <button type="submit" className="t-newsletter-btn" disabled={status === "loading"}>
-              {status === "loading" ? "Subscribing..." : "Subscribe"}
-            </button>
-          </form>
-          {errorMsg && <p className="t-newsletter-msg">{errorMsg}</p>}
-          <p className="t-newsletter-note">Join practice managers and administrators staying ahead of referral management.</p>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
+    };
 
-// ─── Styles (t- prefixed to avoid Tailwind collisions) ───
-const CSS = `
-:root {
-  --navy: #2D3A4E; --navy-deep: #1E2A3A; --navy-darkest: #151F2B;
-  --bg: #FAFAF7; --bg-warm: #F5F3EE; --surface: #EDEADF;
-  --teal: #0D7377; --teal-dark: #095456; --teal-light: #E8F4F4;
-  --coral: #D4613E; --coral-hover: #BF5535;
-  --text: #2D2D2D; --text-secondary: #6B6B6B; --text-tertiary: #9A9A9A;
-  --t-border: #E0DDD5;
-  --serif: var(--font-serif), Georgia, serif;
-  --sans: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
-}
-html { scroll-behavior: smooth; }
-.tether-lp, .tether-lp * { margin: 0; padding: 0; box-sizing: border-box; }
-.tether-lp { font-family: var(--sans); color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; overflow-x: hidden; position: relative; }
-.tether-lp ::selection { background: var(--navy); color: #fff; }
-
-.t-scroll-prog { position: fixed; top: 72px; left: 0; height: 2px; background: linear-gradient(90deg, var(--teal), var(--coral)); z-index: 101; border-radius: 0 2px 2px 0; }
-.t-gradient-orb { position: fixed; width: 600px; height: 600px; border-radius: 50%; pointer-events: none; z-index: 0; opacity: 0.04; background: radial-gradient(circle, var(--teal), transparent 70%); filter: blur(40px); }
-
-.t-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 0 48px; height: 72px; display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(16px) saturate(1.8); -webkit-backdrop-filter: blur(16px) saturate(1.8); background: rgba(250,250,247,0.85); border-bottom: 1px solid rgba(224,221,213,0.5); transition: all 0.3s; }
-.t-nav-s { box-shadow: 0 1px 24px rgba(0,0,0,0.06); }
-.t-nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--navy-deep); transition: transform 0.2s; }
-.t-nav-logo:hover { transform: scale(1.03); }
-.t-nav-logo-text { font-family: var(--sans); font-weight: 600; font-size: 22px; letter-spacing: -0.5px; color: var(--navy-deep); }
-.t-nav-links { display: flex; align-items: center; gap: 36px; list-style: none; }
-.t-nav-links a { font-size: 14px; font-weight: 500; color: var(--text-secondary); text-decoration: none; transition: color 0.2s; letter-spacing: 0.01em; position: relative; }
-.t-nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 1.5px; background: var(--teal); transition: width 0.3s cubic-bezier(0.16,1,0.3,1); pointer-events: none; }
-.t-nav-links a:hover { color: var(--navy-deep); }
-.t-nav-links a:hover::after { width: 100%; }
-.t-nav-login { color: var(--text-secondary) !important; }
-.t-nav-login::after { display: none !important; }
-.t-nav-cta { background: var(--teal) !important; color: #fff !important; padding: 10px 22px !important; border-radius: 8px !important; font-size: 14px !important; font-weight: 600 !important; transition: all 0.25s ease !important; }
-.t-nav-cta::after { display: none !important; }
-.t-nav-cta:hover { background: var(--teal-dark) !important; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(13,115,119,0.25) !important; }
-.t-nav-mob { display: none; background: none; border: none; cursor: pointer; padding: 8px; color: var(--navy-deep); }
-.t-nav-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200; background: rgba(250,250,247,0.98); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 80px 24px; opacity: 0; animation: t-mob-in 0.3s ease forwards; }
-@keyframes t-mob-in { to { opacity: 1; } }
-.t-nav-overlay a { font-size: 24px; font-weight: 500; color: var(--navy-deep); text-decoration: none; }
-.t-nav-overlay-close { position: absolute; top: 24px; right: 24px; background: none; border: none; cursor: pointer; padding: 8px; color: var(--navy-deep); }
-.t-nav-overlay-cta { display: inline-flex; padding: 14px 28px; background: var(--coral); color: #fff; border-radius: 10px; font-size: 15px; font-weight: 600; text-decoration: none; margin-top: 16px; }
-.t-nav-overlay-cta:hover { background: var(--coral-hover); }
-
-.t-hero { position: relative; display: flex; align-items: flex-start; padding: 160px 24px 80px; overflow: hidden; background: linear-gradient(135deg, #FAFAF7 0%, #FAFAF6 45%, #F9F9F5 50%, #FAFAF6 55%, #FAFAF7 100%); background-size: 200% 200%; animation: t-hero-breathe 14s ease-in-out infinite; }
-@keyframes t-hero-breathe { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
-.t-hero-inner { max-width: 1200px; margin: 0 auto; width: 100%; flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; z-index: 1; min-height: 0; }
-.t-hero-content { max-width: 560px; display: flex; flex-direction: column; align-items: center; }
-.t-hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px 6px 8px; background: rgba(45,58,78,0.06); border: 1px solid rgba(45,58,78,0.1); border-radius: 100px; font-size: 13px; font-weight: 500; color: var(--navy); margin-bottom: 28px; letter-spacing: 0.01em; animation: t-badge-in 0.8s cubic-bezier(0.16,1,0.3,1) both; }
-@keyframes t-badge-in { from { opacity: 0; transform: translateY(12px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
-.t-hero-badge-dot { width: 8px; height: 8px; background: var(--teal); border-radius: 50%; animation: t-pd 2s ease infinite; }
-@keyframes t-pd { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.4); } }
-
-.t-hero-title { font-family: var(--serif); font-size: 60px; line-height: 1.06; font-weight: 400; color: var(--navy-darkest); letter-spacing: -1.5px; margin-bottom: 24px; }
-.t-hero-title-line { display: block; overflow: hidden; }
-.t-hero-title-line-inner { display: block; animation: t-title-up 0.9s cubic-bezier(0.16,1,0.3,1) both; }
-.t-hero-title-line:nth-child(1) .t-hero-title-line-inner { animation-delay: 0.15s; }
-.t-hero-title-rotator-line { display: block; text-align: center; }
-.t-hero-title-rotator-line .t-hero-title-line-inner { display: inline-block; }
-.t-hero-title-line:nth-child(2) .t-hero-title-line-inner { animation-delay: 0.25s; }
-.t-hero-title-line:nth-child(3) .t-hero-title-line-inner { animation-delay: 0.35s; }
-@keyframes t-title-up { from { transform: translateY(110%); } to { transform: translateY(0); } }
-
-.t-hero-sub { font-size: 18px; line-height: 1.65; color: var(--text-secondary); margin-bottom: 40px; max-width: 460px; margin-left: auto; margin-right: auto; font-weight: 400; animation: t-fade-up 0.8s cubic-bezier(0.16,1,0.3,1) 0.5s both; }
-@keyframes t-fade-up { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
-.t-hero-actions { display: flex; gap: 16px; align-items: center; justify-content: center; flex-wrap: wrap; animation: t-fade-up 0.8s cubic-bezier(0.16,1,0.3,1) 0.6s both; }
-
-.t-btn-p { display: inline-flex; align-items: center; gap: 10px; padding: 14px 28px; background: var(--coral); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; font-family: var(--sans); cursor: pointer; transition: all 0.25s cubic-bezier(0.16,1,0.3,1); text-decoration: none; letter-spacing: 0.01em; position: relative; overflow: hidden; }
-.t-btn-p::before { content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; background: rgba(255,255,255,0.15); border-radius: 50%; transform: translate(-50%,-50%); transition: width 0.6s, height 0.6s; pointer-events: none; }
-.t-btn-p:hover::before { width: 300px; height: 300px; }
-.t-btn-p:hover { background: var(--coral-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(212,97,62,0.25); }
-.t-btn-s { display: inline-flex; align-items: center; gap: 8px; padding: 14px 24px; background: transparent; color: var(--text); border: 1.5px solid var(--t-border); border-radius: 10px; font-size: 15px; font-weight: 500; font-family: var(--sans); cursor: pointer; transition: all 0.25s; text-decoration: none; }
-.t-btn-s:hover { border-color: var(--navy); color: var(--navy); background: rgba(45,58,78,0.04); }
-.t-btn-teal { display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: var(--teal); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; font-family: var(--sans); cursor: pointer; transition: all 0.25s; text-decoration: none; }
-.t-btn-teal:hover { background: var(--teal-dark); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(13,115,119,0.25); }
-
-.t-hero-demo-wrap { max-width: 1000px; margin: 40px auto 0; width: 100%; }
-.t-hero-demo-frame { border-radius: 14px; overflow: hidden; border: 1px solid #E5E7EB; box-shadow: 0 4px 24px rgba(0,0,0,0.08); background: #fff; }
-.t-hero-demo-video { position: relative; min-height: 400px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-.t-hero-demo-video video { display: block; width: 100%; height: auto; max-height: 70vh; object-fit: contain; }
-.t-hero-demo-caption { text-align: center; font-size: 13px; color: var(--text-tertiary); margin-top: 24px; font-weight: 400; }
-.t-hero-demo-expand { position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; color: #fff; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 50%; border: none; cursor: pointer; z-index: 10; opacity: 0; transition: opacity 0.2s, background 0.2s, transform 0.2s; }
-.t-hero-demo-video:hover .t-hero-demo-expand { opacity: 1; }
-.t-hero-demo-expand:hover { background: rgba(0,0,0,0.7); transform: scale(1.05); }
-.t-hero-demo-progress { position: absolute; bottom: 0; left: 0; height: 3px; background: var(--teal); border-top-right-radius: 3px; border-bottom-right-radius: 3px; transition: width 0.1s linear; }
-
-.t-ask { padding: 120px 48px; background: linear-gradient(180deg, var(--bg-warm), var(--bg)); }
-.t-ask-inner { max-width: 900px; margin: 0 auto; text-align: center; }
-.t-ask-title { font-family: var(--serif); font-size: 44px; line-height: 1.15; font-weight: 400; color: var(--navy-darkest); letter-spacing: -0.8px; margin-bottom: 20px; }
-.t-ask-sub { font-size: 17px; line-height: 1.7; color: var(--text-secondary); max-width: 680px; margin: 0 auto 48px; }
-.t-ask-chat-demo { margin-bottom: 56px; display: flex; justify-content: center; }
-.t-ask-chat-panel { max-width: 520px; width: 100%; background: #fff; border: 1px solid var(--t-border); border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); overflow: hidden; }
-.t-ask-chat-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--t-border); background: #fff; }
-.t-ask-chat-title { font-size: 15px; font-weight: 600; color: #1e293b; }
-.t-ask-chat-header-actions { display: flex; gap: 8px; }
-.t-ask-chat-btn { font-size: 18px; color: var(--text-tertiary); line-height: 1; cursor: default; }
-.t-ask-chat-messages { padding: 20px 16px 16px; min-height: 240px; display: flex; flex-direction: column; gap: 12px; text-align: left; }
-.t-ask-bubble { padding: 12px 16px; font-size: 15px; line-height: 1.5; margin: 0; text-align: left; }
-.t-ask-bubble-user { align-self: flex-end; max-width: 75%; background: #0D9488; color: #fff; border-radius: 16px 16px 4px 16px; }
-.t-ask-bubble-tether { align-self: flex-start; max-width: 85%; background: #f1f5f9; color: #1e293b; border-radius: 16px 16px 16px 4px; }
-.t-ask-bubble p { margin: 0; font-size: inherit; font-weight: inherit; }
-@keyframes t-bubble-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-.t-ask-typing { align-self: flex-start; display: flex; align-items: center; gap: 6px; padding: 14px 18px; background: #f1f5f9; border-radius: 16px 16px 16px 4px; }
-.t-ask-typing-dot { width: 6px; height: 6px; border-radius: 50%; background: #94a3b8; animation: t-typing-dot 0.6s ease-in-out infinite both; }
-.t-ask-typing-dot:nth-child(2) { animation-delay: 0.15s; }
-.t-ask-typing-dot:nth-child(3) { animation-delay: 0.3s; }
-@keyframes t-typing-dot { 0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; } 40% { transform: scale(1.2); opacity: 1; } }
-.t-ask-chat-input { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--t-border); }
-.t-ask-chat-input input { flex: 1; padding: 10px 14px; border: 1px solid var(--t-border); border-radius: 10px; font-size: 14px; font-family: inherit; color: var(--text-tertiary); background: #fafafa; }
-.t-ask-chat-send { width: 40px; height: 40px; border-radius: 10px; background: var(--teal); color: #fff; border: none; display: flex; align-items: center; justify-content: center; cursor: default; }
-.t-ask-chat-send svg { width: 18px; height: 18px; }
-.t-ask-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-.t-ask-card { background: #fff; border: 1px solid var(--t-border); border-radius: 16px; padding: 32px 24px; text-align: center; transition: all 0.3s; }
-.t-ask-card:hover { border-color: var(--teal); box-shadow: 0 8px 24px rgba(13,115,119,0.08); }
-.t-ask-card-icon { width: 48px; height: 48px; border-radius: 12px; background: var(--teal-light); color: var(--teal); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
-.t-ask-card h4 { font-size: 18px; font-weight: 600; color: var(--navy-darkest); margin-bottom: 12px; }
-.t-ask-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin: 0; }
-
-.t-video-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 48px; background: rgba(0,0,0,0.8); }
-.t-video-modal-inner { position: relative; max-width: 90vw; max-height: 90vh; }
-.t-video-modal video { max-width: 90vw; max-height: 90vh; border-radius: 12px; }
-.t-video-modal-close { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.5); border: none; color: #fff; cursor: pointer; padding: 8px 12px; font-size: 20px; line-height: 1; border-radius: 6px; z-index: 10; opacity: 0.9; }
-.t-video-modal-close:hover { opacity: 1; }
-.t-problem { padding: 120px 48px 100px; background: var(--navy-deep); color: #fff; position: relative; overflow: hidden; }
-.t-problem::before { content: ''; position: absolute; top: -200px; right: -200px; width: 600px; height: 600px; background: radial-gradient(circle, rgba(13,115,119,0.12), transparent 70%); pointer-events: none; animation: t-orb-drift 20s ease-in-out infinite alternate; }
-@keyframes t-orb-drift { from { transform: translate(0,0); } to { transform: translate(-60px,40px); } }
-.t-problem::after { content: ''; position: absolute; bottom: -100px; left: -100px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(212,97,62,0.06), transparent 70%); pointer-events: none; }
-.t-problem-fade { position: absolute; bottom: 0; left: 0; right: 0; height: 100px; background: linear-gradient(to bottom, transparent, var(--bg-warm)); pointer-events: none; z-index: 2; }
-.t-problem-inner { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
-.t-plbl { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--coral); margin-bottom: 20px; }
-.t-problem h2 { font-family: var(--serif); font-size: 46px; line-height: 1.1; font-weight: 400; letter-spacing: -1px; margin-bottom: 24px; max-width: 700px; }
-.t-problem-desc { font-size: 18px; line-height: 1.7; color: rgba(255,255,255,0.6); max-width: 600px; margin-bottom: 64px; }
-.t-pstats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: rgba(255,255,255,0.08); border-radius: 16px; overflow: hidden; }
-.t-pstat { padding: 48px 40px; background: var(--navy-deep); transition: background 0.3s; }
-.t-pstat:hover { background: rgba(30,42,58,0.7); }
-.t-pstat-n { font-family: var(--serif); font-size: 54px; font-weight: 400; color: var(--coral); line-height: 1; margin-bottom: 12px; }
-.t-pstat-num { display: inline-block; min-width: 3ch; will-change: contents; }
-.t-pstat-l { font-size: 15px; color: rgba(255,255,255,0.5); line-height: 1.5; }
-
-.t-slbl { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--teal); margin-bottom: 16px; }
-.t-stitle { font-family: var(--serif); font-size: 44px; line-height: 1.15; font-weight: 400; color: var(--navy-darkest); letter-spacing: -0.8px; margin-bottom: 16px; }
-.t-sdesc { font-size: 17px; line-height: 1.65; color: var(--text-secondary); max-width: 520px; margin-bottom: 64px; }
-
-.t-product { padding: 120px 48px; background: var(--bg-warm); }
-.t-product-inner { max-width: 1200px; margin: 0 auto; }
-.t-product-header { text-align: center; margin-bottom: 72px; }
-.t-product-header .t-sdesc { margin-left: auto; margin-right: auto; margin-bottom: 0; }
-.t-prows { display: flex; flex-direction: column; gap: 0; }
-.t-prow { display: flex; align-items: center; gap: 48px; margin-bottom: 64px; }
-.t-prow:last-child { margin-bottom: 0; }
-.t-prow-video { flex: 0 0 60%; width: 60%; border-radius: 12px; overflow: hidden; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 24px rgba(0,0,0,0.06); aspect-ratio: 16/10; }
-.t-prow-video video { display: block; width: 100%; height: 100%; object-fit: cover; }
-.t-prow-text { flex: 0 0 40%; width: 40%; }
-.t-prow-text h3 { font-family: var(--serif); font-size: 28px; font-weight: 400; color: var(--navy-darkest); margin-bottom: 12px; }
-.t-prow-text p { font-size: 15px; line-height: 1.7; color: var(--text-secondary); margin-bottom: 16px; }
-.t-prow-watch { font-size: 14px; font-weight: 500; color: var(--teal); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: color 0.2s; cursor: pointer; background: none; border: none; font-family: inherit; padding: 0; }
-.t-prow-watch:hover { color: var(--teal-dark); }
-
-.t-audiences { padding: 120px 48px; background: var(--bg); }
-.t-audiences-inner { max-width: 1200px; margin: 0 auto; }
-.t-aud-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 64px; }
-.t-aud-card { border: 1px solid var(--t-border); border-radius: 20px; padding: 48px 40px; background: #fff; transition: all 0.35s cubic-bezier(0.16,1,0.3,1); }
-.t-aud-card:hover { border-color: rgba(45,58,78,0.2); box-shadow: 0 8px 40px rgba(0,0,0,0.05); transform: translateY(-4px); }
-.t-aud-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; transition: transform 0.3s; }
-.t-aud-card:hover .t-aud-icon { transform: scale(1.1) rotate(-3deg); }
-.t-aud-spec .t-aud-icon { background: rgba(212,97,62,0.1); color: var(--coral); }
-.t-aud-pcp .t-aud-icon { background: var(--teal-light); color: var(--teal); }
-.t-aud-card h3 { font-family: var(--serif); font-size: 28px; font-weight: 400; color: var(--navy-darkest); margin-bottom: 8px; }
-.t-aud-card-sub { font-size: 15px; color: var(--text-secondary); margin-bottom: 28px; line-height: 1.6; }
-.t-aud-feats { display: flex; flex-direction: column; gap: 14px; }
-.t-aud-feat { display: flex; align-items: flex-start; gap: 12px; font-size: 14.5px; color: var(--text); line-height: 1.5; }
-.t-aud-feat-icon { flex-shrink: 0; width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
-.t-aud-spec .t-aud-feat-icon { background: rgba(212,97,62,0.08); color: var(--coral); }
-.t-aud-pcp .t-aud-feat-icon { background: var(--teal-light); color: var(--teal); }
-.t-aud-feat-highlight { font-weight: 600; color: var(--teal) !important; }
-
-.t-network { padding: 120px 48px; background: linear-gradient(180deg, var(--bg-warm), var(--bg)); }
-.t-network-inner { max-width: 900px; margin: 0 auto; text-align: center; }
-.t-network h2 { font-family: var(--serif); font-size: 44px; line-height: 1.15; font-weight: 400; color: var(--navy-darkest); letter-spacing: -0.8px; margin-bottom: 20px; }
-.t-network h2 em { font-style: italic; color: var(--teal); }
-.t-network-desc { font-size: 17px; line-height: 1.7; color: var(--text-secondary); max-width: 600px; margin: 0 auto 56px; }
-.t-nvis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 48px; }
-.t-nnode { background: #fff; border: 1px solid var(--t-border); border-radius: 14px; padding: 28px 20px; text-align: center; transition: all 0.3s; }
-.t-nnode:hover { border-color: var(--navy); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(45,58,78,0.08); }
-.t-nnode-icon { width: 44px; height: 44px; border-radius: 12px; background: rgba(45,58,78,0.06); color: var(--navy); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; transition: all 0.3s; }
-.t-nnode:hover .t-nnode-icon { background: var(--navy); color: #fff; transform: rotate(-5deg) scale(1.05); }
-.t-nnode h4 { font-size: 14px; font-weight: 600; color: var(--navy-darkest); margin-bottom: 6px; }
-.t-nnode p { font-size: 13px; color: var(--text-tertiary); line-height: 1.5; }
-
-.t-platform { padding: 120px 48px; background: var(--bg-warm); position: relative; }
-.t-platform::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 80px; background: linear-gradient(to bottom, transparent, var(--bg)); pointer-events: none; }
-.t-platform-inner { max-width: 1000px; margin: 0 auto; text-align: center; position: relative; z-index: 1; }
-.t-platform .t-slbl { color: var(--teal); }
-.t-platform h2 { font-family: var(--serif); font-size: 44px; line-height: 1.15; font-weight: 400; color: var(--navy-darkest); letter-spacing: -0.8px; margin-bottom: 20px; }
-.t-platform-desc { font-size: 17px; line-height: 1.7; color: var(--text-secondary); max-width: 600px; margin: 0 auto 56px; }
-.t-platform-layout { display: flex; flex-direction: column; gap: 24px; }
-.t-platform-ehr { background: #fff; border: 1px solid var(--t-border); border-radius: 16px; padding: 48px 40px; text-align: center; transition: all 0.3s; }
-.t-platform-ehr:hover { border-color: var(--navy); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(45,58,78,0.08); }
-.t-platform-ehr-icon { width: 52px; height: 52px; border-radius: 14px; background: rgba(45,58,78,0.06); color: var(--navy); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; transition: all 0.3s; }
-.t-platform-ehr:hover .t-platform-ehr-icon { background: var(--navy); color: #fff; }
-.t-platform-ehr h4 { font-size: 20px; font-weight: 600; color: var(--navy-darkest); margin-bottom: 12px; }
-.t-platform-ehr p { font-size: 15px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px; max-width: 560px; margin-left: auto; margin-right: auto; }
-.t-platform-ehr-note { font-size: 13px; color: var(--text-tertiary); line-height: 1.5; margin-top: 16px !important; margin-bottom: 0 !important; }
-.t-ehr-diagram { width: 100%; max-width: 640px; height: 320px; margin: 24px auto 0; font-family: var(--sans); }
-.t-ehr-diagram svg { width: 100%; height: 100%; }
-.t-ehr-dot { transform-origin: 250px 100px; }
-.t-ehr-dot-1 { animation: t-ehr-dot-up 2.5s ease-in-out infinite; }
-.t-ehr-dot-2 { animation: t-ehr-dot-left 2.5s ease-in-out infinite 0.6s; }
-.t-ehr-dot-3 { animation: t-ehr-dot-right 2.5s ease-in-out infinite 1.2s; }
-.t-ehr-dot-4 { animation: t-ehr-dot-down 2.5s ease-in-out infinite 1.8s; }
-@keyframes t-ehr-dot-up { 0%,100% { transform: translate(0, 0); opacity: 1; } 50% { transform: translate(0, -60px); opacity: 1; } }
-@keyframes t-ehr-dot-left { 0%,100% { transform: translate(0, 0); opacity: 1; } 50% { transform: translate(-150px, 0); opacity: 1; } }
-@keyframes t-ehr-dot-right { 0%,100% { transform: translate(0, 0); opacity: 1; } 50% { transform: translate(150px, 0); opacity: 1; } }
-@keyframes t-ehr-dot-down { 0%,100% { transform: translate(0, 0); opacity: 1; } 50% { transform: translate(0, 60px); opacity: 1; } }
-.t-platform-divider { display: flex; align-items: center; gap: 16px; width: 100%; margin: 8px 0 24px; }
-.t-platform-divider-line { flex: 1; height: 1px; background: #E5E7EB; }
-.t-platform-divider-badge { font-size: 12px; font-weight: 500; color: var(--teal); background: rgba(13,115,119,0.1); padding: 6px 14px; border-radius: 9999px; white-space: nowrap; }
-.t-platform-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
-.t-platform-card { background: #fff; border: 1px solid var(--t-border); border-radius: 14px; padding: 32px 24px; text-align: center; transition: all 0.3s; }
-.t-platform-card:hover { border-color: var(--navy); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(45,58,78,0.08); }
-.t-platform-card-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; transition: all 0.3s; }
-.t-platform-icon-teal { background: rgba(13,115,119,0.08); color: var(--teal); }
-.t-platform-icon-coral { background: rgba(212,97,62,0.08); color: var(--coral); }
-.t-platform-card:hover .t-platform-icon-teal { background: var(--teal); color: #fff; }
-.t-platform-card:hover .t-platform-icon-coral { background: var(--coral); color: #fff; }
-.t-platform-card h4 { font-size: 16px; font-weight: 600; color: var(--navy-darkest); margin-bottom: 8px; }
-.t-platform-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.5; margin: 0; }
-.t-platform-footer { font-size: 13px; color: var(--text-tertiary); margin-top: 40px; line-height: 1.6; }
-.t-platform-footer-live { color: var(--teal); font-weight: 600; }
-.t-platform-footer a { color: var(--teal); text-decoration: none; font-weight: 500; transition: color 0.2s; }
-.t-platform-footer a:hover { color: var(--teal-dark); }
-
-.t-newsletter { padding: 96px 48px; background: linear-gradient(180deg, rgba(13,115,119,0.03), var(--bg-warm)); }
-.t-newsletter-inner { max-width: 600px; margin: 0 auto; text-align: center; }
-.t-newsletter .t-slbl { color: var(--teal); }
-.t-newsletter h2 { font-family: var(--serif); font-size: 36px; font-weight: 400; color: var(--navy-darkest); letter-spacing: -0.8px; margin-bottom: 12px; }
-.t-newsletter-sub { font-size: 16px; line-height: 1.65; color: var(--text-secondary); margin-bottom: 32px; }
-.t-newsletter-form { display: flex; gap: 12px; align-items: center; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
-.t-newsletter-input { flex: 1; min-width: 220px; padding: 14px 18px; border: 1px solid var(--t-border); border-radius: 10px; font-size: 15px; font-family: var(--sans); background: #fff; transition: border-color 0.2s; }
-.t-newsletter-input:focus { outline: none; border-color: var(--teal); }
-.t-newsletter-input.t-newsletter-input-error { border-color: var(--coral); }
-.t-newsletter-btn { padding: 14px 24px; background: var(--teal); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; font-family: var(--sans); cursor: pointer; transition: all 0.25s; white-space: nowrap; }
-.t-newsletter-btn:hover:not(:disabled) { background: var(--teal-dark); transform: translateY(-1px); }
-.t-newsletter-btn:disabled { opacity: 0.7; cursor: not-allowed; }
-.t-newsletter-note { font-size: 13px; color: var(--text-tertiary); }
-.t-newsletter-success { display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 17px; font-weight: 500; color: var(--teal); }
-.t-newsletter-success-icon { animation: t-check-in 0.4s cubic-bezier(0.16,1,0.3,1) both; }
-@keyframes t-check-in { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
-.t-newsletter-msg { font-size: 14px; color: var(--text-secondary); margin-top: 8px; }
-
-.t-trust { padding: 96px 48px; background: var(--teal-light); }
-.t-trust-inner { max-width: 1200px; margin: 0 auto; }
-.t-trust-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
-.t-trust-card { background: #fff; border: 1px solid rgba(13,115,119,0.12); border-radius: 16px; padding: 32px 24px; transition: all 0.3s; }
-.t-trust-card:hover { border-color: rgba(13,115,119,0.25); box-shadow: 0 8px 32px rgba(13,115,119,0.08); }
-.t-trust-card-icon { width: 48px; height: 48px; border-radius: 12px; background: var(--teal-light); color: var(--teal); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
-.t-trust-card h4 { font-size: 16px; font-weight: 600; color: var(--navy-darkest); margin-bottom: 8px; }
-.t-trust-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.5; margin: 0; }
-.t-trust-link { display: inline-flex; align-items: center; gap: 8px; margin-top: 40px; font-size: 14px; font-weight: 500; color: var(--teal); text-decoration: none; transition: color 0.2s; }
-.t-trust-link:hover { color: var(--teal-dark); }
-.t-trust-link-wrap { text-align: center; }
-
-
-.t-fcta { padding: 120px 48px; background: var(--navy-deep); color: #fff; text-align: center; position: relative; overflow: hidden; }
-.t-fcta::before { content: ''; position: absolute; bottom: -100px; left: 50%; transform: translateX(-50%); width: 800px; height: 400px; background: radial-gradient(ellipse, rgba(13,115,119,0.15), transparent 70%); pointer-events: none; animation: t-orb-drift 15s ease-in-out infinite alternate; }
-.t-fcta-inner { max-width: 700px; margin: 0 auto; position: relative; z-index: 1; }
-.t-fcta h2 { font-family: var(--serif); font-size: 52px; line-height: 1.1; font-weight: 400; letter-spacing: -1px; margin-bottom: 20px; }
-.t-fcta p { font-size: 17px; line-height: 1.65; color: rgba(255,255,255,0.55); margin-bottom: 40px; max-width: 480px; margin-left: auto; margin-right: auto; }
-.t-fcta .t-btn-p { font-size: 16px; padding: 16px 32px; }
-.t-fcta-note { margin-top: 20px; font-size: 13px; color: rgba(255,255,255,0.35); }
-
-.t-footer { padding: 64px 48px 40px; background: var(--navy-darkest); border-top: 1px solid rgba(255,255,255,0.06); color: rgba(255,255,255,0.4); }
-.t-footer-inner { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; }
-.t-footer-brand { display: flex; flex-direction: column; gap: 16px; }
-.t-footer-logo { display: flex; align-items: center; gap: 10px; color: #fff; }
-.t-footer-logo-text { font-family: var(--sans); font-weight: 600; font-size: 18px; color: #fff; }
-.t-footer-tagline { font-size: 13px; color: rgba(255,255,255,0.3); max-width: 280px; line-height: 1.5; }
-.t-footer-links { display: flex; gap: 56px; }
-.t-footer-col h5 { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.45); margin-bottom: 16px; }
-.t-footer-col a { display: block; font-size: 14px; color: rgba(255,255,255,0.35); text-decoration: none; margin-bottom: 10px; transition: color 0.2s; }
-.t-footer-col a:hover { color: #fff; }
-.t-footer-bottom { max-width: 1200px; margin: 40px auto 0; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
-.t-footer-bottom a { color: rgba(255,255,255,0.35); text-decoration: none; margin-left: 24px; transition: color 0.2s; }
-.t-footer-bottom a:hover { color: #fff; }
-
-@media (max-width: 900px) {
-  .t-nav { padding: 0 24px; } .t-nav-links { display: none; } .t-nav-mob { display: block; }
-  .t-hero { padding: 100px 24px 60px; } .t-hero-title { font-size: 40px; } .t-hero-content { max-width: 100%; }
-  .t-ask { padding: 80px 24px; } .t-ask-title { font-size: 32px; } .t-ask-cards { grid-template-columns: 1fr; }
-  .t-ask-chat-demo { padding: 0 16px; } .t-ask-chat-panel { max-width: 100%; }
-  .t-problem, .t-product, .t-platform, .t-audiences, .t-network, .t-newsletter, .t-fcta { padding: 80px 24px; }
-  .t-problem h2, .t-stitle, .t-network h2, .t-platform h2 { font-size: 32px; } .t-fcta h2 { font-size: 36px; }
-  .t-pstats, .t-aud-grid, .t-nvis, .t-platform-row { grid-template-columns: 1fr; }
-  .t-pstat-n { font-size: 42px; }
-  .t-footer-inner { flex-direction: column; gap: 40px; } .t-footer-links { gap: 32px; flex-wrap: wrap; }
-  .t-trust-grid { grid-template-columns: 1fr; } .t-trust { padding: 64px 24px; }
-  .t-footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
-  .t-gradient-orb { display: none; }
-}
-@media (max-width: 768px) {
-  .t-prow { flex-direction: column; gap: 24px; margin-bottom: 48px; }
-  .t-prow-video, .t-prow-text { flex: none; width: 100%; }
-  .t-prow-video { order: 1; }
-  .t-prow-text { order: 2; }
-  .t-hero-demo-wrap { margin-top: 28px; width: 100%; }
-  .t-hero-demo-frame { border-radius: 8px; }
-  .t-hero-demo-video { min-height: 280px; }
-}
-@media (max-width: 600px) {
-  .t-newsletter-form { flex-direction: column; align-items: stretch; }
-  .t-newsletter-input { min-width: 0; }
-}
-@media (max-width: 480px) {
-  .t-hero-title { font-size: 34px; } .t-hero-actions { flex-direction: column; align-items: stretch; }
-  .t-btn-p, .t-btn-s, .t-btn-teal { justify-content: center; } .t-pstat { padding: 32px 24px; } .t-aud-card { padding: 32px 24px; }
-  .t-nav { padding-left: 16px; padding-right: 16px; }
-  .t-hero { padding-left: 16px; padding-right: 16px; }
-  .t-hero-demo-wrap { margin-top: 24px; width: 100%; }
-  .t-hero-demo-frame { border-radius: 8px; }
-  .t-hero-demo-video { min-height: 220px; }
-}
-.t-demo-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
-.t-demo-modal-box { background: #fff; border-radius: 16px; border: 1px solid var(--t-border); box-shadow: 0 24px 64px rgba(0,0,0,0.15); max-width: 440px; width: 100%; padding: 32px; position: relative; }
-.t-demo-modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; cursor: pointer; color: var(--text-tertiary); padding: 8px; line-height: 1; }
-.t-demo-modal-close:hover { color: var(--navy); }
-.t-demo-modal h3 { font-family: var(--serif); font-size: 24px; font-weight: 400; color: var(--navy-darkest); margin-bottom: 8px; }
-.t-demo-modal p { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; }
-.t-demo-form label { display: block; font-size: 13px; font-weight: 500; color: var(--navy); margin-bottom: 6px; }
-.t-demo-form input, .t-demo-form textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--t-border); border-radius: 8px; font-size: 15px; font-family: var(--sans); margin-bottom: 16px; }
-.t-demo-form input:focus, .t-demo-form textarea:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 2px rgba(13,115,119,0.15); }
-.t-demo-form textarea { min-height: 80px; resize: vertical; }
-.t-demo-form button[type="submit"] { width: 100%; padding: 14px; background: var(--coral); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: var(--sans); }
-.t-demo-form button[type="submit"]:hover { background: var(--coral-hover); }
-`;
-
-// ─── Expand icon ───
-const IconExpand = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>;
-
-// ─── Product Feature Row (alternating staggered layout) ───
-function ProductFeatureRow({ title, description, videoSrc, videoOnLeft }: { title: string; description: string; videoSrc: string; videoOnLeft: boolean }) {
-  const rowRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [inView, setInView] = useState(false);
-
-  useEffect(() => {
-    const el = rowRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.1 });
-    obs.observe(el);
-    return () => obs.disconnect();
+    timer = setTimeout(tick, 700);
+    return () => { cancelled = true; if (timer) clearTimeout(timer); };
   }, []);
 
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return;
-    if (inView) v.play().catch(() => {});
-    else v.pause();
-  }, [inView]);
-
-  const handleWatchDemo = () => videoRef.current?.requestFullscreen?.();
-
-  const videoBlock = (
-    <div className="t-prow-video">
-      <video ref={videoRef} muted loop playsInline onLoadedData={() => { if (videoRef.current) videoRef.current.playbackRate = 0.75; }}>
-        <source src={videoSrc} type="video/mp4" />
-      </video>
-    </div>
-  );
-  const textBlock = (
-    <div className="t-prow-text">
-      <h3>{title}</h3>
-      <p>{description}</p>
-      <button type="button" className="t-prow-watch" onClick={handleWatchDemo}>
-        <IconExpand /> Watch full demo
+  const action = TYPEWRITER[idx].action;
+  const handleClick = () => { onAction?.(action); };
+  return (
+    <div className="t-illus-ai">
+      <div className="t-illus-ai-icon" aria-hidden="true">
+        <div className="t-illus-ai-spinner">
+          <span className="t-illus-ai-ring" />
+          <span className="t-illus-ai-spinner-dot" />
+        </div>
+      </div>
+      <div className="t-illus-ai-main">
+        <span className="t-illus-ai-eyebrow">Ask Tether</span>
+        <div className="t-illus-ai-line">
+          <span className="t-illus-ai-text">{display}</span>
+          <span className="t-illus-ai-caret" aria-hidden="true" />
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={handleClick}
+        className="t-illus-ai-action"
+        aria-label={`Run action: ${action}`}
+        style={{ opacity: actionVisible ? 1 : 0.55, transition: "opacity 250ms ease" }}
+      >
+        {action}
       </button>
     </div>
   );
+}
+
+function HeroIllustration() {
+  const [rerouted, setRerouted] = useState(false);
+  const [summaryShown, setSummaryShown] = useState(false);
+  const resetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleAction = (action: string) => {
+    const a = action.toLowerCase();
+    if (resetRef.current) clearTimeout(resetRef.current);
+    if (a.includes("alternative")) {
+      setRerouted(true);
+    } else if (a.includes("summary")) {
+      setSummaryShown(true);
+    } else {
+      return;
+    }
+    resetRef.current = setTimeout(() => {
+      setRerouted(false);
+      setSummaryShown(false);
+    }, 7000);
+  };
+
+  useEffect(() => () => { if (resetRef.current) clearTimeout(resetRef.current); }, []);
 
   return (
     <div
-      ref={rowRef}
-      className="t-prow"
-      style={{
-        opacity: inView ? 1 : 0,
-        transform: inView ? "translateY(0)" : "translateY(18px)",
-        transition: "opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1)",
-      }}
+      className="t-illus"
+      role="img"
+      aria-label="Tether referral dashboard, pulling live from athenaOne. A.K. is flagged for action with an AI agent rerouting to an alternate specialist, and a Sent, Received, Completed timeline tracks the loop closure."
     >
-      {videoOnLeft ? (
-        <>
-          {videoBlock}
-          {textBlock}
-        </>
-      ) : (
-        <>
-          {textBlock}
-          {videoBlock}
-        </>
-      )}
+      <span className="t-illus-glow t-illus-glow-teal" aria-hidden="true" />
+      <span className="t-illus-glow t-illus-glow-amber" aria-hidden="true" />
+
+      {/* EHR context strip */}
+      <div className="t-illus-ehr" aria-hidden="true">
+        <div className="t-illus-ehr-left">
+          <span className="t-illus-ehr-mark">a</span>
+          <span className="t-illus-ehr-live-dot" />
+          <span className="t-illus-ehr-text">athenaOne &middot; Georgetown Family Medicine</span>
+        </div>
+        <div className="t-illus-ehr-right">
+          <span className="t-illus-ehr-conn-dot" />
+          <span>EHR Connected</span>
+        </div>
+      </div>
+
+      <div className="t-illus-inner">
+        <div className="t-illus-grid">
+          {/* Left panel: outbound referrals */}
+          <section className="t-illus-pane" aria-labelledby="t-illus-label-out">
+            <header className="t-illus-pane-head">
+              <span id="t-illus-label-out" className="t-illus-eyebrow">Outbound Referrals</span>
+              <span className="t-illus-count">3 active</span>
+            </header>
+
+            <div className="t-illus-colhead" aria-hidden="true">
+              <span>Patient</span>
+              <span>Status</span>
+            </div>
+
+            <div className="t-illus-rows">
+              <div
+                className={`t-illus-ref t-illus-ref-active${rerouted ? " t-illus-ref-rerouting" : ""}`}
+                style={{ animationDelay: "0.1s" }}
+              >
+                <span className="t-illus-init">AK</span>
+                <div className="t-illus-ref-body">
+                  <div className="t-illus-ref-name">A.K. · 67F</div>
+                  <div className="t-illus-ref-meta">Neurology · Dr. Nguyen</div>
+                </div>
+                {rerouted ? (
+                  <span className="t-illus-pill t-illus-pill-rerouting">
+                    <span className="t-illus-pill-dot" />Rerouting
+                  </span>
+                ) : (
+                  <span className="t-illus-pill t-illus-pill-action">Action</span>
+                )}
+              </div>
+
+              <div className={`t-illus-expand${rerouted ? " t-illus-expand-open" : ""}`} aria-hidden={!rerouted}>
+                <div className="t-illus-expand-inner">
+                  <div className="t-illus-alt">
+                    <span className="t-illus-alt-dot" aria-hidden="true" />
+                    <div className="t-illus-alt-body">
+                      <div className="t-illus-alt-name">Dr. Chen &middot; Georgetown Neurology</div>
+                      <div className="t-illus-alt-meta">Accepting new patients &middot; 2.1 mi &middot; Verified today</div>
+                    </div>
+                    <button type="button" className="t-illus-alt-btn" tabIndex={-1}>Send Referral</button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="t-illus-ref" style={{ animationDelay: "0.25s" }}>
+                <span className="t-illus-init t-illus-init-muted">RT</span>
+                <div className="t-illus-ref-body">
+                  <div className="t-illus-ref-name">R.T. · 41M</div>
+                  <div className="t-illus-ref-meta">Orthopedics · Dr. Reyes</div>
+                </div>
+                <span className="t-illus-pill t-illus-pill-pending">Pending</span>
+              </div>
+
+              <div className="t-illus-ref" style={{ animationDelay: "0.4s" }}>
+                <span className="t-illus-init t-illus-init-muted">JM</span>
+                <div className="t-illus-ref-body">
+                  <div className="t-illus-ref-name">J.M. · 58F</div>
+                  <div className="t-illus-ref-meta">Cardiology · Dr. Patel</div>
+                </div>
+                <span className="t-illus-pill t-illus-pill-closed">
+                  <span className="t-illus-pill-dot" />Loop Closed
+                </span>
+              </div>
+            </div>
+          </section>
+
+          {/* Right panel: loop closure timeline */}
+          <section className="t-illus-pane t-illus-pane-timeline" aria-labelledby="t-illus-label-loop">
+            <header className="t-illus-pane-head">
+              <span id="t-illus-label-loop" className="t-illus-eyebrow">Loop Closure</span>
+              <span className="t-illus-count">J.M. · Cardiology</span>
+            </header>
+
+            <div className="t-illus-timeline-wrap">
+              <span className="t-illus-rail" aria-hidden="true" />
+              <span className="t-illus-rail-fill" aria-hidden="true" />
+
+              <ol className="t-illus-timeline">
+                <li className="t-illus-step" style={{ animationDelay: "0.3s" }}>
+                  <span className="t-illus-step-node t-illus-step-done" aria-hidden="true">
+                    <span className="t-illus-step-core" />
+                  </span>
+                  <div className="t-illus-step-body">
+                    <div className="t-illus-step-title">
+                      <strong>Sent</strong>
+                      <span className="t-illus-step-time">9:42 AM</span>
+                    </div>
+                    <span className="t-illus-step-sub">Referral transmitted to Cardiology</span>
+                  </div>
+                </li>
+                <li className="t-illus-step" style={{ animationDelay: "0.6s" }}>
+                  <span className="t-illus-step-node t-illus-step-done" aria-hidden="true">
+                    <span className="t-illus-step-core" />
+                  </span>
+                  <div className="t-illus-step-body">
+                    <div className="t-illus-step-title">
+                      <strong>Received</strong>
+                      <span className="t-illus-step-time">10:18 AM</span>
+                    </div>
+                    <span className="t-illus-step-sub">Specialty acknowledged</span>
+                  </div>
+                </li>
+                <li className="t-illus-step" style={{ animationDelay: "0.9s" }}>
+                  <span className="t-illus-step-node t-illus-step-active" aria-hidden="true" />
+                  <div className="t-illus-step-body">
+                    <div className="t-illus-step-title">
+                      <strong>Completed</strong>
+                      <span className="t-illus-step-time">{summaryShown ? "Just now" : "In progress"}</span>
+                    </div>
+                    <span className={`t-illus-step-sub${summaryShown ? " t-illus-step-sub-hidden" : ""}`}>
+                      Awaiting visit summary
+                    </span>
+                    <div className={`t-illus-step-summary${summaryShown ? " t-illus-step-summary-open" : ""}`} aria-hidden={!summaryShown}>
+                      <div className="t-illus-step-summary-inner">
+                        <div className="t-illus-step-summary-line"><span>Diagnosis</span>Peripheral neuropathy</div>
+                        <div className="t-illus-step-summary-line"><span>Treatment</span>Gabapentin 300mg</div>
+                        <div className="t-illus-step-summary-line"><span>Follow-up</span>8 weeks</div>
+                        <div className="t-illus-step-summary-conf"><IconCheck />Pushed to EHR</div>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              </ol>
+            </div>
+
+            <footer className="t-illus-pane-foot" aria-hidden="true">
+              <span className="t-illus-live-dot" />
+              <span>Last updated 2 min ago</span>
+            </footer>
+          </section>
+        </div>
+
+        <HeroTypewriter onAction={handleAction} />
+      </div>
     </div>
   );
 }
 
-// ─── Hero Video ───
-function HeroVideo() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [progress, setProgress] = useState(0);
+// ─── Ask Tether — animated chat panel ───
+type ChatStep =
+  | { type: "user"; text: string }
+  | { type: "agent-list"; header: string; items: { text: string; tone: "warn" | "danger"; action?: string }[] }
+  | { type: "agent-confirm"; text: string; time: string };
+
+const ASK_TETHER_SCRIPT: ChatStep[] = [
+  { type: "user", text: "Which referrals need follow-up today?" },
+  {
+    type: "agent-list",
+    header: "3 referrals need attention",
+    items: [
+      { text: "J.M. — Cardiology · sent 6 days ago, no response", tone: "warn" },
+      { text: "R.T. — Orthopedics · awaiting visit summary", tone: "warn" },
+      { text: "A.K. — Neurology · specialist not accepting new patients", tone: "danger", action: "Find Alternative" },
+    ],
+  },
+  { type: "user", text: "Send follow-up to Cardiology for J.M." },
+  { type: "agent-confirm", text: "Follow-up sent to Dr. Patel\u2019s office", time: "Just now" },
+];
+
+function AskTetherChatDemo() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+  const [visible, setVisible] = useState(0);
 
   useEffect(() => {
-    const el = containerRef.current;
-    const video = videoRef.current;
-    if (!el || !video) return;
+    const el = ref.current;
+    if (!el) return;
     const obs = new IntersectionObserver(
-      ([e]) => {
-        if (document.fullscreenElement === video) return;
-        if (e.isIntersecting) {
-          video.currentTime = 0;
-          video.play().catch(() => {});
-          setProgress(0);
-        } else {
-          video.pause();
-          video.currentTime = 0;
-          setProgress(0);
-        }
-      },
+      ([e]) => setInView(e.isIntersecting),
       { threshold: 0.25 }
     );
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
 
-  const handleTimeUpdate = useCallback(() => {
-    const v = videoRef.current;
-    if (!v || !(v.duration > 0)) return;
-    setProgress((v.currentTime / v.duration) * 100);
-  }, []);
-
-  const handleExpandClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    videoRef.current?.requestFullscreen?.();
-  };
+  useEffect(() => {
+    if (!inView) { setVisible(0); return; }
+    let cancelled = false;
+    const ids: ReturnType<typeof setTimeout>[] = [];
+    const playOnce = () => {
+      setVisible(0);
+      ASK_TETHER_SCRIPT.forEach((_, i) => {
+        ids.push(setTimeout(() => { if (!cancelled) setVisible((v) => Math.max(v, i + 1)); }, 350 + i * 900));
+      });
+    };
+    playOnce();
+    const loop = setInterval(() => { if (!cancelled) playOnce(); }, 8000);
+    return () => { cancelled = true; ids.forEach(clearTimeout); clearInterval(loop); };
+  }, [inView]);
 
   return (
-    <div className="t-hero-demo-wrap">
-      <div className="t-hero-demo-frame">
-        <div ref={containerRef} className="t-hero-demo-video">
-          <button type="button" className="t-hero-demo-expand" onClick={handleExpandClick} aria-label="Expand to fullscreen"><IconExpand /></button>
-          <video
-            ref={videoRef}
-            autoPlay
-            muted
-            loop
-            playsInline
-            onTimeUpdate={handleTimeUpdate}
-            style={{ width: "100%", display: "block" }}
-          >
-            <source src="/main-demo.mp4" type="video/mp4" />
-          </video>
-          <div className="t-hero-demo-progress" style={{ width: `${progress}%` }} />
+    <div ref={ref} className="t-chat" aria-label="Ask Tether — example conversation">
+      <div className="t-chat-panel">
+        <div className="t-chat-head">
+          <span className="t-chat-lights" aria-hidden>
+            <span style={{ background: "#FF5F57" }} />
+            <span style={{ background: "#FFBD2E" }} />
+            <span style={{ background: "#28C840" }} />
+          </span>
+          <span className="t-chat-title">Ask Tether</span>
+          <span className="t-chat-status" aria-hidden>
+            <span className="t-chat-status-dot" />Active
+          </span>
+        </div>
+        <div className="t-chat-body">
+          {ASK_TETHER_SCRIPT.map((m, i) => {
+            const show = i < visible;
+            const style: React.CSSProperties = {
+              opacity: show ? 1 : 0,
+              transform: show ? "translateY(0)" : "translateY(8px)",
+              transition: "opacity 0.3s ease, transform 0.3s ease",
+            };
+            if (m.type === "user") {
+              return <div key={i} className="t-msg t-msg-user" style={style}><p>{m.text}</p></div>;
+            }
+            if (m.type === "agent-list") {
+              return (
+                <div key={i} className="t-msg t-msg-agent" style={style}>
+                  <div className="t-msg-card">
+                    <div className="t-msg-card-head">{m.header}</div>
+                    <ul>
+                      {m.items.map((it, idx) => (
+                        <li key={idx}>
+                          <span className={`t-msg-dot t-msg-dot-${it.tone}`} aria-hidden />
+                          <span className="t-msg-item-text">{it.text}</span>
+                          {it.action && <button type="button" className="t-msg-action" tabIndex={-1}>{it.action}</button>}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              );
+            }
+            return (
+              <div key={i} className="t-msg t-msg-agent" style={style}>
+                <div className="t-msg-confirm">
+                  <span className="t-msg-check" aria-hidden><IconCheck /></span>
+                  <span className="t-msg-confirm-text">{m.text}</span>
+                  <span className="t-msg-time">{m.time}</span>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
-      <p className="t-hero-demo-caption">Georgetown Family Medicine sending a referral via Tether</p>
     </div>
   );
 }
 
-// ─── Main Component ───
-const DEMO_FORM_ACTION = "https://formspree.io/f/xpqrqkzw"; // Create at formspree.io and replace with your form ID
+// ─── EHR Hub-and-spoke diagram ───
+type HubBadge = "live" | "soon" | "none";
+const HUB_NODES: { name: string; pos: "tl" | "tr" | "bl" | "br"; badge: HubBadge; muted?: boolean }[] = [
+  { name: "Athena",          pos: "tl", badge: "live" },
+  { name: "eClinicalWorks",  pos: "tr", badge: "soon" },
+  { name: "ModMed",          pos: "bl", badge: "soon" },
+  { name: "+ More in 2026",  pos: "br", badge: "none", muted: true },
+];
 
+function EHRHubDiagram() {
+  return (
+    <div
+      className="t-hub"
+      aria-label="Tether integrates bi-directionally with Athena today, with eClinicalWorks and ModMed planned for 2026"
+    >
+      <svg className="t-hub-lines" viewBox="0 0 600 360" preserveAspectRatio="none" aria-hidden>
+        <defs>
+          <linearGradient id="t-hub-grad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="rgba(0,196,160,0.08)" />
+            <stop offset="50%" stopColor="rgba(0,196,160,0.4)" />
+            <stop offset="100%" stopColor="rgba(0,196,160,0.08)" />
+          </linearGradient>
+        </defs>
+        <line x1="80"  y1="60"  x2="300" y2="180" stroke="url(#t-hub-grad)" strokeWidth="1.5" />
+        <line x1="520" y1="60"  x2="300" y2="180" stroke="url(#t-hub-grad)" strokeWidth="1.5" />
+        <line x1="80"  y1="300" x2="300" y2="180" stroke="url(#t-hub-grad)" strokeWidth="1.5" />
+        <line x1="520" y1="300" x2="300" y2="180" stroke="url(#t-hub-grad)" strokeWidth="1.5" />
+
+        <circle r="3" fill="#00C4A0" className="t-hub-dot t-hub-dot-in-tl" />
+        <circle r="3" fill="#00C4A0" className="t-hub-dot t-hub-dot-in-tr" />
+        <circle r="3" fill="#00C4A0" className="t-hub-dot t-hub-dot-in-bl" />
+        <circle r="3" fill="#00C4A0" className="t-hub-dot t-hub-dot-in-br" />
+
+        <circle r="3" fill="#4CE7CC" opacity="0.85" className="t-hub-dot t-hub-dot-out-tl" />
+        <circle r="3" fill="#4CE7CC" opacity="0.85" className="t-hub-dot t-hub-dot-out-tr" />
+        <circle r="3" fill="#4CE7CC" opacity="0.85" className="t-hub-dot t-hub-dot-out-bl" />
+        <circle r="3" fill="#4CE7CC" opacity="0.85" className="t-hub-dot t-hub-dot-out-br" />
+      </svg>
+
+      <div className="t-hub-center" aria-hidden>
+        <TetherWordmark size={26} />
+      </div>
+
+      {HUB_NODES.map((n) => (
+        <div
+          key={n.pos}
+          className={`t-hub-tile t-hub-tile-${n.pos}${n.muted ? " t-hub-tile-muted" : ""}`}
+        >
+          <span className="t-hub-name">{n.name}</span>
+          {n.badge === "live" && <span className="t-hub-pill t-hub-pill-live">Live</span>}
+          {n.badge === "soon" && <span className="t-hub-pill t-hub-pill-soon">2026</span>}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Before / After comparison ───
+const COMPARE_BEFORE = [
+  "Referral faxed · no confirmation sent",
+  "3 days pass · no response",
+  "MA calls specialist office · put on hold",
+  "Patient calls PCP confused",
+  "Referral resent · original lost",
+];
+const COMPARE_AFTER = [
+  "Referral sent with patient data from EHR",
+  "Specialist notified automatically",
+  "Status confirmed · loop opened",
+  "Visit completed · summary returned",
+  "Note pushed back to PCP chart",
+];
+
+function BeforeAfter() {
+  const [afterRef, afterIn] = useInView({ threshold: 0.25 });
+  return (
+    <section className="t-compare t-section" aria-labelledby="t-compare-title">
+      <div className="t-section-inner">
+        <Reveal>
+          <h2 id="t-compare-title" className="t-h2 t-compare-headline">
+            What a referral looks like today.
+          </h2>
+        </Reveal>
+        <div className="t-compare-grid">
+          <Reveal delay={0.1}>
+            <article className="t-compare-card t-compare-card-before">
+              <header className="t-compare-head">
+                <span className="t-compare-eyebrow t-compare-eyebrow-before">Without Tether</span>
+              </header>
+              <ol className="t-compare-steps">
+                {COMPARE_BEFORE.map((s, i) => (
+                  <li key={i} className="t-compare-step t-compare-step-before">
+                    <span className="t-compare-dot t-compare-dot-before" aria-hidden="true" />
+                    <span className="t-compare-text">{s}</span>
+                  </li>
+                ))}
+              </ol>
+              <footer className="t-compare-foot t-compare-foot-before">
+                Average: 8&ndash;12 days. 30% never completed.
+              </footer>
+            </article>
+          </Reveal>
+
+          <article
+            ref={afterRef}
+            className="t-compare-card t-compare-card-after"
+            style={{
+              opacity: afterIn ? 1 : 0,
+              transform: afterIn ? "translateY(0)" : "translateY(24px)",
+              transition: "opacity 0.6s ease-out 0.2s, transform 0.6s ease-out 0.2s",
+            }}
+          >
+            <header className="t-compare-head">
+              <span className="t-compare-eyebrow t-compare-eyebrow-after">With Tether</span>
+            </header>
+            <ol className="t-compare-steps">
+              {COMPARE_AFTER.map((s, i) => {
+                const delay = 0.35 + i * 0.15;
+                return (
+                  <li
+                    key={i}
+                    className="t-compare-step t-compare-step-after"
+                    style={{
+                      opacity: afterIn ? 1 : 0,
+                      transform: afterIn ? "translateX(0)" : "translateX(-6px)",
+                      transition: `opacity 0.5s ease-out ${delay}s, transform 0.5s ease-out ${delay}s`,
+                    }}
+                  >
+                    <span className="t-compare-dot t-compare-dot-after" aria-hidden="true" />
+                    <span className="t-compare-text">{s}</span>
+                  </li>
+                );
+              })}
+            </ol>
+            <footer className="t-compare-foot t-compare-foot-after">
+              Average: same-day coordination. Loop closed automatically.
+            </footer>
+          </article>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Platform 2x2 grid ───
+type PlatformItem = { num: string; title: string; body: string; badge: string; tone: "live" | "soon" | "later" };
+const PLATFORM: PlatformItem[] = [
+  { num: "01", title: "Referral Coordination", body: "Complete referral lifecycle from send to loop closure.", badge: "Live", tone: "live" },
+  { num: "02", title: "Specialist Verification", body: "AI agents call specialist offices to confirm availability before you send.", badge: "Q3 2026", tone: "soon" },
+  { num: "03", title: "Insurance Verification", body: "Eligibility confirmed before the referral leaves your desk.", badge: "Q3 2026", tone: "soon" },
+  { num: "04", title: "Appointment Coordination", body: "Agents book the specialist appointment on behalf of your patient.", badge: "2027", tone: "later" },
+];
+
+function PlatformGrid() {
+  return (
+    <div className="t-platform-grid">
+      {PLATFORM.map((p, i) => (
+        <Reveal key={p.num} delay={i * 0.1}>
+          <article className={`t-platform-card t-platform-card-${p.tone}`}>
+            <span className="t-platform-num">{p.num}</span>
+            <h3 className="t-platform-title">{p.title}</h3>
+            <p className="t-platform-body">{p.body}</p>
+            <span className={`t-platform-badge t-platform-badge-${p.tone}`}>{p.badge}</span>
+          </article>
+        </Reveal>
+      ))}
+    </div>
+  );
+}
+
+// ─── Styles ───
+const CSS = `
+:root {
+  --bg: #0A0A0F;
+  --surface: #14141A;
+  --surface-2: #1C1C24;
+  --navy-darkest: #07070A;
+  --teal: #00D4B4;
+  --teal-dark: #00B398;
+  --teal-light: #4CE7CC;
+  --coral: #E05A3A;
+  --coral-hover: #C84E30;
+  --text: #E8E6E0;
+  --secondary: #A0A096;
+  --tertiary: #888880;
+  --t-border: rgba(255,255,255,0.07);
+  --t-border-strong: rgba(255,255,255,0.12);
+  --text-secondary: var(--secondary);
+  --text-tertiary: var(--tertiary);
+  --serif: var(--font-serif), Georgia, serif;
+  --sans: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+html { scroll-behavior: smooth; background: var(--bg); color-scheme: dark; }
+.tether-lp, .tether-lp * { margin: 0; padding: 0; box-sizing: border-box; }
+.tether-lp { font-family: var(--sans); color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; overflow-x: hidden; position: relative; min-height: 100vh; font-size: 16px; line-height: 1.7; }
+.tether-lp ::selection { background: var(--teal); color: var(--bg); }
+.tether-lp a { color: inherit; text-decoration: none; }
+.tether-lp button { font-family: inherit; cursor: pointer; }
+.tether-lp p { line-height: 1.7; }
+
+.t-scroll-prog { position: fixed; top: 0; left: 0; height: 2px; background: var(--teal); z-index: 101; transition: width 0.1s linear; }
+
+/* ─── Wordmark ─── */
+.t-wordmark { display: inline-flex; align-items: center; gap: 10px; color: var(--text); }
+.t-wordmark svg { flex-shrink: 0; }
+.t-wordmark-text { font-family: var(--sans); font-weight: 600; font-size: 1.125rem; letter-spacing: -0.02em; color: var(--text); }
+
+/* ─── NAV ─── */
+.t-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 0 32px; height: 64px; display: flex; align-items: center; justify-content: space-between; background: transparent; border-bottom: 1px solid transparent; transition: background-color 250ms ease, border-color 250ms ease, backdrop-filter 250ms ease; }
+.t-nav-s { background: rgba(10,10,15,0.85); backdrop-filter: blur(16px) saturate(1.6); -webkit-backdrop-filter: blur(16px) saturate(1.6); border-bottom-color: var(--t-border); }
+.t-nav-links { display: flex; align-items: center; gap: 28px; list-style: none; }
+.t-nav-links a { font-size: 0.875rem; color: var(--secondary); transition: color 150ms ease; }
+.t-nav-links a:hover { color: var(--text); }
+.t-nav-cta { background: var(--coral); color: #fff !important; padding: 9px 18px; border-radius: 999px; font-weight: 600; font-size: 0.875rem; transition: background-color 150ms ease; }
+.t-nav-cta:hover { background: var(--coral-hover); }
+.t-nav-mob { display: none; background: none; border: none; cursor: pointer; padding: 8px; color: var(--text); }
+
+.t-nav-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(10,10,15,0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 80px 24px; }
+.t-nav-overlay a { font-size: 1.25rem; color: var(--text); }
+.t-nav-overlay-close { position: absolute; top: 20px; right: 20px; background: none; border: none; padding: 8px; color: var(--text); }
+.t-nav-overlay-cta { display: inline-flex; padding: 12px 28px; background: var(--coral); color: #fff; font-weight: 600; border-radius: 999px; margin-top: 8px; }
+
+/* ─── HERO ─── */
+.t-hero { position: relative; padding: 132px 32px 88px; overflow: hidden; min-height: 100vh; display: flex; align-items: center; }
+.t-hero::before { content: ""; position: absolute; inset: -200px 0 auto 0; height: 800px; pointer-events: none; background: radial-gradient(ellipse 70% 50% at 30% 30%, rgba(0,212,180,0.10) 0%, transparent 70%); }
+.t-hero-inner { position: relative; width: 100%; max-width: 1320px; margin: 0 auto; }
+.t-hero-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 56px; align-items: center; }
+.t-hero-copy { text-align: left; max-width: 560px; }
+.t-hero-visual { min-width: 0; }
+.t-hero-visual .t-illus { margin: 0; max-width: none; }
+
+@keyframes t-hero-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.t-hero-title { font-family: var(--serif); font-weight: 400; font-size: clamp(2.4rem, 4.4vw, 4.25rem); line-height: 1.04; letter-spacing: -0.035em; color: var(--text); margin: 0 0 24px; text-wrap: balance; opacity: 0; animation: t-hero-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.05s forwards; }
+.t-hero-title em { font-style: italic; color: var(--teal); font-weight: 400; }
+.t-headline-word { display: inline-block; min-width: 0; will-change: opacity; }
+.t-headline-nowrap { white-space: nowrap; }
+
+.t-hero-sub { font-size: 1.0625rem; line-height: 1.65; color: var(--secondary); margin: 0 0 32px; opacity: 0; animation: t-hero-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards; }
+
+.t-hero-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-start; opacity: 0; animation: t-hero-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.35s forwards; }
+.t-btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 24px; font-size: 0.9375rem; font-weight: 600; border-radius: 999px; border: 1px solid transparent; transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease; }
+.t-btn-coral { background: var(--coral); color: #fff; border-color: var(--coral); }
+.t-btn-coral:hover { background: var(--coral-hover); border-color: var(--coral-hover); }
+.t-btn-ghost { background: transparent; color: var(--teal); border-color: rgba(0,212,180,0.45); }
+.t-btn-ghost:hover { border-color: var(--teal); background: rgba(0,212,180,0.06); }
+
+.t-trust-strip { display: flex; align-items: center; justify-content: flex-start; gap: 20px 24px; flex-wrap: wrap; margin-top: 32px; opacity: 0; animation: t-hero-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards; }
+.t-trust-badge { display: inline-flex; align-items: center; gap: 8px; font-size: 0.75rem; letter-spacing: 0.04em; color: var(--secondary); font-weight: 500; }
+.t-trust-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); display: inline-block; box-shadow: 0 0 8px rgba(0,212,180,0.5); }
+
+/* ─── Hero illustration ─── */
+.t-illus { max-width: 920px; width: 100%; margin: 64px auto 0; background: #0A0B0F; border: 1px solid rgba(255,255,255,0.09); border-radius: 16px; overflow: hidden; position: relative; box-shadow: 0 40px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04); opacity: 0; animation: t-hero-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.55s forwards; }
+.t-illus-glow { position: absolute; width: 320px; height: 320px; pointer-events: none; z-index: 0; }
+.t-illus-glow-teal { top: -80px; left: -60px; background: radial-gradient(circle, rgba(0,196,160,0.08) 0%, transparent 70%); }
+.t-illus-glow-amber { bottom: -60px; right: -40px; background: radial-gradient(circle, rgba(220,90,40,0.06) 0%, transparent 70%); }
+.t-illus-inner { position: relative; z-index: 2; padding: 32px 24px; }
+
+.t-illus-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.t-illus-pane { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(7,7,10,0.45)); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 18px 18px 14px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.03); display: flex; flex-direction: column; }
+.t-illus-pane-head { display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px; }
+.t-illus-eyebrow { font-size: 0.625rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(0,196,160,0.7); font-weight: 700; }
+.t-illus-count { font-size: 0.6875rem; color: rgba(255,255,255,0.35); font-variant-numeric: tabular-nums; padding: 3px 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 999px; letter-spacing: 0.02em; }
+.t-illus-colhead { display: flex; align-items: center; justify-content: space-between; padding: 8px 4px; font-size: 0.625rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.2); font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 8px; }
+
+.t-illus-rows { display: flex; flex-direction: column; gap: 6px; }
+.t-illus-ref { display: flex; align-items: center; gap: 12px; padding: 10px 10px; border-radius: 8px; border: 1px solid transparent; background: transparent; opacity: 0; transform: translateY(6px); animation: t-illus-row-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.t-illus-ref-active { background: rgba(0,196,160,0.05); border-color: rgba(0,196,160,0.12); }
+@keyframes t-illus-row-in { to { opacity: 1; transform: translateY(0); } }
+
+.t-illus-init { width: 30px; height: 30px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(0,196,160,0.15); color: rgba(0,196,160,0.95); font-weight: 600; font-size: 0.6875rem; letter-spacing: 0.02em; border: 1px solid rgba(0,196,160,0.25); }
+.t-illus-init-muted { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.5); border-color: rgba(255,255,255,0.07); }
+.t-illus-ref-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.t-illus-ref-name { font-size: 0.75rem; font-weight: 500; color: rgba(255,255,255,0.85); line-height: 1.3; }
+.t-illus-ref-meta { font-size: 0.625rem; color: rgba(255,255,255,0.3); line-height: 1.3; letter-spacing: 0.01em; }
+
+.t-illus-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 4px; font-size: 0.5625rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; border: 1px solid; }
+.t-illus-pill-closed { background: rgba(0,196,160,0.12); color: rgba(0,196,160,0.9); border-color: rgba(0,196,160,0.2); }
+.t-illus-pill-pending { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.4); border-color: rgba(255,255,255,0.08); }
+.t-illus-pill-action { background: rgba(220,90,40,0.12); color: rgba(220,130,80,0.9); border-color: rgba(220,90,40,0.25); }
+.t-illus-pill-dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(0,196,160,0.95); }
+
+/* Timeline */
+.t-illus-pane-timeline { gap: 0; }
+.t-illus-timeline-wrap { position: relative; padding: 8px 0 4px; }
+.t-illus-rail { position: absolute; left: 24px; top: 12px; bottom: 12px; width: 1px; background: rgba(255,255,255,0.08); }
+.t-illus-rail-fill { position: absolute; left: 24px; top: 12px; width: 1px; background: linear-gradient(to bottom, rgba(0,196,160,0.8), rgba(0,196,160,0.2)); height: 0; animation: t-rail-grow 2s cubic-bezier(0.16, 1, 0.3, 1) 0.9s forwards; box-shadow: 0 0 6px rgba(0,196,160,0.4); }
+@keyframes t-rail-grow { from { height: 0; } to { height: 68%; } }
+
+.t-illus-timeline { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 14px; position: relative; }
+.t-illus-step { display: flex; gap: 14px; align-items: flex-start; opacity: 0; transform: translateX(-4px); animation: t-step-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+@keyframes t-step-in { to { opacity: 1; transform: translateX(0); } }
+.t-illus-step-node { width: 18px; height: 18px; flex-shrink: 0; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.15); background: transparent; position: relative; display: flex; align-items: center; justify-content: center; margin-left: 0; z-index: 1; }
+.t-illus-step-done { border-color: rgba(0,196,160,0.7); background: #0A0B0F; }
+.t-illus-step-done .t-illus-step-core { width: 7px; height: 7px; border-radius: 50%; background: rgba(0,196,160,0.95); }
+.t-illus-step-active { border-color: rgba(0,196,160,0.7); background: #0A0B0F; animation: t-pulse-ring 2s ease-out infinite; }
+@keyframes t-pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(0,196,160,0.4); } 50% { box-shadow: 0 0 0 6px rgba(0,196,160,0); } 100% { box-shadow: 0 0 0 0 rgba(0,196,160,0); } }
+
+.t-illus-step-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; padding-top: 1px; }
+.t-illus-step-title { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.t-illus-step-title strong { font-size: 0.75rem; font-weight: 500; color: rgba(255,255,255,0.75); line-height: 1.3; letter-spacing: -0.005em; }
+.t-illus-step-time { font-size: 0.625rem; color: rgba(255,255,255,0.2); font-variant-numeric: tabular-nums; letter-spacing: 0.01em; }
+.t-illus-step-sub { font-size: 0.625rem; color: rgba(255,255,255,0.3); line-height: 1.45; }
+
+.t-illus-pane-foot { display: flex; align-items: center; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); font-size: 0.625rem; color: rgba(255,255,255,0.2); letter-spacing: 0.04em; }
+.t-illus-live-dot { width: 6px; height: 6px; border-radius: 50%; background: #2ED573; box-shadow: 0 0 6px rgba(46,213,115,0.6); animation: t-blink 1.6s ease-in-out infinite; }
+
+/* AI strip */
+.t-illus-ai { margin-top: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; opacity: 0; transform: translateY(6px); animation: t-illus-row-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) 1.2s forwards; }
+.t-illus-ai-icon { width: 32px; height: 32px; flex-shrink: 0; border-radius: 8px; background: rgba(0,196,160,0.12); border: 1px solid rgba(0,196,160,0.18); display: flex; align-items: center; justify-content: center; }
+.t-illus-ai-spinner { position: relative; width: 14px; height: 14px; animation: t-spin 3s linear infinite; }
+@keyframes t-spin { to { transform: rotate(360deg); } }
+.t-illus-ai-ring { position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid rgba(0,196,160,0.5); }
+.t-illus-ai-spinner-dot { position: absolute; top: -2px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background: rgba(0,196,160,0.95); box-shadow: 0 0 4px rgba(0,196,160,0.6); }
+.t-illus-ai-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.t-illus-ai-eyebrow { font-size: 0.625rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(0,196,160,0.6); font-weight: 700; }
+.t-illus-ai-line { display: flex; align-items: center; min-height: 16px; }
+.t-illus-ai-text { font-size: 0.8125rem; color: rgba(255,255,255,0.78); line-height: 1.3; font-variant-numeric: tabular-nums; }
+.t-illus-ai-caret { display: inline-block; width: 1px; height: 11px; background: rgba(0,196,160,0.85); margin-left: 2px; animation: t-caret 1s steps(2, end) infinite; }
+@keyframes t-caret { 50% { opacity: 0; } }
+.t-illus-ai-action { padding: 5px 12px; background: rgba(0,196,160,0.1); border: 1px solid rgba(0,196,160,0.3); color: rgba(0,196,160,0.95); border-radius: 6px; font-size: 0.6875rem; font-weight: 600; font-family: var(--sans); letter-spacing: 0.02em; cursor: pointer; flex-shrink: 0; white-space: nowrap; transition: background-color 180ms ease, border-color 180ms ease, transform 80ms ease; }
+.t-illus-ai-action:hover { background: rgba(0,196,160,0.18); border-color: rgba(0,196,160,0.5); }
+.t-illus-ai-action:active { transform: scale(0.96); }
+.t-illus-ai-action:focus-visible { outline: 2px solid rgba(0,196,160,0.6); outline-offset: 2px; }
+
+/* EHR context header strip */
+.t-illus-ehr { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 16px; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.06); }
+.t-illus-ehr-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.t-illus-ehr-mark { width: 16px; height: 16px; border-radius: 50%; background: linear-gradient(135deg, rgba(0,196,160,0.9), rgba(0,196,160,0.55)); color: #0A0B0F; font-family: var(--sans); font-size: 0.625rem; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; letter-spacing: -0.02em; flex-shrink: 0; box-shadow: 0 0 0 1px rgba(0,196,160,0.35); }
+.t-illus-ehr-live-dot { width: 6px; height: 6px; border-radius: 50%; background: #2ED573; box-shadow: 0 0 6px rgba(46,213,115,0.7); animation: t-blink 1.6s ease-in-out infinite; flex-shrink: 0; }
+.t-illus-ehr-text { font-size: 0.6875rem; color: rgba(255,255,255,0.4); letter-spacing: 0.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.t-illus-ehr-right { display: inline-flex; align-items: center; gap: 6px; font-size: 0.625rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(0,196,160,0.6); font-weight: 600; flex-shrink: 0; }
+.t-illus-ehr-conn-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(0,196,160,0.9); box-shadow: 0 0 6px rgba(0,196,160,0.5); }
+
+/* REROUTING pill (replaces ACTION on click) */
+.t-illus-pill-rerouting { background: rgba(0,196,160,0.15); color: rgba(0,196,160,0.95); border-color: rgba(0,196,160,0.35); animation: t-pill-pulse 1.4s ease-in-out infinite; }
+.t-illus-pill-rerouting .t-illus-pill-dot { background: rgba(0,196,160,0.95); box-shadow: 0 0 6px rgba(0,196,160,0.7); }
+@keyframes t-pill-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(0,196,160,0.35); } 50% { box-shadow: 0 0 0 4px rgba(0,196,160,0); } }
+.t-illus-ref-rerouting { transition: background-color 250ms ease, border-color 250ms ease; background: rgba(0,196,160,0.08); border-color: rgba(0,196,160,0.16); }
+
+/* Slide-down expand wrapper (grid-rows trick) */
+.t-illus-expand { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 300ms ease, margin 300ms ease, opacity 200ms ease; opacity: 0; margin-top: 0; }
+.t-illus-expand-open { grid-template-rows: 1fr; opacity: 1; margin-top: 6px; }
+.t-illus-expand-inner { overflow: hidden; min-height: 0; }
+
+/* Alternative specialist card */
+.t-illus-alt { display: flex; align-items: center; gap: 12px; padding: 12px 12px; border-radius: 8px; background: rgba(0,196,160,0.06); border: 1px solid rgba(0,196,160,0.18); margin-left: 42px; }
+.t-illus-alt-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(0,196,160,0.95); box-shadow: 0 0 6px rgba(0,196,160,0.5); flex-shrink: 0; }
+.t-illus-alt-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.t-illus-alt-name { font-size: 0.75rem; font-weight: 500; color: rgba(255,255,255,0.88); line-height: 1.3; }
+.t-illus-alt-meta { font-size: 0.625rem; color: rgba(0,196,160,0.7); line-height: 1.3; letter-spacing: 0.01em; }
+.t-illus-alt-btn { padding: 5px 10px; background: rgba(0,196,160,0.95); color: #0A0B0F; border: none; border-radius: 5px; font-size: 0.625rem; font-weight: 700; font-family: var(--sans); letter-spacing: 0.04em; text-transform: uppercase; cursor: default; flex-shrink: 0; }
+
+/* Visit summary card inside Completed step */
+.t-illus-step-sub { transition: opacity 200ms ease, max-height 200ms ease; max-height: 40px; overflow: hidden; }
+.t-illus-step-sub-hidden { opacity: 0; max-height: 0; }
+.t-illus-step-summary { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 300ms ease, opacity 240ms ease, margin 300ms ease; opacity: 0; margin-top: 0; }
+.t-illus-step-summary-open { grid-template-rows: 1fr; opacity: 1; margin-top: 6px; }
+.t-illus-step-summary-inner { overflow: hidden; min-height: 0; display: flex; flex-direction: column; gap: 3px; padding: 10px 12px; background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; }
+.t-illus-step-summary-line { display: flex; align-items: baseline; gap: 8px; font-size: 0.6875rem; color: rgba(255,255,255,0.72); line-height: 1.5; }
+.t-illus-step-summary-line span { font-size: 0.5625rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.32); font-weight: 600; min-width: 60px; flex-shrink: 0; }
+.t-illus-step-summary-conf { display: inline-flex; align-items: center; gap: 6px; font-size: 0.625rem; color: rgba(0,196,160,0.9); letter-spacing: 0.04em; padding-top: 6px; margin-top: 4px; border-top: 1px solid rgba(0,196,160,0.12); font-weight: 600; }
+.t-illus-step-summary-conf svg { width: 10px; height: 10px; color: rgba(0,196,160,0.95); flex-shrink: 0; }
+
+/* ─── STATS ─── */
+.t-stats-section { padding: 96px 24px; border-top: 1px solid var(--t-border); }
+.t-stats { display: grid; grid-template-columns: repeat(3, 1fr); max-width: 1080px; margin: 0 auto; }
+.t-stat { padding: 24px 32px; text-align: center; position: relative; }
+.t-stat + .t-stat::before { content: ""; position: absolute; left: 0; top: 12%; bottom: 12%; width: 1px; background: var(--t-border); }
+.t-stat-n { font-family: var(--serif); font-size: clamp(3.25rem, 6vw, 4.5rem); font-weight: 400; line-height: 1; letter-spacing: -0.04em; color: var(--teal); margin-bottom: 16px; font-variant-numeric: tabular-nums; }
+.t-stat-l { font-size: 0.9375rem; color: var(--secondary); line-height: 1.55; max-width: 280px; margin: 0 auto; }
+
+/* ─── SECTION DEFAULTS ─── */
+.t-section { padding: 112px 24px; }
+.t-section-inner { max-width: 1080px; margin: 0 auto; }
+.t-eyebrow { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--teal); margin-bottom: 16px; opacity: 0.85; }
+.t-h2 { font-family: var(--serif); font-size: clamp(2rem, 4vw, 3rem); font-weight: 400; line-height: 1.1; letter-spacing: -0.035em; color: var(--text); text-wrap: balance; }
+.t-section-head { text-align: center; max-width: 720px; margin: 0 auto 72px; }
+.t-section-head p { color: var(--secondary); font-size: 1.0625rem; margin-top: 16px; }
+
+/* ─── HOW IT WORKS ─── */
+.t-how { background: var(--bg); border-top: 1px solid var(--t-border); }
+.t-how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.t-how-card { background: var(--surface); border: 1px solid var(--t-border); border-left: 3px solid rgba(0,212,180,0.2); border-radius: 16px; padding: 36px 32px; transition: background-color 200ms ease, border-color 200ms ease, border-left-color 200ms ease; }
+.t-how-card-2 { border-left-color: rgba(0,212,180,0.5); }
+.t-how-card-3 { border-left-color: rgba(0,212,180,0.8); }
+.t-how-card:hover { background: rgba(0,196,160,0.04); border-color: rgba(0,196,160,0.15); }
+.t-how-card-1:hover { border-left-color: rgba(0,212,180,0.4); }
+.t-how-card-2:hover { border-left-color: rgba(0,212,180,0.7); }
+.t-how-card-3:hover { border-left-color: rgba(0,212,180,1); }
+.t-how-card:hover .t-how-num { color: rgba(0,196,160,0.4); }
+.t-how-num { font-family: var(--serif); font-size: 2.5rem; font-weight: 400; color: var(--tertiary); letter-spacing: -0.03em; line-height: 1; margin-bottom: 28px; transition: color 200ms ease; }
+.t-how-card h3 { font-family: var(--serif); font-size: 1.5rem; font-weight: 400; letter-spacing: -0.025em; color: var(--text); margin-bottom: 12px; }
+.t-how-card p { font-size: 0.9375rem; color: var(--secondary); line-height: 1.65; }
+
+/* ─── SOCIAL PROOF / PROOF POINTS ─── */
+.t-social { padding: 112px 24px; background: var(--bg); border-top: 1px solid var(--t-border); }
+.t-social-inner { max-width: 1080px; margin: 0 auto; text-align: center; }
+.t-social-eyebrow { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--teal); opacity: 0.8; margin-bottom: 18px; }
+.t-social-headline { font-family: var(--serif); font-size: clamp(1.875rem, 4vw, 2.75rem); font-weight: 400; line-height: 1.12; letter-spacing: -0.035em; color: var(--text); margin: 0 auto 56px; max-width: 820px; text-wrap: balance; }
+
+.t-proof-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 980px; margin: 0 auto; text-align: left; }
+.t-proof-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 10px; transition: border-color 200ms ease, background-color 200ms ease; }
+.t-proof-card:hover { border-color: rgba(255,255,255,0.12); background: rgba(255,255,255,0.035); }
+.t-proof-icon { width: 28px; height: 28px; border-radius: 8px; background: rgba(0,212,180,0.15); color: var(--teal); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.t-proof-title { font-size: 1rem; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+.t-proof-body { font-size: 0.875rem; color: var(--secondary); line-height: 1.6; }
+
+.t-social-closer { font-family: var(--serif); font-style: italic; font-size: 1.25rem; color: var(--text); line-height: 1.5; max-width: 640px; margin: 56px auto 0; letter-spacing: -0.01em; }
+
+/* ─── FINAL CTA ─── */
+.t-cta { padding: 96px 24px 128px; }
+.t-cta-inner { max-width: 880px; margin: 0 auto; }
+.t-cta-card { position: relative; padding: 72px 48px; border-radius: 24px; text-align: center; background: linear-gradient(180deg, var(--surface), var(--navy-darkest)); border: 1px solid var(--t-border-strong); overflow: hidden; isolation: isolate; }
+.t-cta-card::before { content: ""; position: absolute; inset: -1px; border-radius: 24px; padding: 1px; background: linear-gradient(135deg, rgba(0,212,180,0.55) 0%, rgba(0,212,180,0) 35%, rgba(224,90,58,0.35) 100%); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask-composite: exclude; pointer-events: none; z-index: 0; }
+.t-cta-card::after { content: ""; position: absolute; left: 50%; top: -180px; width: 600px; height: 360px; transform: translateX(-50%); background: radial-gradient(ellipse, rgba(0,212,180,0.18), transparent 60%); pointer-events: none; z-index: 0; }
+.t-cta-card > * { position: relative; z-index: 1; }
+.t-cta-title { font-family: var(--serif); font-size: clamp(2rem, 4vw, 3rem); font-weight: 400; line-height: 1.1; letter-spacing: -0.035em; color: var(--text); margin-bottom: 16px; text-wrap: balance; }
+.t-cta-sub { font-size: 1.0625rem; color: var(--secondary); max-width: 560px; margin: 0 auto 36px; line-height: 1.65; }
+
+/* ─── FOOTER ─── */
+.t-footer { padding: 64px 24px 32px; background: var(--navy-darkest); border-top: 1px solid var(--t-border); }
+.t-footer-inner { max-width: 1080px; margin: 0 auto; display: grid; grid-template-columns: 1fr 2fr; gap: 56px; align-items: start; }
+.t-footer-brand { display: flex; flex-direction: column; gap: 12px; }
+.t-footer-tagline { font-size: 0.875rem; color: var(--tertiary); max-width: 280px; line-height: 1.55; }
+.t-footer-links { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+.t-footer-col h5 { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--secondary); margin-bottom: 14px; }
+.t-footer-col a { display: block; font-size: 0.875rem; color: var(--tertiary); margin-bottom: 10px; transition: color 150ms ease; }
+.t-footer-col a:hover { color: var(--text); }
+.t-footer-bottom { max-width: 1080px; margin: 56px auto 0; padding-top: 24px; border-top: 1px solid var(--t-border); display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; font-size: 0.8125rem; color: var(--secondary); }
+.t-footer-social { color: var(--secondary); transition: color 150ms ease; }
+.t-footer-social:hover { color: var(--teal); }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 900px) {
+  .t-nav { padding: 0 20px; }
+  .t-nav-links { display: none; }
+  .t-nav-mob { display: block; }
+  .t-section, .t-social, .t-stats-section, .t-cta { padding-left: 20px; padding-right: 20px; }
+  .t-how-grid { grid-template-columns: 1fr; gap: 16px; }
+  .t-stats { grid-template-columns: 1fr; }
+  .t-stat { padding: 32px 24px; }
+  .t-stat + .t-stat::before { left: 12%; right: 12%; top: 0; bottom: auto; width: auto; height: 1px; }
+  .t-footer-inner { grid-template-columns: 1fr; gap: 40px; }
+  .t-footer-links { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 900px) {
+  .t-proof-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 1100px) {
+  .t-hero { min-height: 0; padding: 132px 24px 72px; display: block; }
+  .t-hero-cols { grid-template-columns: 1fr; gap: 40px; }
+  .t-hero-copy { text-align: center; max-width: 720px; margin: 0 auto; }
+  .t-hero-actions { justify-content: center; }
+  .t-trust-strip { justify-content: center; }
+  .t-hero-visual .t-illus { max-width: 920px; margin: 0 auto; }
+}
+@media (max-width: 768px) {
+  .t-hero { padding: 124px 20px 64px; }
+  .t-illus { margin-top: 0; }
+  .t-illus-inner { padding: 22px 16px; }
+  .t-illus-grid { grid-template-columns: 1fr; gap: 10px; }
+  .t-illus-pane { padding: 16px; }
+  .t-illus-ehr { padding: 7px 14px; gap: 8px; }
+  .t-illus-ehr-text { font-size: 0.625rem; }
+  .t-illus-ehr-right span:last-child { display: none; }
+  .t-illus-alt { margin-left: 0; }
+  .t-illus-ai { padding: 12px 14px; gap: 10px; }
+  .t-illus-ai-action { font-size: 0.625rem; padding: 4px 10px; }
+  .t-illus-ai-text { font-size: 0.75rem; }
+  .t-cta-card { padding: 56px 28px; }
+  .t-footer-links { grid-template-columns: 1fr; gap: 28px; }
+  .t-trust-strip { gap: 14px 22px; }
+  .t-social-closer { font-size: 1.0625rem; margin-top: 40px; }
+}
+@media (max-width: 480px) {
+  .t-hero-actions { flex-direction: column; align-items: stretch; width: 100%; max-width: 320px; margin: 0 auto; }
+  .t-btn { justify-content: center; }
+  .t-section { padding-top: 80px; padding-bottom: 80px; }
+  .t-stats-section, .t-social, .t-cta { padding-top: 72px; padding-bottom: 72px; }
+}
+
+@keyframes t-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+/* ─── ASK TETHER ─── */
+.t-ask { background: var(--bg); border-top: 1px solid var(--t-border); }
+.t-chat { max-width: 700px; margin: 0 auto; }
+.t-chat-panel { background: linear-gradient(180deg, rgba(0,212,180,0.03), transparent 30%), linear-gradient(180deg, var(--surface), var(--navy-darkest)); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; overflow: hidden; box-shadow: 0 40px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05); }
+.t-chat-head { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(7,7,10,0.6); border-bottom: 1px solid var(--t-border); }
+.t-chat-lights { display: inline-flex; gap: 6px; }
+.t-chat-lights span { width: 10px; height: 10px; border-radius: 50%; opacity: 0.85; }
+.t-chat-title { flex: 1; text-align: center; font-size: 0.8125rem; color: var(--secondary); font-weight: 500; letter-spacing: 0.01em; }
+.t-chat-status { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--secondary); letter-spacing: 0.04em; }
+.t-chat-status-dot { width: 7px; height: 7px; border-radius: 50%; background: #2ED573; box-shadow: 0 0 8px rgba(46,213,115,0.7); animation: t-blink 1.8s ease-in-out infinite; }
+.t-chat-body { padding: 20px 18px; display: flex; flex-direction: column; gap: 12px; min-height: 360px; }
+.t-msg { max-width: 88%; }
+.t-msg-user { align-self: flex-end; max-width: 80%; padding: 10px 14px; background: rgba(255,255,255,0.06); color: var(--text); font-size: 0.9375rem; border-radius: 14px 14px 4px 14px; border: 1px solid var(--t-border); }
+.t-msg-user p { margin: 0; line-height: 1.45; }
+.t-msg-agent { align-self: flex-start; }
+.t-msg-card { background: rgba(7,7,10,0.55); border: 1px solid var(--t-border); border-left: 2px solid var(--teal); border-radius: 4px 12px 12px 12px; padding: 14px 16px; min-width: 340px; }
+.t-msg-card-head { font-size: 0.875rem; font-weight: 600; color: var(--text); margin-bottom: 12px; letter-spacing: -0.005em; }
+.t-msg-card ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 9px; }
+.t-msg-card li { display: flex; align-items: center; gap: 10px; font-size: 0.8125rem; color: var(--secondary); line-height: 1.45; flex-wrap: wrap; }
+.t-msg-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.t-msg-dot-warn { background: #F0B100; box-shadow: 0 0 6px rgba(240,177,0,0.4); }
+.t-msg-dot-danger { background: #E05A3A; box-shadow: 0 0 6px rgba(224,90,58,0.5); }
+.t-msg-item-text { flex: 1; min-width: 0; }
+.t-msg-action { padding: 4px 10px; background: transparent; border: 1px solid var(--teal); color: var(--teal-light); border-radius: 4px; font-size: 0.75rem; font-weight: 600; font-family: var(--sans); letter-spacing: 0.02em; cursor: default; }
+.t-msg-confirm { display: inline-flex; align-items: center; gap: 10px; background: rgba(0,212,180,0.08); border: 1px solid rgba(0,212,180,0.25); border-radius: 14px 14px 14px 4px; padding: 10px 14px; max-width: 100%; }
+.t-msg-check { width: 22px; height: 22px; flex-shrink: 0; border-radius: 50%; background: var(--teal); color: var(--navy-darkest); display: inline-flex; align-items: center; justify-content: center; }
+.t-msg-check svg { width: 11px; height: 11px; }
+.t-msg-confirm-text { font-size: 0.875rem; color: var(--text); font-weight: 500; }
+.t-msg-time { font-size: 0.75rem; color: var(--tertiary); margin-left: auto; padding-left: 12px; }
+
+.t-ask-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 980px; margin: 56px auto 0; text-align: left; }
+.t-ask-tile { background: rgba(255,255,255,0.02); border: 1px solid var(--t-border); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 10px; transition: border-color 200ms ease, background-color 200ms ease; }
+.t-ask-tile:hover { border-color: var(--t-border-strong); background: rgba(255,255,255,0.035); }
+.t-ask-tile-icon { width: 28px; height: 28px; border-radius: 8px; background: rgba(0,212,180,0.15); color: var(--teal); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.t-ask-tile h4 { font-size: 1rem; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+.t-ask-tile p { font-size: 0.875rem; color: var(--secondary); line-height: 1.6; }
+
+/* ─── EHR HUB ─── */
+.t-ehr { background: var(--bg); border-top: 1px solid var(--t-border); }
+.t-hub { position: relative; max-width: 760px; margin: 0 auto; aspect-ratio: 5 / 3; min-height: 320px; }
+.t-hub-lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.t-hub-center { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 132px; height: 132px; border-radius: 50%; background: radial-gradient(circle, rgba(0,212,180,0.18), rgba(7,7,10,0.9) 70%), var(--surface); border: 1.5px solid var(--teal); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 40px rgba(0,212,180,0.25), inset 0 0 0 4px rgba(0,212,180,0.06); z-index: 2; }
+.t-hub-tile { position: absolute; padding: 10px 16px; background: rgba(0,196,160,0.08); border: 1px solid rgba(0,196,160,0.15); border-radius: 8px; min-width: 152px; display: flex; align-items: center; justify-content: center; gap: 8px; z-index: 1; }
+.t-hub-tile-muted { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); }
+.t-hub-tile-tl { left: 0; top: 0; }
+.t-hub-tile-tr { right: 0; top: 0; }
+.t-hub-tile-bl { left: 0; bottom: 0; }
+.t-hub-tile-br { right: 0; bottom: 0; }
+.t-hub-name { font-size: 0.8125rem; font-weight: 500; color: rgba(255,255,255,0.8); letter-spacing: -0.005em; }
+.t-hub-tile-muted .t-hub-name { font-size: 0.75rem; color: rgba(255,255,255,0.4); }
+.t-hub-pill { font-size: 0.5625rem; padding: 2px 6px; border-radius: 3px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid; }
+.t-hub-pill-live { background: rgba(0,196,160,0.15); color: rgba(0,196,160,0.85); border-color: rgba(0,196,160,0.3); }
+.t-hub-pill-soon { background: rgba(220,90,40,0.12); color: rgba(220,130,80,0.95); border-color: rgba(220,90,40,0.25); }
+
+@keyframes t-hub-in-tl { 0% { transform: translate(80px, 60px); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translate(300px, 180px); opacity: 0; } }
+@keyframes t-hub-in-tr { 0% { transform: translate(520px, 60px); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translate(300px, 180px); opacity: 0; } }
+@keyframes t-hub-in-bl { 0% { transform: translate(80px, 300px); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translate(300px, 180px); opacity: 0; } }
+@keyframes t-hub-in-br { 0% { transform: translate(520px, 300px); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translate(300px, 180px); opacity: 0; } }
+@keyframes t-hub-out-tl { 0% { transform: translate(300px, 180px); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translate(80px, 60px); opacity: 0; } }
+@keyframes t-hub-out-tr { 0% { transform: translate(300px, 180px); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translate(520px, 60px); opacity: 0; } }
+@keyframes t-hub-out-bl { 0% { transform: translate(300px, 180px); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translate(80px, 300px); opacity: 0; } }
+@keyframes t-hub-out-br { 0% { transform: translate(300px, 180px); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translate(520px, 300px); opacity: 0; } }
+
+.t-hub-dot { transform-box: fill-box; transform-origin: center; }
+.t-hub-dot-in-tl { animation: t-hub-in-tl 3.4s linear infinite; }
+.t-hub-dot-in-tr { animation: t-hub-in-tr 3.4s linear infinite 0.6s; }
+.t-hub-dot-in-bl { animation: t-hub-in-bl 3.4s linear infinite 1.2s; }
+.t-hub-dot-in-br { animation: t-hub-in-br 3.4s linear infinite 1.8s; }
+.t-hub-dot-out-tl { animation: t-hub-out-tl 3.4s linear infinite 1.7s; }
+.t-hub-dot-out-tr { animation: t-hub-out-tr 3.4s linear infinite 2.3s; }
+.t-hub-dot-out-bl { animation: t-hub-out-bl 3.4s linear infinite 2.9s; }
+.t-hub-dot-out-br { animation: t-hub-out-br 3.4s linear infinite 0.5s; }
+
+.t-ehr-callout { margin: 40px auto 0; max-width: 620px; text-align: center; display: inline-flex; align-items: center; gap: 10px; padding: 10px 18px; background: rgba(255,255,255,0.02); border: 1px solid var(--t-border); border-radius: 999px; font-size: 0.875rem; color: var(--secondary); }
+.t-ehr-callout em { font-style: italic; color: var(--text); font-weight: 400; }
+.t-ehr-callout-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 8px rgba(0,212,180,0.6); flex-shrink: 0; }
+.t-ehr .t-section-head { margin-bottom: 64px; }
+.t-ehr .t-section-inner { text-align: center; }
+
+/* ─── BEFORE / AFTER COMPARE ─── */
+.t-compare { background: linear-gradient(180deg, var(--bg) 0%, var(--surface) 100%); border-top: 1px solid var(--t-border); }
+.t-compare-headline { text-align: center; max-width: 720px; margin: 0 auto 56px; }
+.t-compare-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 980px; margin: 0 auto; align-items: stretch; }
+.t-compare-grid > div { display: flex; }
+.t-compare-card { flex: 1; height: 100%; position: relative; background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(7,7,10,0.4)); border: 1px solid var(--t-border); border-radius: 14px; padding: 28px 28px 24px; display: flex; flex-direction: column; min-height: 380px; }
+.t-compare-card::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px; border-radius: 14px 14px 0 0; }
+.t-compare-card-before::before { background: rgba(220,90,40,0.4); }
+.t-compare-card-after::before { background: rgba(0,196,160,0.4); }
+.t-compare-head { margin-bottom: 18px; }
+.t-compare-eyebrow { font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
+.t-compare-eyebrow-before { color: rgba(220,130,80,0.95); }
+.t-compare-eyebrow-after { color: rgba(0,196,160,0.95); }
+.t-compare-steps { list-style: none; padding: 0; margin: 0 0 24px; display: flex; flex-direction: column; gap: 12px; }
+.t-compare-step { display: flex; align-items: flex-start; gap: 12px; font-size: 0.875rem; line-height: 1.5; color: var(--secondary); }
+.t-compare-step-before { color: rgba(255,255,255,0.55); }
+.t-compare-step-after { color: rgba(255,255,255,0.85); }
+.t-compare-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 7px; }
+.t-compare-dot-before { background: rgba(220,90,40,0.85); box-shadow: 0 0 4px rgba(220,90,40,0.25); }
+.t-compare-dot-after { background: rgba(0,196,160,0.95); box-shadow: 0 0 6px rgba(0,196,160,0.45); }
+.t-compare-text { flex: 1; min-width: 0; }
+.t-compare-foot { font-size: 0.8125rem; padding-top: 16px; margin-top: auto; border-top: 1px solid var(--t-border); letter-spacing: 0.01em; }
+.t-compare-foot-before { color: rgba(220,130,80,0.85); }
+.t-compare-foot-after { color: rgba(0,196,160,0.9); }
+
+/* ─── PLATFORM 2x2 ─── */
+.t-platform { background: var(--bg); border-top: 1px solid var(--t-border); }
+.t-platform-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; max-width: 960px; margin: 0 auto; align-items: stretch; }
+.t-platform-grid > div { display: flex; }
+.t-platform-card { background: rgba(255,255,255,0.02); border: 1px solid var(--t-border); border-radius: 14px; padding: 28px; display: flex; flex-direction: column; gap: 12px; flex: 1; transition: border-color 200ms ease, background-color 200ms ease; }
+.t-platform-card-live { border-color: rgba(0,196,160,0.22); background: linear-gradient(180deg, rgba(0,196,160,0.04), rgba(255,255,255,0.02)); box-shadow: inset 0 0 0 1px rgba(0,196,160,0.06); }
+.t-platform-card:hover { border-color: var(--t-border-strong); background: rgba(255,255,255,0.035); }
+.t-platform-card-live:hover { border-color: rgba(0,196,160,0.35); }
+.t-platform-num { font-family: var(--serif); font-size: 1.5rem; font-weight: 400; color: var(--tertiary); letter-spacing: -0.03em; line-height: 1; }
+.t-platform-badge { display: inline-flex; align-self: flex-start; margin-top: auto; font-size: 0.75rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; letter-spacing: 0.04em; text-transform: uppercase; border: 1px solid; }
+.t-platform-badge-live { background: rgba(0,212,180,0.12); color: var(--teal-light); border-color: rgba(0,212,180,0.35); }
+.t-platform-badge-soon { background: rgba(224,90,58,0.1); color: #F0846A; border-color: rgba(224,90,58,0.35); }
+.t-platform-badge-later { background: rgba(255,255,255,0.04); color: var(--tertiary); border-color: var(--t-border); }
+.t-platform-title { font-family: var(--serif); font-size: 1.375rem; font-weight: 400; letter-spacing: -0.025em; color: var(--text); }
+.t-platform-body { font-size: 0.9375rem; color: var(--secondary); line-height: 1.6; }
+
+/* ─── Responsive: new sections ─── */
+@media (max-width: 900px) {
+  .t-ask-tiles, .t-platform-grid, .t-compare-grid { grid-template-columns: 1fr; }
+  .t-compare-card { min-height: 0; }
+  .t-msg-card { min-width: 0; }
+  .t-hub { aspect-ratio: auto; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .t-hub-lines, .t-hub-center { display: none; }
+  .t-hub-tile { position: static; min-width: 0; padding: 18px; }
+}
+@media (max-width: 768px) {
+  .t-chat-body { padding: 16px 14px; min-height: 320px; }
+  .t-msg-card { padding: 12px 14px; }
+  .t-msg-time { display: none; }
+  .t-ehr-callout { flex-direction: column; gap: 6px; padding: 14px 18px; border-radius: 14px; text-align: center; }
+}
+`;
+
+// ─── Main Component ───
 export default function TetherLanding() {
   const [scrolled, setScrolled] = useState(false);
   const [scrollPct, setScrollPct] = useState(0);
-  const [showDemoForm, setShowDemoForm] = useState(false);
-  const [videoModal, setVideoModal] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const scrollY = useScrollY();
 
@@ -917,7 +1172,7 @@ export default function TetherLanding() {
   }, [mobileMenuOpen]);
 
   useEffect(() => {
-    setScrolled(scrollY > 20);
+    setScrolled(scrollY > 24);
     const h = document.documentElement.scrollHeight - window.innerHeight;
     setScrollPct(h > 0 ? (scrollY / h) * 100 : 0);
   }, [scrollY]);
@@ -932,13 +1187,9 @@ export default function TetherLanding() {
           url: "https://tetherhealth.co",
           logo: "https://tetherhealth.co/logo.png",
           description:
-            "Healthcare referral management software connecting primary care and specialty practices.",
+            "AI agents that connect PCPs and specialists, close the referral loop, and integrate directly with your EHR.",
           sameAs: ["https://www.linkedin.com/company/tetherhealth"],
-          contactPoint: {
-            "@type": "ContactPoint",
-            contactType: "sales",
-            email: "hello@tetherhealth.co",
-          },
+          contactPoint: { "@type": "ContactPoint", contactType: "sales", email: "hello@tetherhealth.co" },
         }}
       />
       <JsonLd
@@ -949,57 +1200,41 @@ export default function TetherLanding() {
           applicationCategory: "HealthApplication",
           operatingSystem: "Web",
           description:
-            "Referral management software for healthcare practices with real-time tracking and loop closure.",
+            "Intelligent referral coordination for medical practices. AI agents that pull from your EHR, coordinate with specialists, and close the loop.",
           url: "https://tetherhealth.co",
-          offers: {
-            "@type": "Offer",
-            price: "0",
-            priceCurrency: "USD",
-            description: "Contact us for pricing",
-          },
+          offers: { "@type": "Offer", price: "0", priceCurrency: "USD", description: "Contact us for pricing" },
           featureList: [
-            "Real-time referral tracking",
-            "Closed-loop referral management",
-            "Shared provider directory",
-            "Fax automation",
-            "AI-powered document parsing",
+            "EHR-integrated referrals",
+            "Closed-loop referral tracking",
+            "AI referral coordination agents",
+            "Specialist directory",
           ],
         }}
       />
       <style>{CSS}</style>
       <div className="tether-lp">
         <div className="t-scroll-prog" style={{ width: `${scrollPct}%` }} />
-        <div className="t-gradient-orb" style={{ top: `${200 + scrollY * 0.3}px`, left: "60%", transition: "top 0.8s cubic-bezier(0.16,1,0.3,1)" }} />
 
         {/* NAV */}
         <nav className={`t-nav ${scrolled ? "t-nav-s" : ""}`}>
-          <a href="#" className="t-nav-logo">
-            <Image src="/LOGO.jpeg" alt="Tether" width={30} height={30} style={{ objectFit: "contain" }} />
-            <span className="t-nav-logo-text">Tether</span>
-          </a>
+          <a href="#" aria-label="Tether — home"><TetherWordmark /></a>
           <ul className="t-nav-links">
-            <li><a href="#product">Product</a></li>
-            <li><a href="#platform">Platform</a></li>
-            <li><a href="/for-specialists">For Specialists</a></li>
+            <li><a href="#how">How It Works</a></li>
             <li><a href="/security">Security</a></li>
-            <li><a href="/blog">Blog</a></li>
-            <li><a href="https://app.tetherhealth.co/login" className="t-nav-login">Log In</a></li>
-            <li><a href="/request-demo" className="t-nav-cta" style={{ textDecoration: "none", display: "inline-block" }}>Request Demo</a></li>
+            <li><a href="https://app.tetherhealth.co/login">Log In</a></li>
+            <li><a href="/request-demo" className="t-nav-cta">Request Demo</a></li>
           </ul>
           <button className="t-nav-mob" aria-label="Menu" onClick={() => setMobileMenuOpen(true)}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           </button>
         </nav>
         {mobileMenuOpen && (
           <div className="t-nav-overlay">
             <button className="t-nav-overlay-close" aria-label="Close" onClick={() => setMobileMenuOpen(false)}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
-            <a href="#product" onClick={() => setMobileMenuOpen(false)}>Product</a>
-            <a href="#platform" onClick={() => setMobileMenuOpen(false)}>Platform</a>
-            <a href="/for-specialists" onClick={() => setMobileMenuOpen(false)}>For Specialists</a>
+            <a href="#how" onClick={() => setMobileMenuOpen(false)}>How It Works</a>
             <a href="/security" onClick={() => setMobileMenuOpen(false)}>Security</a>
-            <a href="/blog" onClick={() => setMobileMenuOpen(false)}>Blog</a>
             <a href="https://app.tetherhealth.co/login" onClick={() => setMobileMenuOpen(false)}>Log In</a>
             <a href="/request-demo" className="t-nav-overlay-cta" onClick={() => setMobileMenuOpen(false)}>Request Demo</a>
           </div>
@@ -1007,278 +1242,236 @@ export default function TetherLanding() {
 
         {/* HERO */}
         <section className="t-hero">
-          <NetworkNodes />
           <div className="t-hero-inner">
-            <div className="t-hero-content">
-              <div className="t-hero-badge"><div className="t-hero-badge-dot" />Now accepting pilot practices</div>
-              <h1 className="t-hero-title">
-                <span className="t-hero-title-line"><span className="t-hero-title-line-inner">Every referral is a</span></span>
-                <span className="t-hero-title-line t-hero-title-rotator-line"><span className="t-hero-title-line-inner"><WordRotator words={["relationship.", "connection.", "patient.", "partnership."]} /></span></span>
-                <span className="t-hero-title-line"><span className="t-hero-title-line-inner">Stop losing them.</span></span>
-              </h1>
-              <p className="t-hero-sub">Tether is the intelligent referral network powered by AI agents that pull from your EHR, coordinate with specialists, and close the loop automatically. Your staff talks to Tether like a colleague — the agents handle the rest.</p>
-              <div className="t-hero-actions">
-                <a href="#problem" className="t-btn-p" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}>See Why It Matters <IconArrowRight /></a>
-                <a href="/request-demo" className="t-btn-teal" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}>Request Demo</a>
-              </div>
-            </div>
-            <HeroVideo />
-          </div>
-        </section>
-
-        {/* PROBLEM */}
-        <section className="t-problem" id="problem">
-          <div className="t-problem-fade" />
-          <div className="t-problem-inner">
-            <Reveal><div className="t-plbl">The Problem</div></Reveal>
-            <Reveal delay={0.1}><h2>Referrals disappear into a black hole. Your revenue disappears with them.</h2></Reveal>
-            <Reveal delay={0.2}><p className="t-problem-desc">Most referrals are still sent by fax. There is no confirmation, no tracking, and no follow-up. Patients fall through the cracks, specialists lose billable visits, and PCPs never know if their patient received care.</p></Reveal>
-            <Reveal delay={0.3}>
-              <ProblemStats />
-            </Reveal>
-          </div>
-        </section>
-
-        {/* PRODUCT */}
-        <section className="t-product" id="product">
-          <div className="t-product-inner">
-            <div className="t-product-header">
-              <Reveal><div className="t-slbl">Product</div></Reveal>
-              <Reveal delay={0.1}><div className="t-stitle">Built for the way<br />practices actually work</div></Reveal>
-              <Reveal delay={0.15}><p className="t-sdesc">Designed for medical assistants and front desk staff who manage referrals every day. Not physicians who review dashboards once a week.</p></Reveal>
-            </div>
-            <div className="t-prows">
-              <ProductFeatureRow title="Referral Dashboard" description="One dashboard, two views. PCPs track outbound referrals, visit summaries, and loop closure. Specialists manage inbound referrals, assign providers, and update statuses. Both sides see the full picture in real time." videoSrc="/dashboard-demo.mp4" videoOnLeft={true} />
-              <ProductFeatureRow title="Specialist Directory" description="Search providers across clinics in the DMV by specialty, insurance, distance, and availability. Find the right provider and start a referral in one click." videoSrc="/directory-demo.mp4" videoOnLeft={false} />
-              <ProductFeatureRow title="EHR Integration + AI Intelligence" description="Pull patient demographics, conditions, medications, allergies, and insurance directly from your EHR. When specialists send visit summaries, Tether pushes them back to the PCP's chart automatically. Tether's AI agents use all of this data to answer questions, flag issues, and execute follow-ups. Direct integrations with multiple EHR systems, with more being added continuously." videoSrc="/parser-demo.mp4" videoOnLeft={true} />
-            </div>
-          </div>
-        </section>
-
-        {/* ASK TETHER — AI INTELLIGENCE LAYER */}
-        <section className="t-ask" id="ask-tether">
-          <div className="t-ask-inner">
-            <Reveal><div className="t-slbl">Ask Tether — AI Intelligence Layer</div></Reveal>
-            <Reveal delay={0.1}><h2 className="t-ask-title">Meet your referral coordinator that never sleeps.</h2></Reveal>
-            <Reveal delay={0.15}><p className="t-ask-sub">Ask Tether is an AI assistant built into every page. It knows every referral, every specialist&apos;s requirements, and every patient&apos;s history. Ask it anything. Tell it to do anything.</p></Reveal>
-            <Reveal delay={0.2}>
-              <AnimatedChatDemo />
-            </Reveal>
-            <Reveal delay={0.25}>
-              <div className="t-ask-cards">
-                <TiltCard className="t-ask-card">
-                  <div className="t-ask-card-icon"><IconZap /></div>
-                  <h4>Answers questions instantly</h4>
-                  <p>Your MA asks about a patient&apos;s insurance, a specialist&apos;s requirements, or which referrals are overdue. Tether answers in seconds with real data — not generic advice.</p>
-                </TiltCard>
-                <TiltCard className="t-ask-card">
-                  <div className="t-ask-card-icon"><IconSend /></div>
-                  <h4>Executes actions from chat</h4>
-                  <p>Request visit summaries, notify patients, mark referrals as seen, find specialists — all from one conversation. No clicking through menus.</p>
-                </TiltCard>
-                <TiltCard className="t-ask-card">
-                  <div className="t-ask-card-icon"><IconSparkles /></div>
-                  <h4>Gets smarter with every referral</h4>
-                  <p>Every specialist that configures requirements, every referral that flows through, every information request teaches the agents. After 1,000 referrals, Tether knows your referral patterns better than any coordinator could.</p>
-                </TiltCard>
-              </div>
-            </Reveal>
-          </div>
-        </section>
-
-        {/* THE PLATFORM */}
-        <section className="t-platform" id="platform">
-          <div className="t-platform-inner">
-            <Reveal><div className="t-slbl">THE PLATFORM</div></Reveal>
-            <Reveal delay={0.1}><h2>Referral management is just the beginning.</h2></Reveal>
-            <Reveal delay={0.15}><p className="t-platform-desc">Tether&apos;s intelligent agents live inside the EHRs your practice already uses. Starting with referrals, expanding into every workflow your staff touches.</p></Reveal>
-            <Reveal delay={0.2}>
-              <div className="t-platform-layout">
-                <TiltCard className="t-platform-ehr">
-                  <div className="t-platform-ehr-icon"><IconPlug /></div>
-                  <h4>EHR Workflow Integration</h4>
-                  <p>Direct integrations with multiple EHR systems. Patient data flows in, visit summaries flow back. Tether&apos;s AI agents use everything in the EHR to give your staff real-time, actionable intelligence.</p>
-                  <EHRDiagram />
-                  <p className="t-platform-ehr-note">Integrates with your existing EHR. Direct integrations with additional systems being added continuously.</p>
-                </TiltCard>
-                <div className="t-platform-divider">
-                  <div className="t-platform-divider-line" />
-                  <span className="t-platform-divider-badge">Intelligent agents. Every workflow.</span>
-                  <div className="t-platform-divider-line" />
+            <div className="t-hero-cols">
+              <div className="t-hero-copy">
+                <h1 className="t-hero-title">
+                  Every referral is a{" "}
+                  <span className="t-headline-nowrap"><RotatingWord />.</span>
+                  {" "}Stop losing them.
+                </h1>
+                <p className="t-hero-sub">
+                  Tether&apos;s AI agents live inside your EHR. They coordinate referrals, verify specialists, close the loop, and push visit summaries back to your chart. Automatically.
+                </p>
+                <div className="t-hero-actions">
+                  <a href="/request-demo" className="t-btn t-btn-coral">Request Demo</a>
+                  <a href="#how" className="t-btn t-btn-ghost">See How It Works <IconArrowRight /></a>
                 </div>
-                <div className="t-platform-row">
-                  <TiltCard className="t-platform-card">
-                    <div className="t-platform-card-icon t-platform-icon-teal"><IconMessageSquare /></div>
-                    <h4>Ask Tether — AI Agents</h4>
-                    <p>Intelligent agents built into every page. They answer practice-specific questions, surface what needs attention, and execute referral actions from a single conversation. Powered by HIPAA-compliant AI infrastructure.</p>
-                  </TiltCard>
-                  <TiltCard className="t-platform-card">
-                    <div className="t-platform-card-icon t-platform-icon-teal"><IconSend /></div>
-                    <h4>Referral Automation</h4>
-                    <p>Intelligent routing, automated intake parsing, real-time status tracking, and loop closure across every referral. The workflow that started it all.</p>
-                  </TiltCard>
-                  <TiltCard className="t-platform-card">
-                    <div className="t-platform-card-icon t-platform-icon-teal"><IconCalendarCheck /></div>
-                    <h4>Scheduling &amp; Verification</h4>
-                    <p>Automated insurance eligibility checks, patient scheduling, and appointment confirmations. All handled inside your EHR.</p>
-                  </TiltCard>
-                  <TiltCard className="t-platform-card">
-                    <div className="t-platform-card-icon t-platform-icon-teal"><IconMessageSquare /></div>
-                    <h4>Patient Communication</h4>
-                    <p>Automated appointment reminders, referral status notifications, and care coordination updates. Keep patients informed at every step without manual outreach.</p>
-                  </TiltCard>
+                <div className="t-trust-strip" role="list">
+                  <span className="t-trust-badge" role="listitem"><span className="t-trust-badge-dot" />Athena EHR Integrated</span>
+                  <span className="t-trust-badge" role="listitem"><span className="t-trust-badge-dot" />HIPAA Compliant</span>
+                  <span className="t-trust-badge" role="listitem"><span className="t-trust-badge-dot" />MDVIP-Affiliated</span>
                 </div>
               </div>
-            </Reveal>
-            <Reveal delay={0.25}>
-              <div className="t-platform-footer">
-                <span className="t-platform-footer-live">Referral automation and AI intelligence are live.</span> Scheduling automation and insurance verification launching Q2 2026 with pilot partners. <a href="/request-demo">Request early access →</a>
+              <div className="t-hero-visual">
+                <HeroIllustration />
               </div>
-            </Reveal>
+            </div>
           </div>
         </section>
 
-        {/* AUDIENCES */}
-        <section className="t-audiences" id="specialists">
-          <div className="t-audiences-inner">
-            <Reveal><div className="t-slbl">Who It&apos;s For</div></Reveal>
-            <Reveal delay={0.1}><div className="t-stitle">Two sides. One network.</div></Reveal>
-            <Reveal delay={0.15}><p className="t-sdesc">Specialists grow their referral volume. PCPs close the loop on patient care. Both win when the network works.</p></Reveal>
-            <div className="t-aud-grid">
+        {/* STATS */}
+        <section className="t-stats-section" aria-label="Industry statistics">
+          <StatsRow />
+        </section>
+
+        {/* HOW IT WORKS */}
+        <section className="t-how t-section" id="how">
+          <div className="t-section-inner">
+            <div className="t-section-head">
+              <Reveal><div className="t-eyebrow">How It Works</div></Reveal>
+              <Reveal delay={0.05}><h2 className="t-h2">Three steps. Zero phone calls.</h2></Reveal>
+            </div>
+            <div className="t-how-grid">
+              <Reveal delay={0}>
+                <div className="t-how-card t-how-card-1">
+                  <div className="t-how-num">01</div>
+                  <h3>Send</h3>
+                  <p>Pull patient data from your chart and send a structured referral in one click. No fax hunting, no manual entry.</p>
+                </div>
+              </Reveal>
+              <Reveal delay={0.15}>
+                <div className="t-how-card t-how-card-2">
+                  <div className="t-how-num">02</div>
+                  <h3>Coordinate</h3>
+                  <p>AI agents monitor the referral, follow up with the specialist, and flag anything that needs your attention.</p>
+                </div>
+              </Reveal>
+              <Reveal delay={0.30}>
+                <div className="t-how-card t-how-card-3">
+                  <div className="t-how-num">03</div>
+                  <h3>Close the Loop</h3>
+                  <p>When the visit happens, the summary lands back in your chart. You see every outcome, not just the ones that follow up.</p>
+                </div>
+              </Reveal>
+            </div>
+          </div>
+        </section>
+
+        {/* BEFORE / AFTER — the referral problem, visually */}
+        <BeforeAfter />
+
+        {/* ASK TETHER — AI intelligence layer */}
+        <section className="t-ask t-section" id="ask-tether" aria-labelledby="t-ask-title">
+          <div className="t-section-inner">
+            <div className="t-section-head">
+              <Reveal><div className="t-eyebrow">AI Intelligence Layer</div></Reveal>
+              <Reveal delay={0.05}>
+                <h2 id="t-ask-title" className="t-h2">Your referral coordinator that never sleeps.</h2>
+              </Reveal>
               <Reveal delay={0.1}>
-                <div className="t-aud-card t-aud-spec">
-                  <div className="t-aud-icon"><IconZap /></div>
-                  <h3>For Specialists</h3>
-                  <p className="t-aud-card-sub">Turn every referral into a scheduled visit. See who is sending you patients, and make it effortless for them to send more.</p>
-                  <div className="t-aud-feats">
-                    <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Inbound referral management with auto-parsed intake</div>
-                    <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>AI-powered assistant that helps your staff manage incoming referrals, track what&apos;s missing, and close the loop faster</div>
-                    <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Visibility into your referral network and top senders</div>
-                    <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Automated status updates to referring providers</div>
-                    <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Grow volume through the Tether specialist directory</div>
-                  </div>
+                <p>Type a question, get an action. Ask Tether watches your referrals around the clock and answers from live EHR data &mdash; not from a generic model.</p>
+              </Reveal>
+            </div>
+            <Reveal delay={0.15}><AskTetherChatDemo /></Reveal>
+            <div className="t-ask-tiles">
+              <Reveal delay={0.05}>
+                <div className="t-ask-tile">
+                  <span className="t-ask-tile-icon" aria-hidden><IconBolt /></span>
+                  <h4>Answers from your data</h4>
+                  <p>Ask which referrals need follow-up, what a specialist requires, or why a patient hasn&rsquo;t been seen. Real answers from your actual data.</p>
                 </div>
               </Reveal>
-              <Reveal delay={0.2}>
-                <div className="t-aud-card t-aud-pcp">
-                  <div className="t-aud-icon"><IconUsers /></div>
-                  <h3>For Primary Care</h3>
-                  <p className="t-aud-card-sub">Know that your patient actually saw the specialist. Find the right provider, send the referral, and track it without a single phone call.</p>
-                  <div className="t-aud-feats">
-                    <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Ask Tether anything — which referrals need follow-up, what a specialist requires, or what happened at a patient&apos;s visit</div>
-                    <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Specialist directory searchable by location and insurance</div>
-                    <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Real-time referral tracking with zero follow-up calls</div>
-                    <div className="t-aud-feat"><div className="t-aud-feat-icon"><IconCheck /></div>Loop closure notifications when the visit is completed</div>
-                    <div className="t-aud-feat t-aud-feat-highlight"><div className="t-aud-feat-icon"><IconCheck /></div>Always free. No contracts, no software fees.</div>
-                  </div>
+              <Reveal delay={0.15}>
+                <div className="t-ask-tile">
+                  <span className="t-ask-tile-icon" aria-hidden><IconSend /></span>
+                  <h4>Acts, doesn&rsquo;t just suggest</h4>
+                  <p>Sends the follow-up. Finds the alternate specialist. Flags the stuck loop. All inside the same conversation.</p>
+                </div>
+              </Reveal>
+              <Reveal delay={0.25}>
+                <div className="t-ask-tile">
+                  <span className="t-ask-tile-icon" aria-hidden><IconSpark /></span>
+                  <h4>Learns your network</h4>
+                  <p>After 100 referrals, Tether knows which specialists actually pick up the phone, which close the loop, and which to route around.</p>
                 </div>
               </Reveal>
             </div>
           </div>
         </section>
 
-        {/* NETWORK */}
-        <section className="t-network" id="network">
-          <div className="t-network-inner">
-            <Reveal><div className="t-slbl">The Network Effect</div></Reveal>
-            <Reveal delay={0.1}><h2>Not just software.<br />A <em>network</em> that grows with you.</h2></Reveal>
-            <Reveal delay={0.15}><p className="t-network-desc">Every referral sent through Tether strengthens the connection between practices. As more providers join, every practice gets more value. This is how referral management should have always worked.</p></Reveal>
-            <Reveal delay={0.2}>
-              <div className="t-nvis">
-                <TiltCard className="t-nnode"><div className="t-nnode-icon"><IconSend /></div><h4>Outbound Referral</h4><p>Every fax you send through Tether is a warm invite for the specialist to join</p></TiltCard>
-                <TiltCard className="t-nnode"><div className="t-nnode-icon"><IconRefresh /></div><h4>Loop Closure</h4><p>Both sides see the full referral journey from send to completed visit</p></TiltCard>
-                <TiltCard className="t-nnode"><div className="t-nnode-icon"><IconNetwork /></div><h4>Network Growth</h4><p>More connections create a richer directory and smarter routing for everyone</p></TiltCard>
-              </div>
+        {/* EHR INTEGRATIONS — hub and spoke */}
+        <section className="t-ehr t-section" id="integrations" aria-labelledby="t-ehr-title">
+          <div className="t-section-inner">
+            <div className="t-section-head">
+              <Reveal><div className="t-eyebrow">Integrations</div></Reveal>
+              <Reveal delay={0.05}>
+                <h2 id="t-ehr-title" className="t-h2">Lives inside the tools you already use.</h2>
+              </Reveal>
+              <Reveal delay={0.1}>
+                <p>Tether sits inside Athena today and the EHRs you&rsquo;ll add next. Your team learns nothing new.</p>
+              </Reveal>
+            </div>
+            <Reveal delay={0.15}><EHRHubDiagram /></Reveal>
+            <Reveal delay={0.25}>
+              <p className="t-ehr-callout">
+                <span className="t-ehr-callout-dot" aria-hidden />
+                <em>Athena integration live in production. Visit summaries push back to your chart automatically.</em>
+              </p>
             </Reveal>
           </div>
         </section>
 
-        {/* TRUST */}
-        <section className="t-trust">
-          <div className="t-trust-inner">
-            <div className="t-trust-grid">
-              <div className="t-trust-card">
-                <div className="t-trust-card-icon"><IconShield /></div>
-                <h4>HIPAA Compliant</h4>
-                <p>All data encrypted at rest and in transit</p>
-              </div>
-              <div className="t-trust-card">
-                <div className="t-trust-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-                <h4>Enterprise-Grade Encryption</h4>
-                <p>All PHI encrypted at rest (AES-256) and in transit (TLS 1.2+)</p>
-              </div>
-              <div className="t-trust-card">
-                <div className="t-trust-card-icon"><IconClock /></div>
-                <h4>Simple Onboarding</h4>
-                <p>Get started in minutes</p>
-              </div>
-              <div className="t-trust-card">
-                <div className="t-trust-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
-                <h4>Works Alongside Your EMR</h4>
-                <p>Runs alongside your existing EHR</p>
-              </div>
+        {/* PLATFORM VISION */}
+        <section className="t-platform t-section" id="platform" aria-labelledby="t-platform-title">
+          <div className="t-section-inner">
+            <div className="t-section-head">
+              <Reveal><div className="t-eyebrow">The Platform</div></Reveal>
+              <Reveal delay={0.05}>
+                <h2 id="t-platform-title" className="t-h2">Referrals are just the beginning.</h2>
+              </Reveal>
+              <Reveal delay={0.1}>
+                <p>Your MA shouldn&rsquo;t spend 40 minutes chasing a fax confirmation. From sending the referral to booking the appointment, every step belongs to an agent &mdash; not your staff.</p>
+              </Reveal>
             </div>
-            <div className="t-trust-link-wrap">
-              <a href="/security" className="t-trust-link">Learn more about our security practices <IconArrowRight /></a>
-            </div>
+            <PlatformGrid />
           </div>
         </section>
 
-        {/* NEWSLETTER */}
-        <NewsletterSection />
+        {/* SOCIAL PROOF — proof points + inline testimonial */}
+        <section className="t-social" aria-labelledby="t-social-title">
+          <div className="t-social-inner">
+            <Reveal><div className="t-social-eyebrow">Built on real clinical workflows</div></Reveal>
+            <Reveal delay={0.05}>
+              <h2 id="t-social-title" className="t-social-headline">
+                The first referral tool that talks to your EHR. Both ways.
+              </h2>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <div className="t-proof-grid">
+                <article className="t-proof-card">
+                  <span className="t-proof-icon" aria-hidden="true"><IconCheck /></span>
+                  <h3 className="t-proof-title">Live Athena Integration</h3>
+                  <p className="t-proof-body">Patient data in. Visit summaries out. Same chart your team already uses.</p>
+                </article>
+                <article className="t-proof-card">
+                  <span className="t-proof-icon" aria-hidden="true"><IconCheck /></span>
+                  <h3 className="t-proof-title">HIPAA-Compliant AI</h3>
+                  <p className="t-proof-body">Agents operate inside your existing EHR. No PHI leaves your perimeter.</p>
+                </article>
+                <article className="t-proof-card">
+                  <span className="t-proof-icon" aria-hidden="true"><IconCheck /></span>
+                  <h3 className="t-proof-title">MDVIP Network</h3>
+                  <p className="t-proof-body">Trusted by MDVIP-affiliated practices across the DC metro.</p>
+                </article>
+              </div>
+            </Reveal>
+            <Reveal delay={0.2}>
+              <p className="t-social-closer">
+                Every referral, tracked end to end. Every outcome, pushed back to your chart.
+              </p>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* FINAL CTA */}
+        <section className="t-cta">
+          <div className="t-cta-inner">
+            <Reveal>
+              <div className="t-cta-card">
+                <h2 className="t-cta-title">Built for the way practices actually work.</h2>
+                <p className="t-cta-sub">No rip-and-replace. No months of onboarding. Tether works alongside Athena and the EHRs you already run.</p>
+                <a href="/request-demo" className="t-btn t-btn-coral">Request Early Access <IconArrowRight /></a>
+              </div>
+            </Reveal>
+          </div>
+        </section>
 
         {/* FOOTER */}
         <footer className="t-footer">
           <div className="t-footer-inner">
             <div className="t-footer-brand">
-              <div className="t-footer-logo"><Image src="/LOGO.jpeg" alt="Tether" width={24} height={24} style={{ objectFit: "contain" }} /><span className="t-footer-logo-text">Tether Health</span></div>
+              <TetherWordmark />
               <p className="t-footer-tagline">The referral network for modern medical practices.</p>
             </div>
             <div className="t-footer-links">
-              <div className="t-footer-col"><h5>Product</h5><a href="#product">Product</a><a href="#platform">Platform</a><a href="/for-specialists">For Specialists</a><a href="#specialists">For Primary Care</a></div>
-              <div className="t-footer-col"><h5>Company</h5><a href="#">About</a><a href="/blog">Blog</a><a href="/request-demo">Contact</a></div>
-              <div className="t-footer-col"><h5>Legal</h5><a href="/legal#privacy">Privacy Policy</a><a href="/legal#terms">Terms of Service</a><a href="/legal#cookies">Cookie Policy</a><a href="/legal#hipaa">HIPAA Information</a></div>
+              <div className="t-footer-col">
+                <h5>Product</h5>
+                <a href="#how">How It Works</a>
+                <a href="/security">Security</a>
+                <a href="/for-specialists">For Specialists</a>
+              </div>
+              <div className="t-footer-col">
+                <h5>Company</h5>
+                <a href="#">About</a>
+                <a href="/blog">Blog</a>
+                <a href="/request-demo">Contact</a>
+              </div>
+              <div className="t-footer-col">
+                <h5>Legal</h5>
+                <a href="/legal#privacy">Privacy</a>
+                <a href="/legal#terms">Terms</a>
+                <a href="/legal#hipaa">HIPAA</a>
+              </div>
             </div>
           </div>
-          <div className="t-footer-bottom"><span>&copy; 2026 Tether Health, Inc. All rights reserved.</span><div><a href="#">Twitter</a><a href="https://www.linkedin.com/company/111649326/" target="_blank" rel="noopener noreferrer">LinkedIn</a></div></div>
+          <div className="t-footer-bottom">
+            <span>&copy; 2026 Tether Health, Inc.</span>
+            <a href="https://www.linkedin.com/company/111649326/" target="_blank" rel="noopener noreferrer" className="t-footer-social" aria-label="Tether on LinkedIn">
+              <IconLinkedIn />
+            </a>
+          </div>
         </footer>
-
-        {/* Demo Request Modal */}
-        {showDemoForm && (
-          <div className="t-demo-modal" onClick={() => setShowDemoForm(false)}>
-            <div className="t-demo-modal-box" onClick={e => e.stopPropagation()}>
-              <button type="button" className="t-demo-modal-close" onClick={() => setShowDemoForm(false)} aria-label="Close">✕</button>
-              <h3>Request a Demo</h3>
-              <p>Fill out the form below and we&apos;ll reach out to schedule a personalized walkthrough.</p>
-              <form className="t-demo-form" action={DEMO_FORM_ACTION} method="POST">
-                <input type="hidden" name="_subject" value="Demo Request - Tether Health" />
-                <label htmlFor="demo-email">Email</label>
-                <input id="demo-email" type="email" name="email" required placeholder="you@practice.com" />
-                <label htmlFor="demo-practice">Practice name</label>
-                <input id="demo-practice" type="text" name="practice" placeholder="Your practice name" />
-                <label htmlFor="demo-role">Role</label>
-                <input id="demo-role" type="text" name="role" placeholder="e.g. Practice Manager" />
-                <label htmlFor="demo-time">Best time to connect</label>
-                <input id="demo-time" type="text" name="best_time" placeholder="e.g. Tuesday mornings" />
-                <label htmlFor="demo-message">Message (optional)</label>
-                <textarea id="demo-message" name="message" placeholder="Any specific questions or needs?" />
-                <button type="submit">Submit Request</button>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Video Modal */}
-        {videoModal && (
-          <div className="t-video-modal" onClick={() => setVideoModal(null)}>
-            <div className="t-video-modal-inner" onClick={e => e.stopPropagation()}>
-              <button type="button" className="t-video-modal-close" onClick={() => setVideoModal(null)} aria-label="Close">✕</button>
-              <video autoPlay muted loop playsInline style={{ display: "block" }}>
-                <source src={videoModal === "dashboard" ? "/dashboard-demo.mp4" : videoModal === "directory" ? "/directory-demo.mp4" : videoModal === "parser" ? "/parser-demo.mp4" : "/specialist-demo.mp4"} type="video/mp4" />
-              </video>
-            </div>
-          </div>
-        )}
       </div>
     </>
   );
