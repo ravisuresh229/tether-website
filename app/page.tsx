@@ -22,6 +22,14 @@ const CSS = `
 /* demo */
 .demo{position:relative;opacity:0;transform:translateY(28px)}
 .demo-frame{background:var(--paper-2);border:1px solid var(--thread);border-radius:20px;box-shadow:0 50px 90px -46px rgba(12,26,35,.36),0 10px 24px -14px rgba(12,26,35,.1);overflow:hidden}
+
+/* guided tour */
+.btn-tour .play-ic{width:18px;height:18px;flex-shrink:0}
+.btn-tour:hover .play-ic circle{stroke:var(--signal)}
+.btn-tour:hover .play-ic path{fill:var(--signal)}
+.tour-pill{position:fixed;bottom:26px;left:50%;transform:translate(-50%,16px);z-index:70;font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;color:var(--paper);background:var(--ink);border-radius:30px;padding:10px 18px;display:flex;align-items:center;gap:9px;box-shadow:0 14px 34px -12px rgba(12,26,35,.45);opacity:0;pointer-events:none;transition:opacity .4s var(--e1),transform .4s var(--e1)}
+.tour-pill.on{opacity:1;transform:translate(-50%,0)}
+.tour-pill i{width:6px;height:6px;border-radius:50%;background:var(--signal);animation:blink 1.4s infinite;flex-shrink:0}
 .demo-bar{display:flex;align-items:center;gap:9px;padding:14px 20px;border-bottom:1px solid var(--thread-2);background:linear-gradient(var(--paper-2),var(--paper))}
 .demo-bar .dots{display:flex;gap:6px}.demo-bar .dots i{width:9px;height:9px;border-radius:50%;background:var(--thread)}
 .demo-bar .addr{flex:1;text-align:center;font-family:var(--mono);font-size:11px;color:var(--slate)}
@@ -101,11 +109,47 @@ const CSS = `
 .void-stat .l{font-family:var(--mono);font-size:12px;color:#7E919C;margin-top:11px;max-width:22ch;line-height:1.5}
 @media(max-width:700px){.void{padding:44px 28px}.void-orbits{opacity:.35}}
 
+/* how-it-works: sequenced playback */
+.proc2{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--thread)}
+.proc2 .step{padding:34px 26px 42px;border-right:1px solid var(--thread);position:relative;transition:background .6s var(--e1)}
+.proc2 .step:last-child{border-right:none}
+.proc2 .step .trace{position:absolute;top:-1.5px;left:0;height:2.5px;background:var(--signal);width:0;transition:width .9s var(--e2)}
+.proc2 .step.go .trace{width:100%}
+.proc2 .step.go{background:linear-gradient(180deg,rgba(15,182,126,.05),transparent 70%)}
+.proc2 .n{font-family:var(--mono);font-size:12.5px;color:var(--slate);letter-spacing:.08em;transition:color .4s var(--e1)}
+.proc2 .step.go .n{color:var(--signal)}
+.proc2 h3{font-family:var(--display);font-weight:600;font-size:20px;margin:14px 0 10px;letter-spacing:-.01em}
+.proc2 p{font-size:14px;color:var(--slate);line-height:1.6}
+@media(max-width:900px){.proc2{grid-template-columns:1fr}.proc2 .step{border-right:none;border-bottom:1px solid var(--thread)}}
+
+.mini{height:48px;margin-top:18px;display:flex;align-items:center}
+.mini-write{display:flex;flex-direction:column;gap:7px;width:100%;max-width:170px}
+.mini-write .bar{height:7px;border-radius:4px;background:var(--thread-2);overflow:hidden;position:relative}
+.mini-write .bar i{position:absolute;inset:0;width:0;background:linear-gradient(90deg,var(--signal),var(--signal-deep));border-radius:4px;transition:width .6s var(--e1)}
+.step.go .mini-write .bar:nth-child(1) i{width:100%;transition-delay:.15s}
+.step.go .mini-write .bar:nth-child(2) i{width:88%;transition-delay:.35s}
+.step.go .mini-write .bar:nth-child(3) i{width:64%;transition-delay:.55s}
+.mini-route{display:flex;align-items:center;width:100%;max-width:190px;gap:8px}
+.mini-route .nd{width:13px;height:13px;border-radius:4px;border:1.5px solid var(--slate);flex-shrink:0;background:var(--paper-2);transition:border-color .4s var(--e1)}
+.step.go .mini-route .nd{border-color:var(--ink)}
+.step.go .mini-route .nd.b{border-color:var(--signal);background:var(--signal-soft)}
+.mini-route .ln{flex:1;height:2px;background:var(--thread-2);position:relative;border-radius:2px}
+.mini-route .ln .fl{position:absolute;inset:0;width:0;background:var(--signal);border-radius:2px;transition:width .9s var(--e2) .2s}
+.mini-route .ln .pk{position:absolute;top:50%;left:0;width:8px;height:8px;border-radius:50%;background:var(--signal);transform:translate(-50%,-50%);box-shadow:0 0 8px rgba(15,182,126,.8);opacity:0;transition:left .9s var(--e2) .2s,opacity .25s var(--e1) .2s}
+.step.go .mini-route .fl{width:100%}
+.step.go .mini-route .pk{left:100%;opacity:1}
+.mini-close .ring-base{stroke:var(--thread-2)}
+.mini-close .arc{stroke-dasharray:88;stroke-dashoffset:88;transition:stroke-dashoffset .8s var(--e1) .15s}
+.mini-close .chk{stroke-dasharray:34;stroke-dashoffset:34;transition:stroke-dashoffset .45s var(--e1) .8s}
+.step.go .mini-close .arc{stroke-dashoffset:0}
+.step.go .mini-close .chk{stroke-dashoffset:0}
+
 /* savings line */
 .savings{margin-top:34px;font-family:var(--mono);font-size:13px;color:var(--slate);display:flex;gap:16px;flex-wrap:wrap;align-items:baseline}
 .savings .big{font-family:var(--display);font-weight:500;font-size:17px;color:var(--ink);letter-spacing:-.01em}
 .savings .big s{color:var(--slate);text-decoration-color:var(--signal);text-decoration-thickness:2px}
-.savings .big b{color:var(--signal)}
+.savings .big b{color:var(--signal);border-radius:5px;padding:1px 5px;background:transparent;transition:background .6s var(--e1)}
+.savings.lit .big b{background:var(--signal-soft)}
 
 /* ask tether */
 .intel{background:linear-gradient(150deg,var(--paper-2),#FBFCFC);border:1px solid var(--thread);border-radius:24px;padding:54px 50px;display:grid;grid-template-columns:1.05fr .95fr;gap:50px;align-items:center;position:relative;overflow:hidden}
@@ -187,8 +231,59 @@ const CheckIcon = () => (
   </svg>
 );
 
+/* ── Guided tour: auto-scroll the story, hand control back on any input ── */
+const TOUR_STOPS: [string, number][] = [
+  ["problem", 4200],
+  ["how", 5200],
+  ["ask", 6000],
+  ["fits", 4200],
+  ["releases", 4000],
+  ["close", 4200],
+];
+
+function useTour() {
+  const [touring, setTouring] = useState(false);
+  const cancelRef = useRef<(() => void) | null>(null);
+
+  const start = () => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      document.getElementById("how")?.scrollIntoView();
+      return;
+    }
+    cancelRef.current?.();
+
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const events = ["wheel", "touchstart", "keydown", "mousedown"] as const;
+    const cancel = () => {
+      if (timer) clearTimeout(timer);
+      events.forEach((ev) => window.removeEventListener(ev, cancel));
+      cancelRef.current = null;
+      setTouring(false);
+    };
+    cancelRef.current = cancel;
+    /* defer so the click that started the tour doesn't cancel it */
+    setTimeout(() => events.forEach((ev) => window.addEventListener(ev, cancel, { passive: true })), 50);
+    setTouring(true);
+
+    let i = 0;
+    const step = () => {
+      if (i >= TOUR_STOPS.length) {
+        cancel();
+        return;
+      }
+      const [id, dwellMs] = TOUR_STOPS[i++];
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      timer = setTimeout(step, dwellMs);
+    };
+    step();
+  };
+
+  useEffect(() => () => cancelRef.current?.(), []);
+  return { touring, start };
+}
+
 /* ── Hero: word reveal + demo card state machine ── */
-function Hero() {
+function Hero({ onTour }: { onTour: () => void }) {
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -395,9 +490,13 @@ function Hero() {
           <Link href="/request-demo" className="btn btn-primary">
             Request a demo <span className="arr">→</span>
           </Link>
-          <a href="#how" className="btn btn-ghost">
-            Watch it work
-          </a>
+          <button type="button" className="btn btn-ghost btn-tour" onClick={onTour}>
+            <svg className="play-ic" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <circle cx="9" cy="9" r="8" stroke="currentColor" strokeWidth="1.4" />
+              <path d="M7.2 6.2v5.6L11.8 9 7.2 6.2z" fill="currentColor" />
+            </svg>
+            Take the 30-second tour
+          </button>
         </div>
         <div className="hero-meta">
           <span className="item">
@@ -598,6 +697,158 @@ function Hero() {
         </div>
       </div>
     </header>
+  );
+}
+
+/* ── How it works: sequenced step playback, replayable via "Watch it work" ── */
+function HowItWorks() {
+  const ref = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const root = ref.current;
+    if (!root) return;
+    const steps = Array.from(root.querySelectorAll<HTMLElement>(".proc2 .step"));
+    const savings = root.querySelector<HTMLElement>(".savings");
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      steps.forEach((s) => s.classList.add("go"));
+      savings?.classList.add("lit");
+      return;
+    }
+
+    let timers: ReturnType<typeof setTimeout>[] = [];
+    const clearT = () => {
+      timers.forEach(clearTimeout);
+      timers = [];
+    };
+
+    const play = () => {
+      clearT();
+      steps.forEach((s) => s.classList.remove("go"));
+      savings?.classList.remove("lit");
+      /* force reflow so transitions restart on replay */
+      void root.offsetWidth;
+      timers.push(setTimeout(() => steps[0]?.classList.add("go"), 200));
+      timers.push(setTimeout(() => steps[1]?.classList.add("go"), 1300));
+      timers.push(setTimeout(() => steps[2]?.classList.add("go"), 2400));
+      timers.push(setTimeout(() => savings?.classList.add("lit"), 3450));
+    };
+
+    let played = false;
+    const io = new IntersectionObserver(
+      (es) =>
+        es.forEach((e) => {
+          if (e.isIntersecting && !played) {
+            played = true;
+            play();
+          }
+        }),
+      { threshold: 0.3 }
+    );
+    io.observe(root);
+
+    return () => {
+      io.disconnect();
+      clearT();
+    };
+  }, []);
+
+  return (
+    <section id="how" ref={ref}>
+      <div className="wrap">
+        <div className="sec-head fade">
+          <span className="eyebrow">How the loop closes</span>
+          <h2>
+            One workflow. <span className="em">Zero</span> phone calls.
+          </h2>
+          <p>
+            Each stage runs on its own once the last one lands. Your staff reviews and approves;
+            Tether does the chasing.
+          </p>
+        </div>
+        <div className="proc2 fade">
+          <div className="step">
+            <div className="trace"></div>
+            <div className="n">01 · WRITE</div>
+            <div className="mini" aria-hidden="true">
+              <div className="mini-write">
+                <div className="bar">
+                  <i></i>
+                </div>
+                <div className="bar">
+                  <i></i>
+                </div>
+                <div className="bar">
+                  <i></i>
+                </div>
+              </div>
+            </div>
+            <h3>From the chart</h3>
+            <p>
+              Tether pulls patient context from the chart and drafts the complete clinical
+              referral, ready for a quick physician review.
+            </p>
+          </div>
+          <div className="step">
+            <div className="trace"></div>
+            <div className="n">02 · ROUTE</div>
+            <div className="mini" aria-hidden="true">
+              <div className="mini-route">
+                <span className="nd"></span>
+                <span className="ln">
+                  <i className="fl"></i>
+                  <i className="pk"></i>
+                </span>
+                <span className="nd b"></span>
+              </div>
+            </div>
+            <h3>Out the door</h3>
+            <p>
+              Insurance is checked against the specialist&apos;s accepted plans, then the referral
+              routes to the right office. No fax hunting.
+            </p>
+          </div>
+          <div className="step">
+            <div className="trace"></div>
+            <div className="n">03 · CLOSE</div>
+            <div className="mini" aria-hidden="true">
+              <svg className="mini-close" width="40" height="40" viewBox="0 0 40 40" fill="none">
+                <circle className="ring-base" cx="20" cy="20" r="14" strokeWidth="2.5" />
+                <circle
+                  className="arc"
+                  cx="20"
+                  cy="20"
+                  r="14"
+                  stroke="var(--signal)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  transform="rotate(-90 20 20)"
+                />
+                <path
+                  className="chk"
+                  d="M14 20.5l4.5 4.5 8.5-9.5"
+                  stroke="var(--signal)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+            <h3>Back to the chart</h3>
+            <p>
+              Every stage is tracked automatically. When the consult note returns, it lands back in
+              the patient&apos;s chart.
+            </p>
+          </div>
+        </div>
+        <div className="savings fade">
+          <span className="big">
+            Staff time per referral: <s>~25 min</s> → <b>~7 min</b>
+          </span>
+          <span>against our design-partner baseline.</span>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -919,6 +1170,8 @@ function CloseSeal() {
 }
 
 export default function Home() {
+  const { touring, start } = useTour();
+
   return (
     <>
       <style>{CSS}</style>
@@ -934,7 +1187,11 @@ export default function Home() {
         }}
       />
 
-      <Hero />
+      <Hero onTour={start} />
+
+      <div className={`tour-pill${touring ? " on" : ""}`} aria-hidden={!touring}>
+        <i></i>Touring · scroll anytime to take over
+      </div>
 
       {/* PROBLEM */}
       <section id="problem">
@@ -964,55 +1221,7 @@ export default function Home() {
       </section>
 
       {/* HOW */}
-      <section id="how">
-        <div className="wrap">
-          <div className="sec-head fade">
-            <span className="eyebrow">How the loop closes</span>
-            <h2>
-              One workflow. <span className="em">Zero</span> phone calls.
-            </h2>
-            <p>
-              Each stage runs on its own once the last one lands. Your staff reviews and approves;
-              Tether does the chasing.
-            </p>
-          </div>
-          <div className="proc fade">
-            <div className="step">
-              <div className="trace"></div>
-              <div className="n">01 · WRITE</div>
-              <h3>From the chart</h3>
-              <p>
-                Tether pulls patient context from the chart and drafts the complete clinical
-                referral, ready for a quick physician review.
-              </p>
-            </div>
-            <div className="step">
-              <div className="trace"></div>
-              <div className="n">02 · ROUTE</div>
-              <h3>Out the door</h3>
-              <p>
-                Insurance is checked against the specialist&apos;s accepted plans, then the referral
-                routes to the right office. No fax hunting.
-              </p>
-            </div>
-            <div className="step">
-              <div className="trace"></div>
-              <div className="n">03 · CLOSE</div>
-              <h3>Back to the chart</h3>
-              <p>
-                Every stage is tracked automatically. When the consult note returns, it lands back
-                in the patient&apos;s chart.
-              </p>
-            </div>
-          </div>
-          <div className="savings fade">
-            <span className="big">
-              Staff time per referral: <s>~25 min</s> → <b>~7 min</b>
-            </span>
-            <span>against our design-partner baseline.</span>
-          </div>
-        </div>
-      </section>
+      <HowItWorks />
 
       {/* ASK TETHER */}
       <section id="ask">
