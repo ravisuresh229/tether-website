@@ -2,67 +2,80 @@
 
 import { useState } from "react";
 
-const ROLE_OPTIONS = [
-  "Practice Manager",
-  "Medical Assistant",
-  "Office Administrator",
-  "Physician",
-  "Other",
-];
+const CSS = `
+.demo-wrap{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start;padding-top:150px;padding-bottom:60px}
+@media(max-width:900px){.demo-wrap{grid-template-columns:1fr;gap:40px;padding-top:130px}}
+.demo-wrap h1{font-weight:500;font-size:clamp(32px,4.6vw,52px);letter-spacing:-.035em;line-height:1.05;margin-top:18px}
+.demo-wrap h1 .em{font-family:var(--serif);font-style:italic;font-weight:400}
+.demo-wrap .lead{font-size:17px;color:var(--ink-soft);margin-top:20px;line-height:1.6;max-width:42ch}
+.points{margin-top:28px;display:flex;flex-direction:column;gap:14px}
+.points .li{display:flex;gap:11px;align-items:flex-start;font-size:14.5px;color:var(--ink-soft)}
+.points .li svg{flex-shrink:0;margin-top:3px}
+.form{background:var(--paper-2);border:1px solid var(--thread);border-radius:18px;padding:32px;box-shadow:0 30px 64px -44px rgba(12,26,35,.3)}
+.field{margin-bottom:16px}
+.field label{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--slate);display:block;margin-bottom:7px}
+.field input,.field textarea{width:100%;font-family:var(--display);font-size:15px;color:var(--ink);background:var(--paper);border:1px solid var(--thread);border-radius:10px;padding:12px 14px;transition:border-color .2s}
+.field input:focus,.field textarea:focus{outline:none;border-color:var(--signal)}
+.field textarea{resize:vertical;min-height:80px}
+.form .btn-primary{width:100%;justify-content:center;margin-top:6px}
+.form .note{font-family:var(--mono);font-size:11px;color:var(--slate);text-align:center;margin-top:14px}
+.form .err{font-family:var(--mono);font-size:12px;color:#C0452A;margin:4px 0 10px;line-height:1.5}
+.form-done{text-align:center;padding:30px 10px}
+.form-done h3{font-weight:600;font-size:20px;letter-spacing:-.01em;margin-top:18px}
+.form-done p{font-size:14.5px;color:var(--slate);margin-top:10px;line-height:1.6}
+`;
 
-function CheckIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
-}
-
-function CheckCircleIcon() {
-  return (
-    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-      <polyline points="22 4 12 14.01 9 11.01" />
-    </svg>
-  );
-}
+const PointCheck = () => (
+  <svg width="17" height="17" viewBox="0 0 17 17" aria-hidden="true">
+    <circle cx="8.5" cy="8.5" r="8" fill="none" stroke="#0FB67E" strokeWidth="1.3" />
+    <path d="M5 8.5l2.3 2.3L12 6" stroke="#0FB67E" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
 
 export default function RequestDemoPage() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+  const [form, setForm] = useState({
+    name: "",
     email: "",
-    practiceName: "",
-    role: "",
+    practice: "",
+    ehr: "",
     message: "",
   });
+
+  const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    setForm((f) => ({ ...f, [key]: e.target.value }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
-    const { firstName, lastName, email, practiceName, role, message } = formData;
-    if (!firstName?.trim() || !lastName?.trim() || !email?.trim()) {
-      setErrorMsg("First name, last name, and email are required.");
+
+    const nameParts = form.name.trim().split(/\s+/);
+    if (nameParts.length < 2) {
+      setErrorMsg("Please enter your first and last name.");
       return;
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setErrorMsg("Please enter a valid email.");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      setErrorMsg("Please enter a valid work email.");
       return;
     }
+
+    const message =
+      [form.ehr.trim() ? `EHR: ${form.ehr.trim()}` : null, form.message.trim() || null]
+        .filter(Boolean)
+        .join("\n\n") || undefined;
+
     setStatus("loading");
     try {
       const res = await fetch("/api/demo-request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          firstName: firstName.trim(),
-          lastName: lastName.trim(),
-          email: email.trim().toLowerCase(),
-          practiceName: practiceName?.trim() || undefined,
-          role: role || undefined,
-          message: message?.trim() || undefined,
+          firstName: nameParts[0],
+          lastName: nameParts.slice(1).join(" "),
+          email: form.email.trim().toLowerCase(),
+          practiceName: form.practice.trim() || undefined,
+          message,
         }),
       });
       const data = await res.json();
@@ -79,102 +92,114 @@ export default function RequestDemoPage() {
   };
 
   return (
-    <div className="rd-page">
-      <style>{RD_CSS}</style>
+    <>
+      <style>{CSS}</style>
 
-      <main className="rd-main">
-        <div className="rd-grid">
-          <div className="rd-left">
-            <div className="rd-label">REQUEST A DEMO</div>
-            <h1 className="rd-headline">See Tether in action.</h1>
-            <p className="rd-subtitle">
-              Learn how Tether can streamline referral management for your practice. We&apos;ll walk you through the platform and answer your questions.
-            </p>
-            <ul className="rd-value-list">
-              <li><span className="rd-value-icon"><CheckIcon /></span>Live product walkthrough</li>
-              <li><span className="rd-value-icon"><CheckIcon /></span>Personalized to your practice type</li>
-              <li><span className="rd-value-icon"><CheckIcon /></span>15-20 minutes, no commitment</li>
-            </ul>
-          </div>
-
-          <div className="rd-right">
-            <div className="rd-card">
-              {status === "success" ? (
-                <div className="rd-success">
-                  <span className="rd-success-icon"><CheckCircleIcon /></span>
-                  <p className="rd-success-text">Thanks! We&apos;ll be in touch within 24 hours to schedule your demo.</p>
-                </div>
-              ) : (
-                <>
-                  <form className="rd-form" onSubmit={handleSubmit}>
-                    <label htmlFor="rd-first">First Name *</label>
-                    <input id="rd-first" type="text" required value={formData.firstName} onChange={(e) => setFormData((p) => ({ ...p, firstName: e.target.value }))} placeholder="First name" />
-                    <label htmlFor="rd-last">Last Name *</label>
-                    <input id="rd-last" type="text" required value={formData.lastName} onChange={(e) => setFormData((p) => ({ ...p, lastName: e.target.value }))} placeholder="Last name" />
-                    <label htmlFor="rd-email">Work Email *</label>
-                    <input id="rd-email" type="email" required value={formData.email} onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))} placeholder="you@practice.com" />
-                    <label htmlFor="rd-practice">Practice Name</label>
-                    <input id="rd-practice" type="text" value={formData.practiceName} onChange={(e) => setFormData((p) => ({ ...p, practiceName: e.target.value }))} placeholder="Your practice name" />
-                    <label htmlFor="rd-role">Your Role</label>
-                    <select id="rd-role" value={formData.role} onChange={(e) => setFormData((p) => ({ ...p, role: e.target.value }))}>
-                      <option value="">Select role</option>
-                      {ROLE_OPTIONS.map((opt) => (
-                        <option key={opt} value={opt}>{opt}</option>
-                      ))}
-                    </select>
-                    <label htmlFor="rd-message">Message</label>
-                    <textarea id="rd-message" rows={3} value={formData.message} onChange={(e) => setFormData((p) => ({ ...p, message: e.target.value }))} placeholder="Anything specific you'd like to see in the demo?" />
-                    {errorMsg && <p className="rd-form-error">{errorMsg}</p>}
-                    <button type="submit" className="rd-submit" disabled={status === "loading"}>
-                      {status === "loading" ? "Sending…" : "Request Demo →"}
-                    </button>
-                  </form>
-                </>
-              )}
+      <header className="wrap demo-wrap">
+        <div className="fade">
+          <span className="eyebrow">Request a demo</span>
+          <h1>
+            See the loop <span className="em">close.</span>
+          </h1>
+          <p className="lead">
+            A short walkthrough of how Tether writes, routes, and closes a referral, against your
+            real workflow. We&apos;ll tailor it to how your practice runs today.
+          </p>
+          <div className="points">
+            <div className="li">
+              <PointCheck />
+              Works alongside the EHR you already run.
+            </div>
+            <div className="li">
+              <PointCheck />
+              Free during pilot. No contracts, no setup fees.
+            </div>
+            <div className="li">
+              <PointCheck />
+              BAA available before any data is shared.
             </div>
           </div>
         </div>
-      </main>
 
-    </div>
+        <div className="form fade">
+          {status === "success" ? (
+            <div className="form-done">
+              <svg width="52" height="52" viewBox="0 0 52 52" aria-hidden="true" style={{ margin: "0 auto", display: "block" }}>
+                <circle cx="26" cy="26" r="24" fill="none" stroke="#0FB67E" strokeWidth="2" />
+                <path d="M16 26l7 7 14-15" fill="none" stroke="#0FB67E" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <h3>Request received.</h3>
+              <p>
+                We&apos;ll reply within one business day to set up your walkthrough. A confirmation
+                is on its way to your inbox.
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} noValidate>
+              <div className="field">
+                <label htmlFor="rd-name">Name</label>
+                <input
+                  id="rd-name"
+                  type="text"
+                  placeholder="Dr. Jane Doe"
+                  value={form.name}
+                  onChange={set("name")}
+                  autoComplete="name"
+                  required
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="rd-email">Work email</label>
+                <input
+                  id="rd-email"
+                  type="email"
+                  placeholder="jane@practice.com"
+                  value={form.email}
+                  onChange={set("email")}
+                  autoComplete="email"
+                  required
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="rd-practice">Practice</label>
+                <input
+                  id="rd-practice"
+                  type="text"
+                  placeholder="Georgetown Family Medicine"
+                  value={form.practice}
+                  onChange={set("practice")}
+                  autoComplete="organization"
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="rd-ehr">What EHR do you use?</label>
+                <input
+                  id="rd-ehr"
+                  type="text"
+                  placeholder="athenahealth, ModMed, other…"
+                  value={form.ehr}
+                  onChange={set("ehr")}
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="rd-message">Anything we should know? (optional)</label>
+                <textarea
+                  id="rd-message"
+                  placeholder="Tell us how referrals work in your practice today."
+                  value={form.message}
+                  onChange={set("message")}
+                />
+              </div>
+              {errorMsg && <div className="err">{errorMsg}</div>}
+              <button className="btn btn-primary" type="submit" disabled={status === "loading"}>
+                {status === "loading" ? "Sending…" : "Request a demo"}{" "}
+                {status !== "loading" && <span className="arr">→</span>}
+              </button>
+              <div className="note">We&apos;ll reply within one business day.</div>
+            </form>
+          )}
+        </div>
+      </header>
+    </>
   );
 }
-
-const RD_CSS = `
-.rd-page { font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif; color: #0C0D0F; background: #F7F5F0; min-height: 100vh; -webkit-font-smoothing: antialiased; }
-
-.rd-main { max-width: 1100px; margin: 0 auto; padding: 132px 48px 120px; }
-.rd-grid { display: grid; grid-template-columns: 42% 1fr; gap: 64px; align-items: start; }
-.rd-left { position: sticky; top: 96px; }
-.rd-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: #00A882; margin-bottom: 16px; }
-.rd-headline { font-family: var(--font-serif), Georgia, serif; font-size: clamp(30px, 4vw, 44px); line-height: 1.12; font-weight: 400; color: #0C0D0F; letter-spacing: -1px; margin-bottom: 20px; }
-.rd-subtitle { font-size: 17px; line-height: 1.65; color: #3D3B38; margin-bottom: 32px; }
-.rd-value-list { list-style: none; margin: 0; padding: 0; }
-.rd-value-list li { display: flex; align-items: center; gap: 12px; font-size: 15px; color: #0C0D0F; margin-bottom: 14px; }
-.rd-value-icon { width: 22px; height: 22px; border-radius: 6px; background: rgba(0,168,130,0.12); color: #00A882; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-
-.rd-right { min-width: 0; }
-.rd-card { background: #FFFFFF; border: 1px solid rgba(0,0,0,0.08); border-radius: 16px; padding: 36px; box-shadow: 0 4px 24px rgba(10,11,15,0.05); }
-.rd-form label { display: block; font-size: 13px; font-weight: 600; color: #0C0D0F; margin-bottom: 6px; margin-top: 16px; }
-.rd-form label:first-of-type { margin-top: 0; }
-.rd-form input, .rd-form select, .rd-form textarea { width: 100%; padding: 12px 14px; border: 1px solid rgba(0,0,0,0.12); background: #FFFFFF; color: #0C0D0F; border-radius: 8px; font-size: 15px; font-family: inherit; margin-bottom: 4px; }
-.rd-form input::placeholder, .rd-form textarea::placeholder { color: #8C8A85; }
-.rd-form input:focus, .rd-form select:focus, .rd-form textarea:focus { outline: none; border-color: #00A882; box-shadow: 0 0 0 3px rgba(0,168,130,0.15); }
-.rd-form textarea { resize: vertical; min-height: 88px; }
-.rd-form-error { font-size: 14px; color: #C44A28; margin-top: 12px; margin-bottom: 0; }
-.rd-submit { width: 100%; margin-top: 24px; padding: 14px 24px; background: #E8501A; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer; transition: background 0.2s, transform 0.15s ease; }
-.rd-submit:hover:not(:disabled) { background: #CC4615; transform: translateY(-1px); }
-.rd-submit:disabled { opacity: 0.7; cursor: not-allowed; }
-
-.rd-success { text-align: center; padding: 24px 0; }
-.rd-success-icon { display: inline-flex; color: #00A882; margin-bottom: 20px; }
-.rd-success-text { font-size: 18px; line-height: 1.5; color: #0C0D0F; margin: 0; }
-
-@media (max-width: 900px) {
-  .rd-main { padding: 110px 24px 80px; }
-  .rd-grid { grid-template-columns: 1fr; gap: 40px; }
-  .rd-left { position: static; }
-  .rd-headline { font-size: 30px; }
-  .rd-card { padding: 28px 24px; }
-}
-`;

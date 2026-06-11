@@ -1,31 +1,41 @@
 import type { Metadata } from "next";
-import { DM_Sans, Instrument_Serif } from "next/font/google";
+import { Space_Grotesk, Fraunces, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import Rail from "@/components/Rail";
+import TetherFX from "@/components/TetherFX";
 
-const dmSans = DM_Sans({
+const display = Space_Grotesk({
   subsets: ["latin"],
-  variable: "--font-sans",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-display",
   display: "swap",
 });
 
-const instrumentSerif = Instrument_Serif({
+const serif = Fraunces({
   subsets: ["latin"],
-  weight: "400",
+  weight: ["400", "500"],
   style: ["normal", "italic"],
   variable: "--font-serif",
+  display: "swap",
+});
+
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-mono",
   display: "swap",
 });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.tetherhealth.co"),
   title: {
-    default: "Tether — Intelligent Referral Coordination for Medical Practices",
+    default: "Tether · Close the loop on every referral",
     template: "%s | Tether",
   },
   description:
-    "AI agents that connect PCPs and specialists, close the referral loop, and integrate directly with your EHR. Built for practices that are done losing patients to referral black holes.",
+    "Tether writes the clinical referral from the chart, routes it, tracks every stage, and returns the consult note, so the loop closes on its own.",
   keywords: [
     "referral management software",
     "healthcare referral",
@@ -41,15 +51,15 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://tetherhealth.co",
     siteName: "Tether",
-    title: "Tether — Intelligent Referral Coordination for Medical Practices",
+    title: "Tether · Close the loop on every referral",
     description:
-      "AI agents that connect PCPs and specialists, close the referral loop, and integrate directly with your EHR. Built for practices that are done losing patients to referral black holes.",
+      "Tether writes the clinical referral from the chart, routes it, tracks every stage, and returns the consult note, so the loop closes on its own.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tether — Intelligent Referral Coordination for Medical Practices",
+    title: "Tether · Close the loop on every referral",
     description:
-      "AI agents that connect PCPs and specialists, close the referral loop, and integrate directly with your EHR.",
+      "Tether writes the clinical referral from the chart, routes it, tracks every stage, and returns the consult note.",
   },
   robots: {
     index: true,
@@ -81,14 +91,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${dmSans.variable} ${instrumentSerif.variable}`}
-    >
+    <html lang="en" className={`${display.variable} ${serif.variable} ${mono.variable}`}>
       <body>
+        <Rail />
         <Nav />
         {children}
         <Footer />
+        <TetherFX />
       </body>
     </html>
   );
